@@ -11,6 +11,7 @@ type tdApp struct {
 	*application.Application
 	menuBar                                                          *gui.Menu
 	fileMenu, droneMenu, flightMenu, videoMenu, imagesMenu, helpMenu *gui.Menu
+	connectItem, disconnectItem                                      *gui.MenuItem
 	panel                                                            *gui.Panel
 	label                                                            *gui.Label
 }
@@ -34,15 +35,17 @@ func (app *tdApp) buildMenu() {
 	//app.menuBar.AddSeparator()
 
 	app.droneMenu = gui.NewMenu()
-	app.droneMenu.AddOption("Connect").Subscribe(gui.OnClick, app.connectCB)
-	app.droneMenu.AddOption("Disconnect").SetEnabled(false)
+	app.connectItem = app.droneMenu.AddOption("Connect")
+	app.connectItem.Subscribe(gui.OnClick, app.connectCB)
+	app.disconnectItem = app.droneMenu.AddOption("Disconnect")
+	app.disconnectItem.SetEnabled(false).Subscribe(gui.OnClick, app.diconnectCB)
 	app.menuBar.AddMenu("Drone", app.droneMenu)
 
 	app.flightMenu = gui.NewMenu()
-	app.flightMenu.AddOption("Take-off")
-	app.flightMenu.AddOption("Throw Take-off")
-	app.flightMenu.AddOption("Land")
-	app.flightMenu.AddOption("Palm Land")
+	app.flightMenu.AddOption("Take-off").Subscribe(gui.OnClick, app.takeoffCB)
+	app.flightMenu.AddOption("Throw Take-off").Subscribe(gui.OnClick, app.throwTakeoffCB)
+	app.flightMenu.AddOption("Land").Subscribe(gui.OnClick, app.landCB)
+	app.flightMenu.AddOption("Palm Land").Subscribe(gui.OnClick, app.palmLandCB)
 	app.flightMenu.AddSeparator()
 	app.flightMenu.AddOption("Sports (Fast) Mode")
 	app.menuBar.AddMenu("Flight", app.flightMenu)
