@@ -1,13 +1,14 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/g3n/engine/gui"
 	"github.com/g3n/engine/util/application"
 )
 
 type tdApp struct {
 	*application.Application
-	// gui                tdGUI
 	menuBar                                                          *gui.Menu
 	fileMenu, droneMenu, flightMenu, videoMenu, imagesMenu, helpMenu *gui.Menu
 	panel                                                            *gui.Panel
@@ -27,15 +28,13 @@ func (app *tdApp) buildMenu() {
 	app.menuBar.SetLayoutParams(&gui.VBoxLayoutParams{Expand: 0, AlignH: gui.AlignWidth})
 
 	app.fileMenu = gui.NewMenu()
-	app.fileMenu.AddOption("Exit").SetId("exit").Subscribe(gui.OnClick, func(string, interface{}) {
-		app.Quit()
-	})
+	app.fileMenu.AddOption("Exit").SetId("exit").Subscribe(gui.OnClick, app.exitNicely)
 	app.menuBar.AddMenu("File", app.fileMenu)
 
 	//app.menuBar.AddSeparator()
 
 	app.droneMenu = gui.NewMenu()
-	app.droneMenu.AddOption("Connect")
+	app.droneMenu.AddOption("Connect").Subscribe(gui.OnClick, app.connectCB)
 	app.droneMenu.AddOption("Disconnect").SetEnabled(false)
 	app.menuBar.AddMenu("Drone", app.droneMenu)
 
@@ -65,5 +64,9 @@ func (app *tdApp) buildMenu() {
 	app.helpMenu.AddSeparator()
 	app.helpMenu.AddOption("About")
 	app.menuBar.AddMenu("Help", app.helpMenu)
+}
 
+func (app *tdApp) exitNicely(s string, i interface{}) {
+	fmt.Println("Tidying-up and exiting")
+	app.Quit()
 }

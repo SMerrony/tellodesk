@@ -3,12 +3,18 @@ package main
 import (
 	"log"
 
+	"github.com/SMerrony/tello"
 	"github.com/g3n/engine/util/application"
 )
 
 const (
 	appName               = "Tello Desktop"
 	prefWidth, prefHeight = 800, 600
+)
+
+var (
+	drone     tello.Tello
+	stickChan chan<- tello.StickMessage
 )
 
 func main() {
