@@ -3,7 +3,8 @@ package main
 func (app *tdApp) connectCB(s string, i interface{}) {
 	err := drone.ControlConnectDefault()
 	if err != nil {
-		app.Gui().Add(runAlert(errorSev,
+		app.Gui().Add(alertDialog(
+			errorSev,
 			`Could not connect to Drone.
 
 Check that you have a Wifi connection 
