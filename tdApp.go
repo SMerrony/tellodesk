@@ -21,7 +21,7 @@ func (app *tdApp) setup() {
 
 	app.buildMenu()
 	app.Gui().Add(app.menuBar)
-
+	app.Gui().SetName(appName)
 }
 
 func (app *tdApp) buildMenu() {
