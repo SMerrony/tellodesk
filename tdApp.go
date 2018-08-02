@@ -29,6 +29,8 @@ func (app *tdApp) buildMenu() {
 	app.menuBar.SetLayoutParams(&gui.VBoxLayoutParams{Expand: 0, AlignH: gui.AlignWidth})
 
 	app.fileMenu = gui.NewMenu()
+	app.fileMenu.AddOption("Settings")
+	app.fileMenu.AddSeparator()
 	app.fileMenu.AddOption("Exit").SetId("exit").Subscribe(gui.OnClick, app.exitNicely)
 	app.menuBar.AddMenu("File", app.fileMenu)
 
@@ -75,9 +77,8 @@ func (app *tdApp) exitNicely(s string, i interface{}) {
 }
 
 func (app *tdApp) aboutCB(s string, i interface{}) {
-	var ad dialogWin
-	ad.alertDialog(
-		app,
+	alertDialog(
+		app.Gui(),
 		infoSev,
 		fmt.Sprintf("%s\n\nVersion: %s\n\nAuthor: %s\n\nCopyright: %s", appName, appVersion, appAuthor, appCopyright))
 }

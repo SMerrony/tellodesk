@@ -3,9 +3,8 @@ package main
 func (app *tdApp) connectCB(s string, i interface{}) {
 	err := drone.ControlConnectDefault()
 	if err != nil {
-		var ad dialogWin
-		ad.alertDialog(
-			app,
+		alertDialog(
+			app.Gui(),
 			errorSev,
 			`Could not connect to Drone.
 
