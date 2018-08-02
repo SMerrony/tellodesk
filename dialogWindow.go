@@ -15,7 +15,7 @@ const (
 )
 
 const (
-	dlgWidth, dlgHeight = 300, 200
+	dlgWidth, dlgHeight float32 = 300.0, 200.0
 )
 
 type dialogWin struct{}
@@ -25,19 +25,20 @@ func (t *dialogWin) alertDialog(app *tdApp, sev severityType, msg string) *gui.W
 	win.SetResizable(false)
 	win.SetPaddings(4, 4, 4, 4)
 
-	var titleStr, iconStr string
+	var iconStr string
+	titleStr := appName + " - "
 	switch sev {
 	case infoSev:
-		titleStr = "Information"
+		titleStr += "Information"
 		iconStr = string(icon.Info)
 	case warningSev:
-		titleStr = "Warning"
+		titleStr += "Warning"
 		iconStr = string(icon.Warning)
 	case errorSev:
-		titleStr = "Error"
+		titleStr += "Error"
 		iconStr = string(icon.Error)
 	case criticalSev:
-		titleStr = "Critical Error"
+		titleStr += "Critical Error"
 		iconStr = string(icon.Error)
 	}
 	win.SetTitle(titleStr)
@@ -62,6 +63,7 @@ func (t *dialogWin) alertDialog(app *tdApp, sev severityType, msg string) *gui.W
 	win.SetCloseButton(false)
 
 	app.Gui().Add(win)
+	win.SetPosition(app.Gui().Width()/2-dlgWidth/2, app.Gui().Height()/2-dlgHeight/2)
 	app.Gui().SetModal(win)
 
 	return win

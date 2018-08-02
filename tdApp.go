@@ -65,11 +65,19 @@ func (app *tdApp) buildMenu() {
 	app.helpMenu = gui.NewMenu()
 	app.helpMenu.AddOption("Online Help")
 	app.helpMenu.AddSeparator()
-	app.helpMenu.AddOption("About")
+	app.helpMenu.AddOption("About").Subscribe(gui.OnClick, app.aboutCB)
 	app.menuBar.AddMenu("Help", app.helpMenu)
 }
 
 func (app *tdApp) exitNicely(s string, i interface{}) {
 	fmt.Println("Tidying-up and exiting")
 	app.Quit()
+}
+
+func (app *tdApp) aboutCB(s string, i interface{}) {
+	var ad dialogWin
+	ad.alertDialog(
+		app,
+		infoSev,
+		fmt.Sprintf("%s\n\nVersion: %s\n\nAuthor: %s\n\nCopyright: %s", appName, appVersion, appAuthor, appCopyright))
 }
