@@ -125,7 +125,7 @@ type KnownJs struct {
 
 func listKnownJoystickTypes() (known []*KnownJs) {
 	switch runtime.GOOS {
-	case "window":
+	case "windows":
 		for jsid, config := range jsKnownWindowsConfigs {
 			known = append(known, &KnownJs{jsid, config.Name})
 		}

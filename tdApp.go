@@ -29,7 +29,7 @@ func (app *tdApp) buildMenu() {
 	app.menuBar.SetLayoutParams(&gui.VBoxLayoutParams{Expand: 0, AlignH: gui.AlignWidth})
 
 	app.fileMenu = gui.NewMenu()
-	app.fileMenu.AddOption("Settings")
+	app.fileMenu.AddOption("Settings").Subscribe(gui.OnClick, app.settingsDialog)
 	app.fileMenu.AddSeparator()
 	app.fileMenu.AddOption("Exit").SetId("exit").Subscribe(gui.OnClick, app.exitNicely)
 	app.menuBar.AddMenu("File", app.fileMenu)
@@ -72,7 +72,7 @@ func (app *tdApp) buildMenu() {
 }
 
 func (app *tdApp) exitNicely(s string, i interface{}) {
-	fmt.Println("Tidying-up and exiting")
+	app.Log().Info("Tidying-up and exiting")
 	app.Quit()
 }
 
