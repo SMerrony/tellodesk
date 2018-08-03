@@ -22,6 +22,7 @@ func (app *tdApp) setup() {
 	app.buildMenu()
 	app.Gui().Add(app.menuBar)
 	app.Gui().SetName(appName)
+	app.Subscribe(application.OnQuit, app.exitNicely) // catch main window being closed
 }
 
 func (app *tdApp) buildMenu() {
