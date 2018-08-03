@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/g3n/engine/gui"
 )
 
@@ -57,14 +59,20 @@ func (app *tdApp) settingsDialog(s string, i interface{}) {
 	ok.SetMargins(3, 3, 3, 3)
 	win.Add(cancel)
 	cancel.Subscribe(gui.OnClick, func(e string, ev interface{}) {
-		app.Log().Info("Cancelled")
+		app.Log().Info("Settings Cancelled")
 		app.Gui().Root().SetModal(nil)
-		app.Gui().Root().Remove(win)
+		app.mainPanel.Remove(win)
 	})
 	win.Add(ok)
+	ok.Subscribe(gui.OnClick, func(e string, ev interface{}) {
+		app.Log().Info("Settings Okayed")
+		fmt.Printf("Debug: found ID: %s, chosen ID: %s\n", dDrop.Selected().Text(), tDrop.Selected().Text())
+		app.Gui().Root().SetModal(nil)
+		app.mainPanel.Remove(win)
+	})
 
-	root := app.Gui().Root()
+	root := app.mainPanel
 	root.Add(win)
 	win.SetPosition(root.Width()/2-settingsWidth/2, root.Height()/2-settingsHeight/2)
-	root.SetModal(win)
+	app.Gui().SetModal(win)
 }

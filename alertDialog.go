@@ -18,7 +18,7 @@ const (
 	dlgWidth, dlgHeight float32 = 300.0, 200.0
 )
 
-func alertDialog(root *gui.Root, sev severityType, msg string) {
+func alertDialog(app *tdApp, sev severityType, msg string) {
 	win := gui.NewWindow(dlgWidth, dlgHeight)
 	win.SetResizable(false)
 	win.SetPaddings(4, 4, 4, 4)
@@ -53,14 +53,14 @@ func alertDialog(root *gui.Root, sev severityType, msg string) {
 	ok := gui.NewButton("OK")
 	ok.SetLayoutParams(&gui.VBoxLayoutParams{Expand: 0, AlignH: gui.AlignCenter})
 	ok.Subscribe(gui.OnClick, func(e string, ev interface{}) {
-		root.SetModal(nil)
-		root.Remove(win)
+		app.Gui().Root().SetModal(nil)
+		app.mainPanel.Remove(win)
 	})
 	win.Add(ok)
 
 	win.SetCloseButton(false)
 
-	root.Add(win)
-	win.SetPosition(root.Width()/2-dlgWidth/2, root.Height()/2-dlgHeight/2)
-	root.SetModal(win)
+	app.mainPanel.Add(win)
+	win.SetPosition(app.mainPanel.Width()/2-dlgWidth/2, app.mainPanel.Height()/2-dlgHeight/2)
+	app.Gui().SetModal(win)
 }

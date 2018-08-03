@@ -10,6 +10,7 @@ import (
 type tdApp struct {
 	*application.Application
 	menuBar                                                          *gui.Menu
+	mainPanel                                                        *gui.Panel
 	fileMenu, droneMenu, flightMenu, videoMenu, imagesMenu, helpMenu *gui.Menu
 	connectItem, disconnectItem                                      *gui.MenuItem
 	panel                                                            *gui.Panel
@@ -18,9 +19,15 @@ type tdApp struct {
 
 func (app *tdApp) setup() {
 	app.Gui().SetLayout(gui.NewVBoxLayout())
-
+	// most stuff happens on the main panel
+	app.mainPanel = gui.NewPanel(prefWidth, prefHeight)
+	app.Gui().Subscribe(gui.OnResize, func(evname string, ev interface{}) {
+		app.mainPanel.SetWidth(app.Gui().ContentWidth())
+		app.mainPanel.SetHeight(app.Gui().ContentHeight())
+	})
+	app.Gui().Add(app.mainPanel)
 	app.buildMenu()
-	app.Gui().Add(app.menuBar)
+	app.mainPanel.Add(app.menuBar)
 	app.Gui().SetName(appName)
 	app.Subscribe(application.OnQuit, app.exitNicely) // catch main window being closed
 }
@@ -79,7 +86,7 @@ func (app *tdApp) exitNicely(s string, i interface{}) {
 
 func (app *tdApp) aboutCB(s string, i interface{}) {
 	alertDialog(
-		app.Gui(),
+		app,
 		infoSev,
 		fmt.Sprintf("%s\n\nVersion: %s\n\nAuthor: %s\n\nCopyright: %s", appName, appVersion, appAuthor, appCopyright))
 }
