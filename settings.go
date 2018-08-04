@@ -2,14 +2,45 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
+	"strconv"
+	"strings"
 
 	"github.com/g3n/engine/gui"
+	"gopkg.in/yaml.v2"
 )
+
+// settings holds the settings we want to persist across program invocations
+type settingsT struct {
+	JoystickID   int
+	JoystickType string
+}
 
 const (
 	dialogTitle                           = appName + " Settings"
 	settingsWidth, settingsHeight float32 = 500, 200
 )
+
+func saveSettings(s settingsT, filename string) error {
+	bytes, err := yaml.Marshal(s)
+	if err != nil {
+		return err
+	}
+	return ioutil.WriteFile(filename, bytes, 0644)
+}
+
+func loadSettings(filename string) (settingsT, error) {
+	bytes, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return settingsT{}, err
+	}
+	var s settingsT
+	err = yaml.Unmarshal(bytes, &s)
+	if err != nil {
+		return settingsT{}, err
+	}
+	return s, nil
+}
 
 func (app *tdApp) settingsDialog(s string, i interface{}) {
 	win := gui.NewWindow(settingsWidth, settingsHeight)
@@ -33,12 +64,19 @@ func (app *tdApp) settingsDialog(s string, i interface{}) {
 	for _, j := range found {
 		dDrop.Add(gui.NewImageLabel(j.Name))
 	}
+	if app.settingsLoaded {
+		dDrop.SelectPos(app.settings.JoystickID)
+	}
 	win.Add(dDrop)
 	tDrop := gui.NewDropDown(150, gui.NewImageLabel(""))
 	tDrop.SetMargins(3, 3, 3, 3)
 	known := listKnownJoystickTypes()
 	for _, k := range known {
-		tDrop.Add(gui.NewImageLabel(k.Name))
+		il := gui.NewImageLabel(k.Name)
+		tDrop.Add(il)
+		if app.settings.JoystickType == k.Name {
+			tDrop.SetSelected(il)
+		}
 	}
 	win.Add(tDrop)
 
@@ -67,6 +105,18 @@ func (app *tdApp) settingsDialog(s string, i interface{}) {
 	ok.Subscribe(gui.OnClick, func(e string, ev interface{}) {
 		app.Log().Info("Settings Okayed")
 		fmt.Printf("Debug: found ID: %s, chosen ID: %s\n", dDrop.Selected().Text(), tDrop.Selected().Text())
+		sID, _ := strconv.Atoi(strings.Split(dDrop.Selected().Text(), ":")[0])
+		err := openJoystick(sID, tDrop.Selected().Text())
+		if err != nil {
+			alertDialog(app, errorSev, err.Error())
+		} else {
+			app.settings.JoystickID = sID
+			app.settings.JoystickType = tDrop.Selected().Text()
+			if err = saveSettings(app.settings, appSettingsFile); err != nil {
+				app.Log().Error(err.Error())
+				alertDialog(app, errorSev, err.Error())
+			}
+		}
 		app.Gui().Root().SetModal(nil)
 		app.mainPanel.Remove(win)
 	})

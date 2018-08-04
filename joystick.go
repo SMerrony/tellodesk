@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"runtime"
@@ -109,7 +110,7 @@ func listJoysticks() (found []*FoundJs) {
 			}
 		} else {
 			fmt.Printf("Joystick ID: %d: Name: %s, Axes: %d, Buttons: %d\n", jsid, js.Name(), js.AxisCount(), js.ButtonCount())
-			found = append(found, &FoundJs{jsid, js.Name()})
+			found = append(found, &FoundJs{jsid, fmt.Sprintf("%d: %s", jsid, js.Name())})
 			js.Close()
 		}
 	}
@@ -135,6 +136,17 @@ func listKnownJoystickTypes() (known []*KnownJs) {
 		}
 	}
 	return known
+}
+
+func openJoystick(id int, chosenType string) (err error) {
+
+	js, err = joystick.Open(id)
+	if err != nil {
+		return errors.New("Could not open Joystick")
+	}
+	jsID = id
+
+	return nil
 }
 
 func intAbs(x int16) int16 {

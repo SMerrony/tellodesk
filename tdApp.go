@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/g3n/engine/gui"
 	"github.com/g3n/engine/util/application"
@@ -9,6 +10,8 @@ import (
 
 type tdApp struct {
 	*application.Application
+	settingsLoaded                                                   bool
+	settings                                                         settingsT
 	menuBar                                                          *gui.Menu
 	mainPanel                                                        *gui.Panel
 	fileMenu, droneMenu, flightMenu, videoMenu, imagesMenu, helpMenu *gui.Menu
@@ -26,6 +29,23 @@ func (app *tdApp) setup() {
 		app.mainPanel.SetHeight(app.Gui().ContentHeight())
 	})
 	app.Gui().Add(app.mainPanel)
+
+	// load any saved settings now as they may affect the gui
+	var err error
+	app.settings, err = loadSettings(appSettingsFile)
+	if err != nil {
+		if strings.Contains(err.Error(), "cannot find") {
+			alertDialog(app, warningSev, "Could not open settings file\n\n"+appSettingsFile+"\n\n"+
+				"This is normal on a first run,\nor until you have saved your settings")
+		} else {
+			alertDialog(app, warningSev, err.Error())
+		}
+		app.settingsLoaded = false
+		app.Log().Info("Error loading saved settings: %v", err)
+	} else {
+		app.settingsLoaded = true
+	}
+
 	app.buildMenu()
 	app.mainPanel.Add(app.menuBar)
 	app.Gui().SetName(appName)
@@ -34,11 +54,10 @@ func (app *tdApp) setup() {
 
 func (app *tdApp) buildMenu() {
 	app.menuBar = gui.NewMenuBar()
-	app.menuBar.SetLayoutParams(&gui.VBoxLayoutParams{Expand: 0, AlignH: gui.AlignWidth})
-
 	app.fileMenu = gui.NewMenu()
 	app.fileMenu.AddOption("Settings").Subscribe(gui.OnClick, app.settingsDialog)
 	app.fileMenu.AddSeparator()
+	//app.fileMenu.AddOption("Exit").SetId("exit").Subscribe(gui.OnClick, func(s string, i interface{}) { app.Quit() })
 	app.fileMenu.AddOption("Exit").SetId("exit").Subscribe(gui.OnClick, app.exitNicely)
 	app.menuBar.AddMenu("File", app.fileMenu)
 
@@ -80,6 +99,7 @@ func (app *tdApp) buildMenu() {
 }
 
 func (app *tdApp) exitNicely(s string, i interface{}) {
+	app.UnsubscribeID(application.OnQuit, nil) // prevent this being called again due to window app.Quit subscription
 	app.Log().Info("Tidying-up and exiting")
 	app.Quit()
 }
@@ -88,5 +108,5 @@ func (app *tdApp) aboutCB(s string, i interface{}) {
 	alertDialog(
 		app,
 		infoSev,
-		fmt.Sprintf("%s\n\nVersion: %s\n\nAuthor: %s\n\nCopyright: %s", appName, appVersion, appAuthor, appCopyright))
+		fmt.Sprintf("Version: %s\n\nAuthor: %s\n\nCopyright: %s\n\nDisclaimer: %s", appVersion, appAuthor, appCopyright, appDisclaimer))
 }
