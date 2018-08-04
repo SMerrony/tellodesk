@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/g3n/engine/math32"
+
 	"github.com/g3n/engine/gui"
 	"gopkg.in/yaml.v2"
 )
@@ -79,6 +81,11 @@ func (app *tdApp) settingsDialog(s string, i interface{}) {
 		}
 	}
 	win.Add(tDrop)
+
+	warningLab := gui.NewLabel("You must reconnect to the drone after changing joystick settings")
+	warningLab.SetLayoutParams(&gui.GridLayoutParams{ColSpan: 3, AlignH: gui.AlignCenter})
+	warningLab.SetBgColor(math32.NewColor("Red"))
+	win.Add(warningLab)
 
 	// empty row...
 	win.Add(gui.NewLabel(""))

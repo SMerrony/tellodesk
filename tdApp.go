@@ -43,6 +43,11 @@ func (app *tdApp) setup() {
 		app.settingsLoaded = false
 		app.Log().Info("Error loading saved settings: %v", err)
 	} else {
+		fmt.Printf("Debug: loaded settings: chosen JS type is %s\n", app.settings.JoystickType)
+		err = openJoystick(app.settings.JoystickID, app.settings.JoystickType)
+		if err != nil {
+			alertDialog(app, errorSev, "Could not open configured joystick")
+		}
 		app.settingsLoaded = true
 	}
 

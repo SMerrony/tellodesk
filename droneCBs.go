@@ -14,10 +14,13 @@ to the Tello network.`)
 	}
 	app.disconnectItem.SetEnabled(true)
 	app.connectItem.SetEnabled(false)
+	stickChan, _ = drone.StartStickListener()
+	go readJoystick(false, jsStopChan)
 }
 
 func (app *tdApp) diconnectCB(s string, i interface{}) {
 	drone.ControlDisconnect()
 	app.disconnectItem.SetEnabled(false)
 	app.connectItem.SetEnabled(true)
+	jsStopChan <- true // stop the joystick listener goroutine
 }

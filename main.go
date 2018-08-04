@@ -18,13 +18,15 @@ const (
 )
 
 var (
-	drone     tello.Tello
-	stickChan chan<- tello.StickMessage
+	drone      tello.Tello
+	stickChan  chan<- tello.StickMessage
+	jsStopChan chan bool
 )
 
 func main() {
+	var err error
 	td := new(tdApp)
-	a, err := application.Create(application.Options{
+	td.Application, err = application.Create(application.Options{
 		Title:       appName,
 		Width:       prefWidth,
 		Height:      prefHeight,
@@ -34,9 +36,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error creating application: %v", err)
 	}
-
-	td.Application = a
-
+	jsStopChan = make(chan bool) // not buffered
 	td.setup()
 
 	td.Run()

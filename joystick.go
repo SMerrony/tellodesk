@@ -122,23 +122,33 @@ func listJoysticks() (found []*FoundJs) {
 type KnownJs struct {
 	ID   int
 	Name string
+	Conf JoystickConfig
 }
 
 func listKnownJoystickTypes() (known []*KnownJs) {
 	switch runtime.GOOS {
 	case "windows":
 		for jsid, config := range jsKnownWindowsConfigs {
-			known = append(known, &KnownJs{jsid, config.Name})
+			known = append(known, &KnownJs{jsid, config.Name, config})
 		}
 	case "linux":
 		for jsid, config := range jsKnownLinuxConfigs {
-			known = append(known, &KnownJs{jsid, config.Name})
+			known = append(known, &KnownJs{jsid, config.Name, config})
 		}
 	}
 	return known
 }
 
 func openJoystick(id int, chosenType string) (err error) {
+
+	kt := listKnownJoystickTypes()
+	for _, t := range kt {
+		if t.Name == chosenType {
+			jsConfig = t.Conf
+			fmt.Printf("Debug: Joystick type set to: %s\n", jsConfig.Name)
+			break
+		}
+	}
 
 	js, err = joystick.Open(id)
 	if err != nil {
@@ -156,7 +166,7 @@ func intAbs(x int16) int16 {
 	return x
 }
 
-func readJoystick(test bool) {
+func readJoystick(test bool, stopChan chan bool) {
 	var (
 		sm                 tello.StickMessage
 		jsState, prevState joystick.State
@@ -259,6 +269,14 @@ func readJoystick(test bool) {
 			}
 		}
 		prevState = jsState
+
+		select {
+		case <-stopChan:
+			js.Close()
+			fmt.Println("Debug - joystick listener stopping")
+			return
+		default:
+		}
 
 		time.Sleep(jsUpdatePeriod)
 	}
