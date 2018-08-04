@@ -48,6 +48,7 @@ func (app *tdApp) settingsDialog(s string, i interface{}) {
 	win := gui.NewWindow(settingsWidth, settingsHeight)
 	win.SetTitle(dialogTitle)
 	win.SetCloseButton(false)
+	win.SetColor(math32.NewColor("Gray"))
 	//win.SetPaddings(8, 8, 8, 8)
 
 	lay := gui.NewGridLayout(3)

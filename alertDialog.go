@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/g3n/engine/gui"
 	"github.com/g3n/engine/gui/assets/icon"
+	"github.com/g3n/engine/math32"
 )
 
 type severityType int
@@ -22,6 +23,7 @@ func alertDialog(app *tdApp, sev severityType, msg string) {
 	win := gui.NewWindow(dlgWidth, dlgHeight)
 	win.SetResizable(false)
 	win.SetPaddings(4, 4, 4, 4)
+	win.SetColor(math32.NewColor("Gray"))
 
 	var iconStr string
 	titleStr := appName + " - "

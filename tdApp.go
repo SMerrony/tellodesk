@@ -18,6 +18,7 @@ type tdApp struct {
 	connectItem, disconnectItem                                      *gui.MenuItem
 	panel                                                            *gui.Panel
 	label                                                            *gui.Label
+	feed                                                             *gui.Image
 }
 
 func (app *tdApp) setup() {
@@ -53,7 +54,11 @@ func (app *tdApp) setup() {
 
 	app.buildMenu()
 	app.mainPanel.Add(app.menuBar)
+	app.buildFeed()
+	app.mainPanel.Add(app.feed)
+	app.feed.SetPosition(10, app.menuBar.Height())
 	app.Gui().SetName(appName)
+
 	app.Subscribe(application.OnQuit, app.exitNicely) // catch main window being closed
 }
 
@@ -101,6 +106,16 @@ func (app *tdApp) buildMenu() {
 	app.helpMenu.AddSeparator()
 	app.helpMenu.AddOption("About").Subscribe(gui.OnClick, app.aboutCB)
 	app.menuBar.AddMenu("Help", app.helpMenu)
+}
+
+func (app *tdApp) buildFeed() {
+	const bluesky = "sky1280x720.png"
+	var err error
+	app.feed, err = gui.NewImage(bluesky)
+	if err != nil {
+		app.Log().Fatal("Could not load bluesky image - %v", err)
+		app.Quit()
+	}
 }
 
 func (app *tdApp) exitNicely(s string, i interface{}) {
