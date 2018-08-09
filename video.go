@@ -69,7 +69,8 @@ func (app *tdApp) videoListener() {
 		log.Fatalf("GetBestStream %v", err)
 	}
 
-	codec, err := gmf.FindEncoder(gmf.AV_CODEC_ID_PNG)
+	// codec, err := gmf.FindEncoder(gmf.AV_CODEC_ID_PNG)
+	codec, err := gmf.FindEncoder(gmf.AV_CODEC_ID_RAWVIDEO)
 	if err != nil {
 		log.Fatalf("FindDecoder %v", err)
 	}
@@ -80,7 +81,8 @@ func (app *tdApp) videoListener() {
 		cc.SetStrictCompliance(gmf.FF_COMPLIANCE_EXPERIMENTAL)
 	}
 
-	cc.SetPixFmt(gmf.AV_PIX_FMT_RGB24).
+	// cc.SetPixFmt(gmf.AV_PIX_FMT_RGB24).
+	cc.SetPixFmt(gmf.AV_PIX_FMT_BGR32).
 		SetWidth(1280).
 		SetHeight(720).
 		SetTimeBase(gmf.AVR{Num: 1, Den: 1})
@@ -95,12 +97,18 @@ func (app *tdApp) videoListener() {
 	dstFrame := gmf.NewFrame().
 		SetWidth(1280).
 		SetHeight(720).
-		SetFormat(gmf.AV_PIX_FMT_RGB32)
+		SetFormat(gmf.AV_PIX_FMT_BGR32) //SetFormat(gmf.AV_PIX_FMT_RGB32)
 	defer gmf.Release(dstFrame)
 
 	if err := dstFrame.ImgAlloc(); err != nil {
 		log.Fatalf("ImgAlloc %v", err)
 	}
+
+	ist := assert(iCtx.GetStream(srcVideoStream.Index())).(*gmf.Stream)
+	defer gmf.Release(ist)
+
+	codecCtx := ist.CodecCtx()
+	defer gmf.Release(codecCtx)
 
 	for pkt := range iCtx.GetNewPackets() {
 
@@ -109,7 +117,7 @@ func (app *tdApp) videoListener() {
 			continue
 		}
 
-		frame, err := pkt.Frames(srcVideoStream.CodecCtx())
+		frame, err := pkt.Frames(codecCtx)
 		if err != nil {
 			app.Log().Info("CodeCtx %v", err)
 			continue
@@ -117,19 +125,23 @@ func (app *tdApp) videoListener() {
 
 		swsCtx.Scale(frame, dstFrame)
 
+		p, err := dstFrame.Encode(cc)
+		if err != nil {
+			app.Log().Fatal("Encode %v", err)
+		}
+
 		rgba := new(image.RGBA)
 		rgba.Stride = 4 * 1280
 		rgba.Rect = image.Rect(0, 0, 1280, 720)
+		rgba.Pix = p.Data()
 
-		if p, err := dstFrame.Encode(cc); p != nil {
-			rgba.Pix = p.Data()
+		app.texture.SetFromRGBA(rgba)
+		app.feed.SetChanged(true)
+		app.Log().Info("Frame decoded")
 
-			app.texture.SetFromRGBA(rgba)
-			app.feed.SetChanged(true)
-			app.Log().Info("Frame decoded")
-			gmf.Release(p)
-		} else if err != nil {
-			log.Fatalf("Encode %v", err)
-		}
+		gmf.Release(p)
+		gmf.Release(frame)
+		gmf.Release(pkt)
+
 	}
 }
