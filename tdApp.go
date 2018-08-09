@@ -38,6 +38,7 @@ func (app *tdApp) setup() {
 	app.Gui().Subscribe(gui.OnResize, func(evname string, ev interface{}) {
 		app.mainPanel.SetWidth(app.Gui().ContentWidth())
 		app.mainPanel.SetHeight(app.Gui().ContentHeight())
+		app.menuBar.SetWidth(app.Gui().ContentWidth())
 	})
 	app.Gui().Add(app.mainPanel)
 
@@ -116,6 +117,8 @@ func (app *tdApp) buildMenu() {
 	app.helpMenu.AddSeparator()
 	app.helpMenu.AddOption("About").Subscribe(gui.OnClick, app.aboutCB)
 	app.menuBar.AddMenu("Help", app.helpMenu)
+
+	app.menuBar.SetWidth(videoWidth)
 }
 
 func (app *tdApp) buildFeed() {
