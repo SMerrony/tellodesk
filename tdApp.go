@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/g3n/g3nd/app"
+
 	"github.com/g3n/engine/gui"
+	"github.com/g3n/engine/texture"
 	"github.com/g3n/engine/util/application"
 )
 
@@ -19,6 +22,9 @@ type tdApp struct {
 	panel                                                            *gui.Panel
 	label                                                            *gui.Label
 	feed                                                             *gui.Image
+	texture                                                          *texture.Texture2D
+	videoStopChan                                                    chan bool
+	videoChan                                                        <-chan []byte
 }
 
 func (app *tdApp) setup() {
@@ -90,7 +96,7 @@ func (app *tdApp) buildMenu() {
 	app.menuBar.AddMenu("Flight", app.flightMenu)
 
 	app.videoMenu = gui.NewMenu()
-	app.videoMenu.AddOption("Start Video View")
+	app.videoMenu.AddOption("Start Video View").Subscribe(gui.OnClick, app.startVideoCB)
 	app.videoMenu.AddOption("Stop Video View")
 	app.videoMenu.AddSeparator()
 	app.videoMenu.AddOption("Record Video")
@@ -109,13 +115,14 @@ func (app *tdApp) buildMenu() {
 }
 
 func (app *tdApp) buildFeed() {
-	const bluesky = "sky1280x720.png"
+	const bluesky = "sky1280x720.jpg"
 	var err error
-	app.feed, err = gui.NewImage(bluesky)
+	app.texture, err = texture.NewTexture2DFromImage(bluesky)
 	if err != nil {
 		app.Log().Fatal("Could not load bluesky image - %v", err)
 		app.Quit()
 	}
+	app.feed = gui.NewImageFromTex(app.texture)
 }
 
 func (app *tdApp) exitNicely(s string, i interface{}) {
@@ -129,4 +136,8 @@ func (app *tdApp) aboutCB(s string, i interface{}) {
 		app,
 		infoSev,
 		fmt.Sprintf("Version: %s\n\nAuthor: %s\n\nCopyright: %s\n\nDisclaimer: %s", appVersion, appAuthor, appCopyright, appDisclaimer))
+}
+
+func (app *tdApp) Render(a *app.App) {
+
 }
