@@ -11,6 +11,10 @@ import (
 	"github.com/g3n/engine/util/application"
 )
 
+const (
+	videoWidth, videoHeight = 960, 720
+)
+
 type tdApp struct {
 	*application.Application
 	settingsLoaded                                                   bool
@@ -62,7 +66,7 @@ func (app *tdApp) setup() {
 	app.mainPanel.Add(app.menuBar)
 	app.buildFeed()
 	app.mainPanel.Add(app.feed)
-	app.feed.SetPosition(10, app.menuBar.Height())
+	app.feed.SetPosition(0, app.menuBar.Height())
 	app.Gui().SetName(appName)
 
 	app.Subscribe(application.OnQuit, app.exitNicely) // catch main window being closed
@@ -115,7 +119,7 @@ func (app *tdApp) buildMenu() {
 }
 
 func (app *tdApp) buildFeed() {
-	const bluesky = "sky1280x720.jpg"
+	const bluesky = "sky960x720.png"
 	var err error
 	app.texture, err = texture.NewTexture2DFromImage(bluesky)
 	if err != nil {

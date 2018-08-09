@@ -14,7 +14,7 @@ const (
 	appCopyright          = "©2018 S.Merrony"
 	appDisclaimer         = "The author(s) is/are in no way\nconnected with Ryze®."
 	appSettingsFile       = "tellodesktop.yaml"
-	prefWidth, prefHeight = 1300, 800
+	prefWidth, prefHeight = videoWidth, videoHeight + 80
 )
 
 var (

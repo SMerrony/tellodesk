@@ -83,8 +83,8 @@ func (app *tdApp) videoListener() {
 
 	// cc.SetPixFmt(gmf.AV_PIX_FMT_RGB24).
 	cc.SetPixFmt(gmf.AV_PIX_FMT_BGR32).
-		SetWidth(1280).
-		SetHeight(720).
+		SetWidth(videoWidth).
+		SetHeight(videoHeight).
 		SetTimeBase(gmf.AVR{Num: 1, Den: 1})
 
 	if err := cc.Open(nil); err != nil {
@@ -95,8 +95,8 @@ func (app *tdApp) videoListener() {
 	defer gmf.Release(swsCtx)
 
 	dstFrame := gmf.NewFrame().
-		SetWidth(1280).
-		SetHeight(720).
+		SetWidth(videoWidth).
+		SetHeight(videoHeight).
 		SetFormat(gmf.AV_PIX_FMT_BGR32) //SetFormat(gmf.AV_PIX_FMT_RGB32)
 	defer gmf.Release(dstFrame)
 
@@ -109,6 +109,10 @@ func (app *tdApp) videoListener() {
 
 	codecCtx := ist.CodecCtx()
 	defer gmf.Release(codecCtx)
+
+	rgba := new(image.RGBA)
+	rgba.Stride = 4 * videoWidth
+	rgba.Rect = image.Rect(0, 0, videoWidth, videoHeight)
 
 	for pkt := range iCtx.GetNewPackets() {
 
@@ -126,18 +130,16 @@ func (app *tdApp) videoListener() {
 		swsCtx.Scale(frame, dstFrame)
 
 		p, err := dstFrame.Encode(cc)
+
 		if err != nil {
 			app.Log().Fatal("Encode %v", err)
 		}
 
-		rgba := new(image.RGBA)
-		rgba.Stride = 4 * 1280
-		rgba.Rect = image.Rect(0, 0, 1280, 720)
 		rgba.Pix = p.Data()
 
 		app.texture.SetFromRGBA(rgba)
 		app.feed.SetChanged(true)
-		app.Log().Info("Frame decoded")
+		//app.Log().Info("Frame decoded")
 
 		gmf.Release(p)
 		gmf.Release(frame)
