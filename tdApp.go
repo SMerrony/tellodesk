@@ -80,7 +80,7 @@ func (app *tdApp) buildMenu() {
 	app.fileMenu.AddSeparator()
 	//app.fileMenu.AddOption("Exit").SetId("exit").Subscribe(gui.OnClick, func(s string, i interface{}) { app.Quit() })
 	app.fileMenu.AddOption("Exit").SetId("exit").Subscribe(gui.OnClick, app.exitNicely)
-	app.menuBar.AddMenu("File", app.fileMenu)
+	app.menuBar.AddMenu("File ", app.fileMenu)
 
 	//app.menuBar.AddSeparator()
 
@@ -89,7 +89,7 @@ func (app *tdApp) buildMenu() {
 	app.connectItem.Subscribe(gui.OnClick, app.connectCB)
 	app.disconnectItem = app.droneMenu.AddOption("Disconnect")
 	app.disconnectItem.SetEnabled(false).Subscribe(gui.OnClick, app.diconnectCB)
-	app.menuBar.AddMenu("Drone", app.droneMenu)
+	app.menuBar.AddMenu(" Drone ", app.droneMenu)
 
 	app.flightMenu = gui.NewMenu()
 	app.flightMenu.AddOption("Take-off").Subscribe(gui.OnClick, app.takeoffCB)
@@ -98,25 +98,25 @@ func (app *tdApp) buildMenu() {
 	app.flightMenu.AddOption("Palm Land").Subscribe(gui.OnClick, app.palmLandCB)
 	app.flightMenu.AddSeparator()
 	app.flightMenu.AddOption("Sports (Fast) Mode")
-	app.menuBar.AddMenu("Flight", app.flightMenu)
+	app.menuBar.AddMenu(" Flight ", app.flightMenu)
 
 	app.videoMenu = gui.NewMenu()
-	app.videoMenu.AddOption("Start Video View").Subscribe(gui.OnClick, app.startVideoCB)
-	app.videoMenu.AddOption("Stop Video View")
-	app.videoMenu.AddSeparator()
+	// app.videoMenu.AddOption("Start Video View").Subscribe(gui.OnClick, app.startVideoCB)
+	// app.videoMenu.AddOption("Stop Video View")
+	// app.videoMenu.AddSeparator()
 	app.videoMenu.AddOption("Record Video")
-	app.menuBar.AddMenu("Video", app.videoMenu)
+	app.menuBar.AddMenu(" Video ", app.videoMenu)
 
 	app.imagesMenu = gui.NewMenu()
 	app.imagesMenu.AddOption("Take Photo")
 	app.imagesMenu.AddOption("Save Photo(s)").SetEnabled(false)
-	app.menuBar.AddMenu("Images", app.imagesMenu)
+	app.menuBar.AddMenu(" Images ", app.imagesMenu)
 
 	app.helpMenu = gui.NewMenu()
 	app.helpMenu.AddOption("Online Help")
 	app.helpMenu.AddSeparator()
 	app.helpMenu.AddOption("About").Subscribe(gui.OnClick, app.aboutCB)
-	app.menuBar.AddMenu("Help", app.helpMenu)
+	app.menuBar.AddMenu(" Help", app.helpMenu)
 
 	app.menuBar.SetWidth(videoWidth)
 }

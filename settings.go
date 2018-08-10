@@ -46,10 +46,11 @@ func loadSettings(filename string) (settingsT, error) {
 
 func (app *tdApp) settingsDialog(s string, i interface{}) {
 	win := gui.NewWindow(settingsWidth, settingsHeight)
+	win.SetResizable(false)
+	win.SetPaddings(4, 4, 4, 4)
 	win.SetTitle(dialogTitle)
 	win.SetCloseButton(false)
 	win.SetColor(math32.NewColor("Gray"))
-	//win.SetPaddings(8, 8, 8, 8)
 
 	lay := gui.NewGridLayout(3)
 	lay.SetAlignH(gui.AlignCenter)
@@ -71,6 +72,7 @@ func (app *tdApp) settingsDialog(s string, i interface{}) {
 		dDrop.SelectPos(app.settings.JoystickID)
 	}
 	win.Add(dDrop)
+
 	tDrop := gui.NewDropDown(150, gui.NewImageLabel(""))
 	tDrop.SetMargins(3, 3, 3, 3)
 	known := listKnownJoystickTypes()
@@ -84,6 +86,7 @@ func (app *tdApp) settingsDialog(s string, i interface{}) {
 	win.Add(tDrop)
 
 	warningLab := gui.NewLabel("You must reconnect to the drone after changing joystick settings")
+	warningLab.SetMargins(3, 3, 3, 3)
 	warningLab.SetLayoutParams(&gui.GridLayoutParams{ColSpan: 3, AlignH: gui.AlignCenter})
 	warningLab.SetBgColor(math32.NewColor("Red"))
 	win.Add(warningLab)

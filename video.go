@@ -8,7 +8,30 @@ import (
 	"github.com/3d0c/gmf"
 )
 
-func (app *tdApp) startVideoCB(s string, i interface{}) {
+// func (app *tdApp) startVideoCB(s string, i interface{}) {
+
+// 	var err error
+
+// 	app.videoChan, err = drone.VideoConnectDefault()
+// 	if err != nil {
+// 		alertDialog(app, errorSev, err.Error())
+// 	}
+
+// 	// start video feed when drone connects
+// 	drone.StartVideo()
+// 	go func() {
+// 		for {
+// 			drone.StartVideo()
+// 			time.Sleep(500 * time.Millisecond)
+// 		}
+// 	}()
+
+// 	app.videoStopChan = make(chan bool) // unbuffered
+
+// 	go app.videoListener()
+// }
+
+func (app *tdApp) startVideo() {
 
 	var err error
 
