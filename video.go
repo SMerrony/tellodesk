@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"image"
 	"log"
 	"os"
@@ -39,6 +40,18 @@ func (app *tdApp) recordVideoCB(s string, i interface{}) {
 	fs.Subscribe("OnOK", func(n string, ev interface{}) {
 		vidPath = fs.Selected()
 		app.Log().Info("Selected: %s", vidPath)
+		if vidPath != "" {
+			var err error
+			app.videoFile, err = os.OpenFile(vidPath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
+			if err != nil {
+				alertDialog(app, errorSev, "Could not open video file")
+			} else {
+				app.videoWriter = bufio.NewWriter(app.videoFile)
+				app.videoRecording = true
+				app.recordVideoItem.SetEnabled(false)
+				app.stopRecordingItem.SetEnabled(true)
+			}
+		}
 		fs.Close()
 	})
 	fs.Subscribe("OnCancel", func(n string, ev interface{}) {
@@ -47,7 +60,11 @@ func (app *tdApp) recordVideoCB(s string, i interface{}) {
 }
 
 func (app *tdApp) stopRecordingCB(s string, i interface{}) {
-
+	app.videoRecording = false
+	app.videoWriter.Flush()
+	app.videoFile.Close()
+	app.recordVideoItem.SetEnabled(true)
+	app.stopRecordingItem.SetEnabled(false)
 }
 
 func (app *tdApp) startVideo() {
@@ -75,6 +92,9 @@ func (app *tdApp) startVideo() {
 
 func (app *tdApp) customReader() ([]byte, int) {
 	block := <-app.videoChan
+	if app.videoRecording {
+		app.videoWriter.Write(block)
+	}
 	return block, len(block)
 }
 

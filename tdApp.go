@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/g3n/g3nd/app"
@@ -30,6 +32,8 @@ type tdApp struct {
 	texture                                                          *texture.Texture2D
 	videoChan                                                        <-chan []byte
 	videoRecording                                                   bool
+	videoFile                                                        *os.File
+	videoWriter                                                      *bufio.Writer
 }
 
 func (app *tdApp) setup() {
@@ -106,6 +110,7 @@ func (app *tdApp) buildMenu() {
 	app.recordVideoItem.Subscribe(gui.OnClick, app.recordVideoCB)
 	app.stopRecordingItem = app.videoMenu.AddOption("Stop Recording")
 	app.stopRecordingItem.Subscribe(gui.OnClick, app.stopRecordingCB)
+	app.stopRecordingItem.SetEnabled(false)
 	app.menuBar.AddMenu(" Video ", app.videoMenu)
 
 	app.imagesMenu = gui.NewMenu()
