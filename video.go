@@ -3,6 +3,7 @@ package main
 import (
 	"image"
 	"log"
+	"os"
 	"time"
 
 	"github.com/3d0c/gmf"
@@ -31,6 +32,24 @@ import (
 // 	go app.videoListener()
 // }
 
+func (app *tdApp) recordVideoCB(s string, i interface{}) {
+	var vidPath string
+	cwd, _ := os.Getwd()
+	fs, _ := NewFileSelect(app.mainPanel, cwd, "Choose File for Video Recording", ".h264")
+	fs.Subscribe("OnOK", func(n string, ev interface{}) {
+		vidPath = fs.Selected()
+		app.Log().Info("Selected: %s", vidPath)
+		fs.Close()
+	})
+	fs.Subscribe("OnCancel", func(n string, ev interface{}) {
+		fs.Close()
+	})
+}
+
+func (app *tdApp) stopRecordingCB(s string, i interface{}) {
+
+}
+
 func (app *tdApp) startVideo() {
 
 	var err error
@@ -49,7 +68,7 @@ func (app *tdApp) startVideo() {
 		}
 	}()
 
-	app.videoStopChan = make(chan bool) // unbuffered
+	//app.videoStopChan = make(chan bool) // unbuffered
 
 	go app.videoListener()
 }

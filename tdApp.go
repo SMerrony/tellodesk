@@ -23,12 +23,13 @@ type tdApp struct {
 	mainPanel                                                        *gui.Panel
 	fileMenu, droneMenu, flightMenu, videoMenu, imagesMenu, helpMenu *gui.Menu
 	connectItem, disconnectItem                                      *gui.MenuItem
+	recordVideoItem, stopRecordingItem                               *gui.MenuItem
 	panel                                                            *gui.Panel
 	label                                                            *gui.Label
 	feed                                                             *gui.Image
 	texture                                                          *texture.Texture2D
-	videoStopChan                                                    chan bool
 	videoChan                                                        <-chan []byte
+	videoRecording                                                   bool
 }
 
 func (app *tdApp) setup() {
@@ -101,10 +102,10 @@ func (app *tdApp) buildMenu() {
 	app.menuBar.AddMenu(" Flight ", app.flightMenu)
 
 	app.videoMenu = gui.NewMenu()
-	// app.videoMenu.AddOption("Start Video View").Subscribe(gui.OnClick, app.startVideoCB)
-	// app.videoMenu.AddOption("Stop Video View")
-	// app.videoMenu.AddSeparator()
-	app.videoMenu.AddOption("Record Video")
+	app.recordVideoItem = app.videoMenu.AddOption("Record Video")
+	app.recordVideoItem.Subscribe(gui.OnClick, app.recordVideoCB)
+	app.stopRecordingItem = app.videoMenu.AddOption("Stop Recording")
+	app.stopRecordingItem.Subscribe(gui.OnClick, app.stopRecordingCB)
 	app.menuBar.AddMenu(" Video ", app.videoMenu)
 
 	app.imagesMenu = gui.NewMenu()
