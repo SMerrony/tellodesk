@@ -3,7 +3,10 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"os"
+	"os/exec"
+	"runtime"
 	"strings"
 
 	"github.com/g3n/g3nd/app"
@@ -102,7 +105,7 @@ func (app *tdApp) buildMenu() {
 	app.flightMenu.AddOption("Land").Subscribe(gui.OnClick, app.landCB)
 	app.flightMenu.AddOption("Palm Land").Subscribe(gui.OnClick, app.palmLandCB)
 	app.flightMenu.AddSeparator()
-	app.flightMenu.AddOption("Sports (Fast) Mode")
+	app.flightMenu.AddOption("Sports (Fast) Mode").Subscribe(gui.OnClick, app.nyi)
 	app.menuBar.AddMenu(" Flight ", app.flightMenu)
 
 	app.videoMenu = gui.NewMenu()
@@ -114,12 +117,12 @@ func (app *tdApp) buildMenu() {
 	app.menuBar.AddMenu(" Video ", app.videoMenu)
 
 	app.imagesMenu = gui.NewMenu()
-	app.imagesMenu.AddOption("Take Photo")
-	app.imagesMenu.AddOption("Save Photo(s)").SetEnabled(false)
+	app.imagesMenu.AddOption("Take Photo").Subscribe(gui.OnClick, app.nyi)
+	app.imagesMenu.AddOption("Save Photo(s)").SetEnabled(false).Subscribe(gui.OnClick, app.nyi)
 	app.menuBar.AddMenu(" Images ", app.imagesMenu)
 
 	app.helpMenu = gui.NewMenu()
-	app.helpMenu.AddOption("Online Help")
+	app.helpMenu.AddOption("Online Help").Subscribe(gui.OnClick, app.onlineHelpCB)
 	app.helpMenu.AddSeparator()
 	app.helpMenu.AddOption("About").Subscribe(gui.OnClick, app.aboutCB)
 	app.menuBar.AddMenu(" Help", app.helpMenu)
@@ -144,6 +147,10 @@ func (app *tdApp) exitNicely(s string, i interface{}) {
 	app.Quit()
 }
 
+func (app *tdApp) onlineHelpCB(s string, i interface{}) {
+	openBrowser(appHelpURL)
+}
+
 func (app *tdApp) aboutCB(s string, i interface{}) {
 	alertDialog(
 		app,
@@ -151,6 +158,30 @@ func (app *tdApp) aboutCB(s string, i interface{}) {
 		fmt.Sprintf("Version: %s\n\nAuthor: %s\n\nCopyright: %s\n\nDisclaimer: %s", appVersion, appAuthor, appCopyright, appDisclaimer))
 }
 
+func (app *tdApp) nyi(s string, i interface{}) {
+	alertDialog(app, infoSev, "Function not yet implemented")
+}
+
 func (app *tdApp) Render(a *app.App) {
 
+}
+
+// helper funcs
+
+func openBrowser(url string) {
+	var err error
+
+	switch runtime.GOOS {
+	case "linux":
+		err = exec.Command("xdg-open", url).Start()
+	case "windows":
+		err = exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
+	case "darwin":
+		err = exec.Command("open", url).Start()
+	default:
+		err = fmt.Errorf("unsupported platform")
+	}
+	if err != nil {
+		log.Fatal(err)
+	}
 }
