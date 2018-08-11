@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	"github.com/g3n/engine/gui"
 	"github.com/g3n/engine/gui/assets/icon"
 	"github.com/g3n/engine/math32"
@@ -19,8 +21,13 @@ const (
 	dlgWidth, dlgHeight float32 = 300.0, 200.0
 )
 
-func alertDialog(app *tdApp, sev severityType, msg string) {
-	win := gui.NewWindow(dlgWidth, dlgHeight)
+type alert struct {
+	*gui.Window
+}
+
+func alertDialog(parent *gui.Panel, sev severityType, msg string) (win *alert) {
+	win = new(alert)
+	win.Window = gui.NewWindow(dlgWidth, dlgHeight)
 	win.SetResizable(false)
 	win.SetPaddings(4, 4, 4, 4)
 	win.SetColor(math32.NewColor("Gray"))
@@ -55,14 +62,18 @@ func alertDialog(app *tdApp, sev severityType, msg string) {
 	ok := gui.NewButton("OK")
 	ok.SetLayoutParams(&gui.VBoxLayoutParams{Expand: 0, AlignH: gui.AlignCenter})
 	ok.Subscribe(gui.OnClick, func(e string, ev interface{}) {
-		app.Gui().Root().SetModal(nil)
-		app.mainPanel.Remove(win)
+		parent.Root().SetModal(nil)
+		parent.Remove(win)
 	})
 	win.Add(ok)
 
 	win.SetCloseButton(false)
 
-	app.mainPanel.Add(win)
-	win.SetPosition(app.mainPanel.Width()/2-dlgWidth/2, app.mainPanel.Height()/2-dlgHeight/2)
-	app.Gui().SetModal(win)
+	win.Subscribe(gui.OnClick, func(e string, ev interface{}) { log.Println("What?") })
+
+	parent.Add(win)
+	win.SetPosition(parent.Width()/2-dlgWidth/2, parent.Height()/2-dlgHeight/2)
+	parent.Root().SetModal(win)
+
+	return win
 }

@@ -4,7 +4,7 @@ func (app *tdApp) connectCB(s string, i interface{}) {
 	err := drone.ControlConnectDefault()
 	if err != nil {
 		alertDialog(
-			app,
+			app.mainPanel,
 			errorSev,
 			`Could not connect to Drone.
 

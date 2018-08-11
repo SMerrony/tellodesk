@@ -14,7 +14,7 @@ const (
 	appCopyright          = "©2018 S.Merrony"
 	appDisclaimer         = "The author(s) is/are in no way\nconnected with Ryze®."
 	appSettingsFile       = "tellodesktop.yaml"
-	appHelpURL            = "http://stephenmerrony.co.uk/blog/"
+	appHelpURL            = "http://stephenmerrony.co.uk/blog/" // FIXME Help URL
 	prefWidth, prefHeight = videoWidth, videoHeight + 80
 )
 

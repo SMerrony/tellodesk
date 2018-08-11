@@ -44,7 +44,7 @@ func (app *tdApp) recordVideoCB(s string, i interface{}) {
 			var err error
 			app.videoFile, err = os.OpenFile(vidPath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
 			if err != nil {
-				alertDialog(app, errorSev, "Could not open video file")
+				alertDialog(app.mainPanel, errorSev, "Could not open video file")
 			} else {
 				app.videoWriter = bufio.NewWriter(app.videoFile)
 				app.videoRecording = true
@@ -73,7 +73,7 @@ func (app *tdApp) startVideo() {
 
 	app.videoChan, err = drone.VideoConnectDefault()
 	if err != nil {
-		alertDialog(app, errorSev, err.Error())
+		alertDialog(app.mainPanel, errorSev, err.Error())
 	}
 
 	// start video feed when drone connects

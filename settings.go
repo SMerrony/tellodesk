@@ -44,8 +44,17 @@ func loadSettings(filename string) (settingsT, error) {
 	return s, nil
 }
 
-func (app *tdApp) settingsDialog(s string, i interface{}) {
-	win := gui.NewWindow(settingsWidth, settingsHeight)
+type settingsDlg struct {
+	*gui.Window
+}
+
+func (app *tdApp) settingsCB(s string, i interface{}) {
+	app.settingsDialog()
+}
+
+func (app *tdApp) settingsDialog() (win *settingsDlg) {
+	win = new(settingsDlg)
+	win.Window = gui.NewWindow(settingsWidth, settingsHeight)
 	win.SetResizable(false)
 	win.SetPaddings(4, 4, 4, 4)
 	win.SetTitle(dialogTitle)
@@ -119,13 +128,13 @@ func (app *tdApp) settingsDialog(s string, i interface{}) {
 		sID, _ := strconv.Atoi(strings.Split(dDrop.Selected().Text(), ":")[0])
 		err := openJoystick(sID, tDrop.Selected().Text())
 		if err != nil {
-			alertDialog(app, errorSev, err.Error())
+			alertDialog(app.mainPanel, errorSev, err.Error())
 		} else {
 			app.settings.JoystickID = sID
 			app.settings.JoystickType = tDrop.Selected().Text()
 			if err = saveSettings(app.settings, appSettingsFile); err != nil {
 				app.Log().Error(err.Error())
-				alertDialog(app, errorSev, err.Error())
+				alertDialog(app.mainPanel, errorSev, err.Error())
 			}
 		}
 		app.Gui().Root().SetModal(nil)
@@ -136,4 +145,6 @@ func (app *tdApp) settingsDialog(s string, i interface{}) {
 	root.Add(win)
 	win.SetPosition(root.Width()/2-settingsWidth/2, root.Height()/2-settingsHeight/2)
 	app.Gui().SetModal(win)
+
+	return win
 }

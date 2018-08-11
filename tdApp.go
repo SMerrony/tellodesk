@@ -26,6 +26,7 @@ type tdApp struct {
 	settings                                                         settingsT
 	menuBar                                                          *gui.Menu
 	mainPanel                                                        *gui.Panel
+	statusBar                                                        *statusbar
 	fileMenu, droneMenu, flightMenu, videoMenu, imagesMenu, helpMenu *gui.Menu
 	connectItem, disconnectItem                                      *gui.MenuItem
 	recordVideoItem, stopRecordingItem                               *gui.MenuItem
@@ -40,9 +41,9 @@ type tdApp struct {
 }
 
 func (app *tdApp) setup() {
-	app.Gui().SetLayout(gui.NewVBoxLayout())
 	// most stuff happens on the main panel
 	app.mainPanel = gui.NewPanel(prefWidth, prefHeight)
+	app.mainPanel.SetLayout(gui.NewVBoxLayout())
 	app.Gui().Subscribe(gui.OnResize, func(evname string, ev interface{}) {
 		app.mainPanel.SetWidth(app.Gui().ContentWidth())
 		app.mainPanel.SetHeight(app.Gui().ContentHeight())
@@ -55,10 +56,10 @@ func (app *tdApp) setup() {
 	app.settings, err = loadSettings(appSettingsFile)
 	if err != nil {
 		if strings.Contains(err.Error(), "cannot find") {
-			alertDialog(app, warningSev, "Could not open settings file\n\n"+appSettingsFile+"\n\n"+
+			alertDialog(app.mainPanel, warningSev, "Could not open settings file\n\n"+appSettingsFile+"\n\n"+
 				"This is normal on a first run,\nor until you have saved your settings")
 		} else {
-			alertDialog(app, warningSev, err.Error())
+			alertDialog(app.mainPanel, warningSev, err.Error())
 		}
 		app.settingsLoaded = false
 		app.Log().Info("Error loading saved settings: %v", err)
@@ -66,7 +67,7 @@ func (app *tdApp) setup() {
 		fmt.Printf("Debug: loaded settings: chosen JS type is %s\n", app.settings.JoystickType)
 		err = openJoystick(app.settings.JoystickID, app.settings.JoystickType)
 		if err != nil {
-			alertDialog(app, errorSev, "Could not open configured joystick")
+			alertDialog(app.mainPanel, errorSev, "Could not open configured joystick")
 		}
 		app.settingsLoaded = true
 	}
@@ -75,7 +76,10 @@ func (app *tdApp) setup() {
 	app.mainPanel.Add(app.menuBar)
 	app.buildFeed()
 	app.mainPanel.Add(app.feed)
-	app.feed.SetPosition(0, app.menuBar.Height())
+	//app.feed.SetPosition(0, app.menuBar.Height())
+	app.statusBar = buildStatusbar(app.mainPanel)
+	app.mainPanel.Add(app.statusBar)
+
 	app.Gui().SetName(appName)
 
 	app.Subscribe(application.OnQuit, app.exitNicely) // catch main window being closed
@@ -84,7 +88,7 @@ func (app *tdApp) setup() {
 func (app *tdApp) buildMenu() {
 	app.menuBar = gui.NewMenuBar()
 	app.fileMenu = gui.NewMenu()
-	app.fileMenu.AddOption("Settings").Subscribe(gui.OnClick, app.settingsDialog)
+	app.fileMenu.AddOption("Settings").Subscribe(gui.OnClick, app.settingsCB)
 	app.fileMenu.AddSeparator()
 	//app.fileMenu.AddOption("Exit").SetId("exit").Subscribe(gui.OnClick, func(s string, i interface{}) { app.Quit() })
 	app.fileMenu.AddOption("Exit").SetId("exit").Subscribe(gui.OnClick, app.exitNicely)
@@ -153,13 +157,13 @@ func (app *tdApp) onlineHelpCB(s string, i interface{}) {
 
 func (app *tdApp) aboutCB(s string, i interface{}) {
 	alertDialog(
-		app,
+		app.mainPanel,
 		infoSev,
 		fmt.Sprintf("Version: %s\n\nAuthor: %s\n\nCopyright: %s\n\nDisclaimer: %s", appVersion, appAuthor, appCopyright, appDisclaimer))
 }
 
 func (app *tdApp) nyi(s string, i interface{}) {
-	alertDialog(app, infoSev, "Function not yet implemented")
+	alertDialog(app.mainPanel, infoSev, "Function not yet implemented")
 }
 
 func (app *tdApp) Render(a *app.App) {
