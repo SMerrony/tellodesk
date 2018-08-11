@@ -14,9 +14,14 @@ to the Tello network.`)
 	}
 	app.disconnectItem.SetEnabled(true)
 	app.connectItem.SetEnabled(false)
+
 	app.startVideo()
+
 	stickChan, _ = drone.StartStickListener()
 	go readJoystick(false, jsStopChan)
+
+	fdChan, _ = drone.StreamFlightData(false, fdPeriodMs)
+	go app.fdListener()
 }
 
 func (app *tdApp) diconnectCB(s string, i interface{}) {

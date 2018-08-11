@@ -12,5 +12,6 @@
 *.out
 
 *.h264
+*.mp4
 
 tellodesktop.yaml

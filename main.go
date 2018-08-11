@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"sync"
 
 	"github.com/SMerrony/tello"
 	"github.com/g3n/engine/util/application"
@@ -16,12 +17,16 @@ const (
 	appSettingsFile       = "tellodesktop.yaml"
 	appHelpURL            = "http://stephenmerrony.co.uk/blog/" // FIXME Help URL
 	prefWidth, prefHeight = videoWidth, videoHeight + 80
+	fdPeriodMs            = 100
 )
 
 var (
-	drone      tello.Tello
-	stickChan  chan<- tello.StickMessage
-	jsStopChan chan bool
+	drone        tello.Tello
+	stickChan    chan<- tello.StickMessage
+	jsStopChan   chan bool
+	fdChan       <-chan tello.FlightData
+	flightDataMu sync.RWMutex
+	flightData   tello.FlightData
 )
 
 func main() {
