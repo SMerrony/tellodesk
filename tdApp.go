@@ -9,6 +9,8 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/g3n/engine/gui/assets/icon"
+
 	"github.com/g3n/g3nd/app"
 
 	"github.com/g3n/engine/gui"
@@ -25,6 +27,7 @@ type tdApp struct {
 	settingsLoaded                                                   bool
 	settings                                                         settingsT
 	menuBar                                                          *gui.Menu
+	toolBar                                                          *toolbar
 	mainPanel                                                        *gui.Panel
 	statusBar                                                        *statusbar
 	fileMenu, droneMenu, flightMenu, videoMenu, imagesMenu, helpMenu *gui.Menu
@@ -74,9 +77,14 @@ func (app *tdApp) setup() {
 
 	app.buildMenu()
 	app.mainPanel.Add(app.menuBar)
+
+	app.toolBar = buildToolbar(app.mainPanel)
+	app.mainPanel.Add(app.toolBar)
+
 	app.buildFeed()
 	app.mainPanel.Add(app.feed)
 	//app.feed.SetPosition(0, app.menuBar.Height())
+
 	app.statusBar = buildStatusbar(app.mainPanel)
 	app.mainPanel.Add(app.statusBar)
 
@@ -88,47 +96,75 @@ func (app *tdApp) setup() {
 func (app *tdApp) buildMenu() {
 	app.menuBar = gui.NewMenuBar()
 	app.fileMenu = gui.NewMenu()
-	app.fileMenu.AddOption("Settings").Subscribe(gui.OnClick, app.settingsCB)
+	settings := app.fileMenu.AddOption("Settings")
+	settings.SetIcon(icon.Settings)
+	settings.Subscribe(gui.OnClick, app.settingsCB)
+
 	app.fileMenu.AddSeparator()
 	//app.fileMenu.AddOption("Exit").SetId("exit").Subscribe(gui.OnClick, func(s string, i interface{}) { app.Quit() })
-	app.fileMenu.AddOption("Exit").SetId("exit").Subscribe(gui.OnClick, app.exitNicely)
+	ex := app.fileMenu.AddOption("Exit")
+	ex.SetId("exit")
+	ex.SetIcon(icon.Close)
+	ex.Subscribe(gui.OnClick, app.exitNicely)
 	app.menuBar.AddMenu("File ", app.fileMenu)
 
 	//app.menuBar.AddSeparator()
 
 	app.droneMenu = gui.NewMenu()
 	app.connectItem = app.droneMenu.AddOption("Connect")
+	app.connectItem.SetIcon(icon.Sync)
 	app.connectItem.Subscribe(gui.OnClick, app.connectCB)
 	app.disconnectItem = app.droneMenu.AddOption("Disconnect")
+	app.disconnectItem.SetIcon(icon.SyncDisabled)
 	app.disconnectItem.SetEnabled(false).Subscribe(gui.OnClick, app.diconnectCB)
 	app.menuBar.AddMenu(" Drone ", app.droneMenu)
 
 	app.flightMenu = gui.NewMenu()
-	app.flightMenu.AddOption("Take-off").Subscribe(gui.OnClick, app.takeoffCB)
-	app.flightMenu.AddOption("Throw Take-off").Subscribe(gui.OnClick, app.throwTakeoffCB)
-	app.flightMenu.AddOption("Land").Subscribe(gui.OnClick, app.landCB)
-	app.flightMenu.AddOption("Palm Land").Subscribe(gui.OnClick, app.palmLandCB)
+	to := app.flightMenu.AddOption("Take-off")
+	to.SetIcon(icon.FlightTakeoff)
+	to.Subscribe(gui.OnClick, app.takeoffCB)
+	tto := app.flightMenu.AddOption("Throw Take-off")
+	tto.SetIcon(icon.ThumbUp)
+	tto.Subscribe(gui.OnClick, app.throwTakeoffCB)
+	lnd := app.flightMenu.AddOption("Land")
+	lnd.SetIcon(icon.FlightLand)
+	lnd.Subscribe(gui.OnClick, app.landCB)
+	plnd := app.flightMenu.AddOption("Palm Land")
+	plnd.SetIcon(icon.PanTool)
+	plnd.Subscribe(gui.OnClick, app.palmLandCB)
 	app.flightMenu.AddSeparator()
-	app.flightMenu.AddOption("Sports (Fast) Mode").Subscribe(gui.OnClick, app.nyi)
+	sm := app.flightMenu.AddOption("Sports (Fast) Mode")
+	sm.SetIcon(icon.DirectionsRun)
+	sm.Subscribe(gui.OnClick, app.nyi)
 	app.menuBar.AddMenu(" Flight ", app.flightMenu)
 
 	app.videoMenu = gui.NewMenu()
 	app.recordVideoItem = app.videoMenu.AddOption("Record Video")
+	app.recordVideoItem.SetIcon(icon.Videocam)
 	app.recordVideoItem.Subscribe(gui.OnClick, app.recordVideoCB)
 	app.stopRecordingItem = app.videoMenu.AddOption("Stop Recording")
+	app.stopRecordingItem.SetIcon(icon.VideocamOff)
 	app.stopRecordingItem.Subscribe(gui.OnClick, app.stopRecordingCB)
 	app.stopRecordingItem.SetEnabled(false)
 	app.menuBar.AddMenu(" Video ", app.videoMenu)
 
 	app.imagesMenu = gui.NewMenu()
-	app.imagesMenu.AddOption("Take Photo").Subscribe(gui.OnClick, app.nyi)
-	app.imagesMenu.AddOption("Save Photo(s)").SetEnabled(false).Subscribe(gui.OnClick, app.nyi)
+	tp := app.imagesMenu.AddOption("Take Photo")
+	tp.SetIcon(icon.CameraAlt)
+	tp.Subscribe(gui.OnClick, app.nyi)
+	sp := app.imagesMenu.AddOption("Save Photo(s)")
+	sp.SetIcon(icon.Save)
+	sp.SetEnabled(false).Subscribe(gui.OnClick, app.nyi)
 	app.menuBar.AddMenu(" Images ", app.imagesMenu)
 
 	app.helpMenu = gui.NewMenu()
-	app.helpMenu.AddOption("Online Help").Subscribe(gui.OnClick, app.onlineHelpCB)
+	oh := app.helpMenu.AddOption("Online Help")
+	oh.SetIcon(icon.Help)
+	oh.Subscribe(gui.OnClick, app.onlineHelpCB)
 	app.helpMenu.AddSeparator()
-	app.helpMenu.AddOption("About").Subscribe(gui.OnClick, app.aboutCB)
+	ab := app.helpMenu.AddOption("About")
+	ab.SetIcon(icon.Info)
+	ab.Subscribe(gui.OnClick, app.aboutCB)
 	app.menuBar.AddMenu(" Help", app.helpMenu)
 
 	app.menuBar.SetWidth(videoWidth)

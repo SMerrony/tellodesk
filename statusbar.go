@@ -15,7 +15,7 @@ type statusbar struct {
 
 func buildStatusbar(parent *gui.Panel) (sb *statusbar) {
 	sb = new(statusbar)
-	sb.Panel = gui.NewPanel(parent.Width(), parent.Height())
+	sb.Panel = gui.NewPanel(parent.Width(), 30)
 
 	hbl := gui.NewHBoxLayout()
 	hbl.SetSpacing(4)
@@ -32,7 +32,7 @@ func buildStatusbar(parent *gui.Panel) (sb *statusbar) {
 	params := gui.HBoxLayoutParams{Expand: 0}
 	padParams := gui.HBoxLayoutParams{Expand: 1}
 
-	sb.connectionLab = gui.NewLabel("Connection Status")
+	sb.connectionLab = gui.NewLabel(" Connection Status ")
 	sb.connectionLab.ApplyStyle(&labStyle)
 	sb.connectionLab.SetColor(math32.NewColor("white"))
 	sb.connectionLab.SetPaddingsColor(&padCol)
@@ -43,7 +43,7 @@ func buildStatusbar(parent *gui.Panel) (sb *statusbar) {
 	padder.SetLayoutParams(&padParams)
 	sb.Add(padder)
 
-	sb.heightLab = gui.NewLabel("Height:   . m")
+	sb.heightLab = gui.NewLabel(" Height:   . m ")
 	sb.heightLab.ApplyStyle(&labStyle)
 	sb.heightLab.SetPaddingsColor(&padCol)
 	sb.heightLab.SetLayoutParams(&params)
@@ -53,7 +53,7 @@ func buildStatusbar(parent *gui.Panel) (sb *statusbar) {
 	padder2.SetLayoutParams(&padParams)
 	sb.Add(padder2)
 
-	sb.batteryPctLab = gui.NewLabel("Battery:   %")
+	sb.batteryPctLab = gui.NewLabel(" Battery:   % ")
 	sb.batteryPctLab.ApplyStyle(&labStyle)
 	sb.batteryPctLab.SetPaddingsColor(&padCol)
 	sb.batteryPctLab.SetLayoutParams(&params)
@@ -63,7 +63,7 @@ func buildStatusbar(parent *gui.Panel) (sb *statusbar) {
 	padder3.SetLayoutParams(&padParams)
 	sb.Add(padder3)
 
-	sb.wifiStrLab = gui.NewLabel("Wifi Strength:   %")
+	sb.wifiStrLab = gui.NewLabel(" Wifi Strength:   % ")
 	sb.wifiStrLab.ApplyStyle(&labStyle)
 	sb.wifiStrLab.SetPaddingsColor(&padCol)
 	sb.wifiStrLab.SetLayoutParams(&params)
@@ -76,9 +76,9 @@ func buildStatusbar(parent *gui.Panel) (sb *statusbar) {
 func (app *tdApp) fdListener() {
 	for {
 		fd := <-fdChan
-		app.statusBar.heightLab.SetText(fmt.Sprintf("Height: %.1fm", float32(fd.Height)/10))
-		app.statusBar.batteryPctLab.SetText(fmt.Sprintf("Battery: %d%%", fd.BatteryPercentage))
-		app.statusBar.wifiStrLab.SetText(fmt.Sprintf("Wifi Strength: %d%%", fd.WifiStrength))
+		app.statusBar.heightLab.SetText(fmt.Sprintf(" Height: %.1fm ", float32(fd.Height)/10))
+		app.statusBar.batteryPctLab.SetText(fmt.Sprintf(" Battery: %d%% ", fd.BatteryPercentage))
+		app.statusBar.wifiStrLab.SetText(fmt.Sprintf(" Wifi Strength: %d%% ", fd.WifiStrength))
 		app.statusBar.SetChanged(true)
 	}
 }
