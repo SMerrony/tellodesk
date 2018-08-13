@@ -18,7 +18,9 @@ to the Tello network.`)
 	app.startVideo()
 
 	stickChan, _ = drone.StartStickListener()
-	go readJoystick(false, jsStopChan)
+	go readJoystick(false, jsStopChan) // FIXME - if defined & opened ok!
+
+	currentTrack = newTrack()
 
 	fdChan, _ = drone.StreamFlightData(false, fdPeriodMs)
 	go app.fdListener()

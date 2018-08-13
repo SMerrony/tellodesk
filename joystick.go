@@ -166,6 +166,7 @@ func intAbs(x int16) int16 {
 	return x
 }
 
+// readJoystick is run as a Goroutine upon connection to the drone (see droneCBs.go)
 func readJoystick(test bool, stopChan chan bool) {
 	var (
 		sm                 tello.StickMessage

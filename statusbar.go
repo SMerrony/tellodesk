@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/g3n/engine/gui"
 	"github.com/g3n/engine/math32"
 )
@@ -70,15 +68,4 @@ func buildStatusbar(parent *gui.Panel) (sb *statusbar) {
 	sb.Add(sb.wifiStrLab)
 
 	return sb
-}
-
-// fdListener should be run as a Goroutine to consume FD updates on the chan as they arrive
-func (app *tdApp) fdListener() {
-	for {
-		fd := <-fdChan
-		app.statusBar.heightLab.SetText(fmt.Sprintf(" Height: %.1fm ", float32(fd.Height)/10))
-		app.statusBar.batteryPctLab.SetText(fmt.Sprintf(" Battery: %d%% ", fd.BatteryPercentage))
-		app.statusBar.wifiStrLab.SetText(fmt.Sprintf(" Wifi Strength: %d%% ", fd.WifiStrength))
-		app.statusBar.SetChanged(true)
-	}
 }

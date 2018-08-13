@@ -22,6 +22,7 @@ const (
 	videoWidth, videoHeight = 960, 720
 )
 
+// tdApp holds GUI-related data, general data is currently globally defined in main()
 type tdApp struct {
 	*application.Application
 	settingsLoaded                                                   bool
