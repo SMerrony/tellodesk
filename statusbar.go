@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/g3n/engine/gui"
 	"github.com/g3n/engine/math32"
 )
@@ -41,7 +43,7 @@ func buildStatusbar(parent *gui.Panel) (sb *statusbar) {
 	padder.SetLayoutParams(&padParams)
 	sb.Add(padder)
 
-	sb.heightLab = gui.NewLabel(" Height:   . m ")
+	sb.heightLab = gui.NewLabel(" Height: 00.0 m ")
 	sb.heightLab.ApplyStyle(&labStyle)
 	sb.heightLab.SetPaddingsColor(&padCol)
 	sb.heightLab.SetLayoutParams(&params)
@@ -51,7 +53,7 @@ func buildStatusbar(parent *gui.Panel) (sb *statusbar) {
 	padder2.SetLayoutParams(&padParams)
 	sb.Add(padder2)
 
-	sb.batteryPctLab = gui.NewLabel(" Battery:   % ")
+	sb.batteryPctLab = gui.NewLabel(" Battery: 000% ")
 	sb.batteryPctLab.ApplyStyle(&labStyle)
 	sb.batteryPctLab.SetPaddingsColor(&padCol)
 	sb.batteryPctLab.SetLayoutParams(&params)
@@ -61,11 +63,20 @@ func buildStatusbar(parent *gui.Panel) (sb *statusbar) {
 	padder3.SetLayoutParams(&padParams)
 	sb.Add(padder3)
 
-	sb.wifiStrLab = gui.NewLabel(" Wifi Strength:   % ")
+	sb.wifiStrLab = gui.NewLabel(" Wifi Strength: 000% ")
 	sb.wifiStrLab.ApplyStyle(&labStyle)
 	sb.wifiStrLab.SetPaddingsColor(&padCol)
 	sb.wifiStrLab.SetLayoutParams(&params)
 	sb.Add(sb.wifiStrLab)
 
 	return sb
+}
+
+func (app *tdApp) updateStatusBar(s string, ev interface{}) {
+	flightDataMu.RLock()
+	app.statusBar.heightLab.SetText(fmt.Sprintf(" Height: %.1fm ", float32(flightData.Height)/10))
+	app.statusBar.batteryPctLab.SetText(fmt.Sprintf(" Battery: %d%% ", flightData.BatteryPercentage))
+	app.statusBar.wifiStrLab.SetText(fmt.Sprintf(" Wifi Strength: %d%% ", flightData.WifiStrength))
+	flightDataMu.RUnlock()
+	app.statusBar.SetChanged(true)
 }

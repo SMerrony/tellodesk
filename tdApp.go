@@ -11,11 +11,11 @@ import (
 
 	"github.com/g3n/engine/gui/assets/icon"
 
-	"github.com/g3n/g3nd/app"
-
+	"github.com/g3n/engine/core"
 	"github.com/g3n/engine/gui"
 	"github.com/g3n/engine/texture"
 	"github.com/g3n/engine/util/application"
+	"github.com/g3n/g3nd/app"
 )
 
 const (
@@ -30,6 +30,7 @@ type tdApp struct {
 	menuBar                                                          *gui.Menu
 	toolBar                                                          *toolbar
 	mainPanel                                                        *gui.Panel
+	tabBar                                                           *gui.TabBar
 	statusBar                                                        *statusbar
 	fileMenu, droneMenu, flightMenu, videoMenu, imagesMenu, helpMenu *gui.Menu
 	connectItem, disconnectItem                                      *gui.MenuItem
@@ -42,6 +43,7 @@ type tdApp struct {
 	videoRecording                                                   bool
 	videoFile                                                        *os.File
 	videoWriter                                                      *bufio.Writer
+	ourDispatcher                                                    *core.Dispatcher
 }
 
 func (app *tdApp) setup() {
@@ -76,17 +78,32 @@ func (app *tdApp) setup() {
 		app.settingsLoaded = true
 	}
 
+	app.ourDispatcher = core.NewDispatcher()
+
 	app.buildMenu()
 	app.mainPanel.Add(app.menuBar)
 
 	app.toolBar = buildToolbar(app.mainPanel)
 	app.mainPanel.Add(app.toolBar)
 
+	app.tabBar = gui.NewTabBar(videoWidth, videoHeight+20)
+	app.mainPanel.Add(app.tabBar)
+
 	app.buildFeed()
-	app.mainPanel.Add(app.feed)
+	feedTab := app.tabBar.AddTab("Feed")
+	feedTab.SetPinned(true)
+	feedTab.SetContent(app.feed)
+	//app.mainPanel.Add(app.feed)
 	//app.feed.SetPosition(0, app.menuBar.Height())
 
+	trackTab := app.tabBar.AddTab("Track")
+	trackTab.SetPinned(true)
+
+	planTab := app.tabBar.AddTab("Planner")
+	planTab.SetPinned(true)
+
 	app.statusBar = buildStatusbar(app.mainPanel)
+	app.ourDispatcher.Subscribe("fdUpdate", app.updateStatusBar)
 	app.mainPanel.Add(app.statusBar)
 
 	app.Gui().SetName(appName)
@@ -204,7 +221,7 @@ func (app *tdApp) nyi(s string, i interface{}) {
 }
 
 func (app *tdApp) Render(a *app.App) {
-
+	//app.statusBar.tm.ProcessTimers()
 }
 
 // helper funcs
