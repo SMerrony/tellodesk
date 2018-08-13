@@ -1,6 +1,9 @@
 package main
 
 import (
+	"encoding/csv"
+	"fmt"
+	"os"
 	"sync"
 	"time"
 
@@ -27,6 +30,15 @@ func newTrack() (tt *telloTrack) {
 	return tt
 }
 
+func (tp *telloPosT) toStrings() (strings []string) {
+	strings = append(strings, tp.timeStamp.String())
+	strings = append(strings, fmt.Sprintf("%.1f", float64(tp.heightDm)/10))
+	strings = append(strings, fmt.Sprintf("%.3f", tp.mvoX))
+	strings = append(strings, fmt.Sprintf("%.3f", tp.mvoY))
+	strings = append(strings, fmt.Sprintf("%d", tp.imuYaw))
+	return strings
+}
+
 func (tt *telloTrack) addPositionIfChanged(fd tello.FlightData) {
 	var pos telloPosT
 
@@ -42,4 +54,31 @@ func (tt *telloTrack) addPositionIfChanged(fd tello.FlightData) {
 		tt.positions = append(tt.positions, pos)
 		tt.trackMu.Unlock()
 	}
+}
+
+func (app *tdApp) exportTrackCB(s string, ev interface{}) {
+	var expPath string
+	cwd, _ := os.Getwd()
+	fs, _ := NewFileSelect(app.mainPanel, cwd, "Choose File for Path Export", ".csv")
+	fs.Subscribe("OnOK", func(n string, ev interface{}) {
+		expPath = fs.Selected()
+		if expPath != "" {
+			exp, err := os.Create(expPath)
+			if err != nil {
+				alertDialog(app.mainPanel, warningSev, "Could not create CSV file")
+			} else {
+				defer exp.Close()
+				w := csv.NewWriter(exp)
+				currentTrack.trackMu.RLock()
+				for _, k := range currentTrack.positions {
+					w.Write(k.toStrings())
+				}
+				currentTrack.trackMu.RUnlock()
+			}
+		}
+		fs.Close()
+	})
+	fs.Subscribe("OnCancel", func(n string, ev interface{}) {
+		fs.Close()
+	})
 }

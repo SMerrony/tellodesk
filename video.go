@@ -39,7 +39,7 @@ func (app *tdApp) recordVideoCB(s string, i interface{}) {
 	fs, _ := NewFileSelect(app.mainPanel, cwd, "Choose File for Video Recording", ".h264")
 	fs.Subscribe("OnOK", func(n string, ev interface{}) {
 		vidPath = fs.Selected()
-		app.Log().Info("Selected: %s", vidPath)
+		//app.Log().Info("Selected: %s", vidPath)
 		if vidPath != "" {
 			var err error
 			app.videoFile, err = os.OpenFile(vidPath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
@@ -172,10 +172,6 @@ func (app *tdApp) videoListener() {
 	codecCtx := ist.CodecCtx()
 	defer gmf.Release(codecCtx)
 
-	rgba := new(image.RGBA)
-	rgba.Stride = 4 * videoWidth
-	rgba.Rect = image.Rect(0, 0, videoWidth, videoHeight)
-
 	for pkt := range iCtx.GetNewPackets() {
 
 		if pkt.StreamIndex() != srcVideoStream.Index() {
@@ -196,16 +192,28 @@ func (app *tdApp) videoListener() {
 		if err != nil {
 			app.Log().Fatal("Encode %v", err)
 		}
-
+		rgba := new(image.RGBA)
+		rgba.Stride = 4 * videoWidth
+		rgba.Rect = image.Rect(0, 0, videoWidth, videoHeight)
 		rgba.Pix = p.Data()
 
-		app.texture.SetFromRGBA(rgba)
-		app.feed.SetChanged(true)
-		//app.Log().Info("Frame decoded")
+		select {
+		case app.picChan <- rgba:
+		default:
+		}
 
 		gmf.Release(p)
 		gmf.Release(frame)
 		gmf.Release(pkt)
 
+	}
+}
+
+func (app *tdApp) updateFeedTCB(cb interface{}) {
+	select {
+	case tmpPic := <-app.picChan:
+		app.texture.SetFromRGBA(tmpPic)
+		app.feed.SetChanged(true)
+	default:
 	}
 }

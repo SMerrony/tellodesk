@@ -3,15 +3,18 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"image"
 	"log"
 	"os"
 	"os/exec"
 	"runtime"
 	"strings"
+	"sync"
+	"time"
 
+	"github.com/SMerrony/tello"
 	"github.com/g3n/engine/gui/assets/icon"
 
-	"github.com/g3n/engine/core"
 	"github.com/g3n/engine/gui"
 	"github.com/g3n/engine/texture"
 	"github.com/g3n/engine/util/application"
@@ -25,25 +28,27 @@ const (
 // tdApp holds GUI-related data, general data is currently globally defined in main()
 type tdApp struct {
 	*application.Application
-	settingsLoaded                                                   bool
-	settings                                                         settingsT
-	menuBar                                                          *gui.Menu
-	toolBar                                                          *toolbar
-	mainPanel                                                        *gui.Panel
-	tabBar                                                           *gui.TabBar
-	statusBar                                                        *statusbar
-	fileMenu, droneMenu, flightMenu, videoMenu, imagesMenu, helpMenu *gui.Menu
-	connectItem, disconnectItem                                      *gui.MenuItem
-	recordVideoItem, stopRecordingItem                               *gui.MenuItem
-	panel                                                            *gui.Panel
-	label                                                            *gui.Label
-	feed                                                             *gui.Image
-	texture                                                          *texture.Texture2D
-	videoChan                                                        <-chan []byte
-	videoRecording                                                   bool
-	videoFile                                                        *os.File
-	videoWriter                                                      *bufio.Writer
-	ourDispatcher                                                    *core.Dispatcher
+	settingsLoaded                                                              bool
+	settings                                                                    settingsT
+	menuBar                                                                     *gui.Menu
+	toolBar                                                                     *toolbar
+	mainPanel                                                                   *gui.Panel
+	tabBar                                                                      *gui.TabBar
+	statusBar                                                                   *statusbar
+	fileMenu, droneMenu, flightMenu, trackMenu, videoMenu, imagesMenu, helpMenu *gui.Menu
+	connectItem, disconnectItem                                                 *gui.MenuItem
+	recordVideoItem, stopRecordingItem                                          *gui.MenuItem
+	panel                                                                       *gui.Panel
+	label                                                                       *gui.Label
+	feed                                                                        *gui.Image
+	texture                                                                     *texture.Texture2D
+	picChan                                                                     chan *image.RGBA
+	videoChan                                                                   <-chan []byte
+	videoRecording                                                              bool
+	videoFile                                                                   *os.File
+	videoWriter                                                                 *bufio.Writer
+	flightDataMu                                                                sync.RWMutex
+	flightData                                                                  tello.FlightData
 }
 
 func (app *tdApp) setup() {
@@ -78,8 +83,6 @@ func (app *tdApp) setup() {
 		app.settingsLoaded = true
 	}
 
-	app.ourDispatcher = core.NewDispatcher()
-
 	app.buildMenu()
 	app.mainPanel.Add(app.menuBar)
 
@@ -88,6 +91,8 @@ func (app *tdApp) setup() {
 
 	app.tabBar = gui.NewTabBar(videoWidth, videoHeight+20)
 	app.mainPanel.Add(app.tabBar)
+
+	app.picChan = make(chan *image.RGBA, 1)
 
 	app.buildFeed()
 	feedTab := app.tabBar.AddTab("Feed")
@@ -102,9 +107,12 @@ func (app *tdApp) setup() {
 	planTab := app.tabBar.AddTab("Planner")
 	planTab.SetPinned(true)
 
+	app.tabBar.SetSelected(0)
+
 	app.statusBar = buildStatusbar(app.mainPanel)
-	app.ourDispatcher.Subscribe("fdUpdate", app.updateStatusBar)
 	app.mainPanel.Add(app.statusBar)
+	//app.Subscribe("fdUpdate", app.updateStatusBar)
+	app.Gui().TimerManager.SetInterval(100*time.Millisecond, true, app.updateStatusBarTCB)
 
 	app.Gui().SetName(appName)
 
@@ -155,6 +163,15 @@ func (app *tdApp) buildMenu() {
 	sm.SetIcon(icon.DirectionsRun)
 	sm.Subscribe(gui.OnClick, app.nyi)
 	app.menuBar.AddMenu(" Flight ", app.flightMenu)
+
+	app.trackMenu = gui.NewMenu()
+	ct := app.trackMenu.AddOption("Clear Track")
+	ct.SetIcon(icon.Delete)
+	ct.Subscribe(gui.OnClick, app.nyi)
+	et := app.trackMenu.AddOption("Export Track")
+	et.SetIcon(icon.Save)
+	et.Subscribe(gui.OnClick, app.exportTrackCB)
+	app.menuBar.AddMenu(" Track ", app.trackMenu)
 
 	app.videoMenu = gui.NewMenu()
 	app.recordVideoItem = app.videoMenu.AddOption("Record Video")

@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"sync"
 
 	"github.com/SMerrony/tello"
 	"github.com/g3n/engine/util/application"
@@ -21,12 +20,12 @@ const (
 )
 
 var (
-	drone        tello.Tello
-	stickChan    chan<- tello.StickMessage
-	jsStopChan   chan bool
-	fdChan       <-chan tello.FlightData
-	flightDataMu sync.RWMutex
-	flightData   tello.FlightData
+	drone      tello.Tello
+	stickChan  chan<- tello.StickMessage
+	jsStopChan chan bool
+	fdChan     <-chan tello.FlightData
+	// flightDataMu sync.RWMutex
+	// flightData   tello.FlightData
 	currentTrack *telloTrack
 )
 

@@ -72,11 +72,20 @@ func buildStatusbar(parent *gui.Panel) (sb *statusbar) {
 	return sb
 }
 
-func (app *tdApp) updateStatusBar(s string, ev interface{}) {
-	flightDataMu.RLock()
-	app.statusBar.heightLab.SetText(fmt.Sprintf(" Height: %.1fm ", float32(flightData.Height)/10))
-	app.statusBar.batteryPctLab.SetText(fmt.Sprintf(" Battery: %d%% ", flightData.BatteryPercentage))
-	app.statusBar.wifiStrLab.SetText(fmt.Sprintf(" Wifi Strength: %d%% ", flightData.WifiStrength))
-	flightDataMu.RUnlock()
+// func (app *tdApp) updateStatusBar(s string, ev interface{}) {
+// 	app.flightDataMu.RLock()
+// 	app.statusBar.heightLab.SetText(fmt.Sprintf(" Height: %.1fm ", float32(app.flightData.Height)/10))
+// 	app.statusBar.batteryPctLab.SetText(fmt.Sprintf(" Battery: %d%% ", app.flightData.BatteryPercentage))
+// 	app.statusBar.wifiStrLab.SetText(fmt.Sprintf(" Wifi Strength: %d%% ", app.flightData.WifiStrength))
+// 	app.flightDataMu.RUnlock()
+// 	app.statusBar.SetChanged(true)
+// }
+
+func (app *tdApp) updateStatusBarTCB(cb interface{}) {
+	app.flightDataMu.RLock()
+	app.statusBar.heightLab.SetText(fmt.Sprintf(" Height: %.1fm ", float32(app.flightData.Height)/10))
+	app.statusBar.batteryPctLab.SetText(fmt.Sprintf(" Battery: %d%% ", app.flightData.BatteryPercentage))
+	app.statusBar.wifiStrLab.SetText(fmt.Sprintf(" Wifi Strength: %d%% ", app.flightData.WifiStrength))
+	app.flightDataMu.RUnlock()
 	app.statusBar.SetChanged(true)
 }

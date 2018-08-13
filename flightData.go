@@ -5,10 +5,10 @@ package main
 func (app *tdApp) fdListener() {
 	for {
 		tmpFd := <-fdChan
-		flightDataMu.Lock()
-		flightData = tmpFd
-		flightDataMu.Unlock()
-		// currentTrack.addPositionIfChanged(fd)
-		app.ourDispatcher.Dispatch("fdUpdate", nil)
+		app.flightDataMu.Lock()
+		app.flightData = tmpFd
+		app.flightDataMu.Unlock()
+		currentTrack.addPositionIfChanged(tmpFd)
+		//app.Dispatch("fdUpdate", nil)
 	}
 }

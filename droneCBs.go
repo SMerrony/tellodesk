@@ -1,5 +1,9 @@
 package main
 
+import (
+	"time"
+)
+
 func (app *tdApp) connectCB(s string, i interface{}) {
 	err := drone.ControlConnectDefault()
 	if err != nil {
@@ -16,6 +20,8 @@ to the Tello network.`)
 	app.connectItem.SetEnabled(false)
 
 	app.startVideo()
+
+	app.Gui().TimerManager.SetInterval(33*time.Millisecond, true, app.updateFeedTCB)
 
 	stickChan, _ = drone.StartStickListener()
 	go readJoystick(false, jsStopChan) // FIXME - if defined & opened ok!
