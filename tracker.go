@@ -25,16 +25,16 @@ type telloTrack struct {
 
 func newTrack() (tt *telloTrack) {
 	tt = new(telloTrack)
-	tt.positions = make([]telloPosT, 1000)
+	tt.positions = make([]telloPosT, 0, 1000)
 
 	return tt
 }
 
 func (tp *telloPosT) toStrings() (strings []string) {
-	strings = append(strings, tp.timeStamp.String())
-	strings = append(strings, fmt.Sprintf("%.1f", float64(tp.heightDm)/10))
+	strings = append(strings, tp.timeStamp.Format("20060102150405.000"))
 	strings = append(strings, fmt.Sprintf("%.3f", tp.mvoX))
 	strings = append(strings, fmt.Sprintf("%.3f", tp.mvoY))
+	strings = append(strings, fmt.Sprintf("%.1f", float64(tp.heightDm)/10))
 	strings = append(strings, fmt.Sprintf("%d", tp.imuYaw))
 	return strings
 }
@@ -47,12 +47,18 @@ func (tt *telloTrack) addPositionIfChanged(fd tello.FlightData) {
 	pos.mvoY = fd.MVO.PositionY
 	pos.imuYaw = fd.IMU.Yaw
 
-	lastPos := tt.positions[len(tt.positions)-1]
-	if lastPos.heightDm != pos.heightDm || lastPos.mvoX != pos.mvoX || lastPos.mvoY != pos.mvoY || lastPos.imuYaw != pos.imuYaw {
-		pos.timeStamp = time.Now()
+	if len(tt.positions) == 0 {
 		tt.trackMu.Lock()
 		tt.positions = append(tt.positions, pos)
 		tt.trackMu.Unlock()
+	} else {
+		lastPos := tt.positions[len(tt.positions)-1]
+		if lastPos.heightDm != pos.heightDm || lastPos.mvoX != pos.mvoX || lastPos.mvoY != pos.mvoY || lastPos.imuYaw != pos.imuYaw {
+			pos.timeStamp = time.Now()
+			tt.trackMu.Lock()
+			tt.positions = append(tt.positions, pos)
+			tt.trackMu.Unlock()
+		}
 	}
 }
 
@@ -74,6 +80,7 @@ func (app *tdApp) exportTrackCB(s string, ev interface{}) {
 					w.Write(k.toStrings())
 				}
 				currentTrack.trackMu.RUnlock()
+				w.Flush()
 			}
 		}
 		fs.Close()
