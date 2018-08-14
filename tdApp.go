@@ -42,8 +42,11 @@ type tdApp struct {
 	label                                                                       *gui.Label
 	feed                                                                        *gui.Image
 	texture                                                                     *texture.Texture2D
+	picMu                                                                       sync.RWMutex
+	pic                                                                         *image.RGBA
 	picChan                                                                     chan *image.RGBA
 	videoChan                                                                   <-chan []byte
+	videoRecMu                                                                  sync.RWMutex
 	videoRecording                                                              bool
 	videoFile                                                                   *os.File
 	videoWriter                                                                 *bufio.Writer
@@ -52,6 +55,9 @@ type tdApp struct {
 }
 
 func (app *tdApp) setup() {
+
+	//app.videoRecording.Store(false)
+
 	// most stuff happens on the main panel
 	app.mainPanel = gui.NewPanel(prefWidth, prefHeight)
 	app.mainPanel.SetLayout(gui.NewVBoxLayout())
@@ -92,7 +98,7 @@ func (app *tdApp) setup() {
 	app.tabBar = gui.NewTabBar(videoWidth, videoHeight+20)
 	app.mainPanel.Add(app.tabBar)
 
-	app.picChan = make(chan *image.RGBA, 1)
+	//app.picChan = make(chan *image.RGBA, 1)
 
 	app.buildFeed()
 	feedTab := app.tabBar.AddTab("Feed")
@@ -100,6 +106,7 @@ func (app *tdApp) setup() {
 	feedTab.SetContent(app.feed)
 	//app.mainPanel.Add(app.feed)
 	//app.feed.SetPosition(0, app.menuBar.Height())
+	app.Subscribe("feedUpdate", app.feedUpdateCB)
 
 	trackTab := app.tabBar.AddTab("Track")
 	trackTab.SetPinned(true)
@@ -214,6 +221,7 @@ func (app *tdApp) buildFeed() {
 		app.Quit()
 	}
 	app.feed = gui.NewImageFromTex(app.texture)
+	app.pic = image.NewRGBA(image.Rect(0, 0, videoWidth, videoHeight))
 }
 
 func (app *tdApp) exitNicely(s string, i interface{}) {

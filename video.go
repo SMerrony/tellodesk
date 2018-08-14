@@ -47,7 +47,9 @@ func (app *tdApp) recordVideoCB(s string, i interface{}) {
 				alertDialog(app.mainPanel, errorSev, "Could not open video file")
 			} else {
 				app.videoWriter = bufio.NewWriter(app.videoFile)
+				app.videoRecMu.Lock()
 				app.videoRecording = true
+				app.videoRecMu.Unlock()
 				app.recordVideoItem.SetEnabled(false)
 				app.stopRecordingItem.SetEnabled(true)
 			}
@@ -60,7 +62,9 @@ func (app *tdApp) recordVideoCB(s string, i interface{}) {
 }
 
 func (app *tdApp) stopRecordingCB(s string, i interface{}) {
+	app.videoRecMu.Lock()
 	app.videoRecording = false
+	app.videoRecMu.Unlock()
 	app.videoWriter.Flush()
 	app.videoFile.Close()
 	app.recordVideoItem.SetEnabled(true)
@@ -87,15 +91,17 @@ func (app *tdApp) startVideo() {
 
 	//app.videoStopChan = make(chan bool) // unbuffered
 
-	go app.videoListener()
+	go videoListener(app)
 }
 
 func (app *tdApp) customReader() ([]byte, int) {
-	block := <-app.videoChan
+	pkt := <-app.videoChan
+	app.videoRecMu.RLock()
 	if app.videoRecording {
-		app.videoWriter.Write(block)
+		app.videoWriter.Write(pkt)
 	}
-	return block, len(block)
+	app.videoRecMu.RUnlock()
+	return pkt, len(pkt)
 }
 
 func assert(i interface{}, err error) interface{} {
@@ -106,7 +112,8 @@ func assert(i interface{}, err error) interface{} {
 	return i
 }
 
-func (app *tdApp) videoListener() {
+//func (app *tdApp) videoListener() {
+func videoListener(app *tdApp) {
 
 	iCtx := gmf.NewCtx()
 	defer iCtx.CloseInputAndRelease()
@@ -197,10 +204,21 @@ func (app *tdApp) videoListener() {
 		rgba.Rect = image.Rect(0, 0, videoWidth, videoHeight)
 		rgba.Pix = p.Data()
 
-		select {
-		case app.picChan <- rgba:
-		default:
-		}
+		// NO RACE, but slow...
+		// select {
+		// case app.picChan <- rgba:
+		// default:
+		// }
+
+		// RACE...
+		//app.Dispatch("feedUpdate", rgba)
+
+		app.picMu.Lock()
+		app.pic = rgba
+		app.picMu.Unlock()
+
+		// RAce...
+		//app.Dispatch("feedUpdate", nil)
 
 		gmf.Release(p)
 		gmf.Release(frame)
@@ -210,10 +228,23 @@ func (app *tdApp) videoListener() {
 }
 
 func (app *tdApp) updateFeedTCB(cb interface{}) {
-	select {
-	case tmpPic := <-app.picChan:
-		app.texture.SetFromRGBA(tmpPic)
-		app.feed.SetChanged(true)
-	default:
-	}
+	// no race, but slower...
+	// select {
+	// case tmpPic := <-app.picChan:
+	// 	app.texture.SetFromRGBA(tmpPic)
+	// 	app.feed.SetChanged(true)
+	// default:
+	// }
+	app.picMu.RLock()
+	app.texture.SetFromRGBA(app.pic)
+	app.picMu.RUnlock()
+}
+
+// func (app *tdApp) feedUpdateCB(s string, ev interface{}) {
+// 	app.texture.SetFromRGBA(ev.(*image.RGBA))
+// }
+func (app *tdApp) feedUpdateCB(s string, ev interface{}) {
+	app.picMu.RLock()
+	app.texture.SetFromRGBA(app.pic)
+	app.picMu.RUnlock()
 }

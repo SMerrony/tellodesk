@@ -1,8 +1,6 @@
 package main
 
-import (
-	"time"
-)
+import "time"
 
 func (app *tdApp) connectCB(s string, i interface{}) {
 	err := drone.ControlConnectDefault()
