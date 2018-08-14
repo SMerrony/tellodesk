@@ -38,6 +38,7 @@ type tdApp struct {
 	fileMenu, droneMenu, flightMenu, trackMenu, videoMenu, imagesMenu, helpMenu *gui.Menu
 	connectItem, disconnectItem                                                 *gui.MenuItem
 	recordVideoItem, stopRecordingItem                                          *gui.MenuItem
+	importTrackItem                                                             *gui.MenuItem
 	panel                                                                       *gui.Panel
 	label                                                                       *gui.Label
 	feed                                                                        *gui.Image
@@ -52,6 +53,7 @@ type tdApp struct {
 	videoWriter                                                                 *bufio.Writer
 	flightDataMu                                                                sync.RWMutex
 	flightData                                                                  tello.FlightData
+	trackChart                                                                  *gui.Chart
 }
 
 func (app *tdApp) setup() {
@@ -108,8 +110,10 @@ func (app *tdApp) setup() {
 	//app.feed.SetPosition(0, app.menuBar.Height())
 	app.Subscribe("feedUpdate", app.feedUpdateCB)
 
+	app.trackChart = app.buildTrackChart(videoWidth, videoHeight)
 	trackTab := app.tabBar.AddTab("Track")
 	trackTab.SetPinned(true)
+	trackTab.SetContent(app.trackChart)
 
 	planTab := app.tabBar.AddTab("Planner")
 	planTab.SetPinned(true)
@@ -175,9 +179,12 @@ func (app *tdApp) buildMenu() {
 	ct := app.trackMenu.AddOption("Clear Track")
 	ct.SetIcon(icon.Delete)
 	ct.Subscribe(gui.OnClick, app.nyi)
-	et := app.trackMenu.AddOption("Export Track")
+	et := app.trackMenu.AddOption("Export Track as CSV")
 	et.SetIcon(icon.Save)
 	et.Subscribe(gui.OnClick, app.exportTrackCB)
+	app.importTrackItem = app.trackMenu.AddOption("Import CSV Track")
+	app.importTrackItem.SetIcon(icon.Input)
+	app.importTrackItem.Subscribe(gui.OnClick, app.exportTrackCB)
 	app.menuBar.AddMenu(" Track ", app.trackMenu)
 
 	app.videoMenu = gui.NewMenu()

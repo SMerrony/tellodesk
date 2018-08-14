@@ -24,6 +24,7 @@ to the Tello network.`)
 	stickChan, _ = drone.StartStickListener()
 	go readJoystick(false, jsStopChan) // FIXME - if defined & opened ok!
 
+	app.importTrackItem.SetEnabled(false)
 	currentTrack = newTrack()
 
 	fdChan, _ = drone.StreamFlightData(false, fdPeriodMs)
@@ -34,5 +35,6 @@ func (app *tdApp) diconnectCB(s string, i interface{}) {
 	drone.ControlDisconnect()
 	app.disconnectItem.SetEnabled(false)
 	app.connectItem.SetEnabled(true)
+	app.importTrackItem.SetEnabled(true)
 	jsStopChan <- true // stop the joystick listener goroutine
 }

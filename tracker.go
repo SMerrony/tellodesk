@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"github.com/SMerrony/tello"
+	"github.com/g3n/engine/gui"
+	"github.com/g3n/engine/math32"
 )
 
 type telloPosT struct {
@@ -88,4 +90,11 @@ func (app *tdApp) exportTrackCB(s string, ev interface{}) {
 	fs.Subscribe("OnCancel", func(n string, ev interface{}) {
 		fs.Close()
 	})
+}
+
+func (app *tdApp) buildTrackChart(w, h float32) (tc *gui.Chart) {
+	tc = gui.NewChart(w, h)
+	tc.SetTitle("Live Track", 14)
+	tc.SetColor(math32.NewColor("white"))
+	return tc
 }
