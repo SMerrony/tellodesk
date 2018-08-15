@@ -28,32 +28,33 @@ const (
 // tdApp holds GUI-related data, general data is currently globally defined in main()
 type tdApp struct {
 	*application.Application
-	settingsLoaded                                                              bool
-	settings                                                                    settingsT
-	menuBar                                                                     *gui.Menu
-	toolBar                                                                     *toolbar
-	mainPanel                                                                   *gui.Panel
-	tabBar                                                                      *gui.TabBar
-	statusBar                                                                   *statusbar
-	fileMenu, droneMenu, flightMenu, trackMenu, videoMenu, imagesMenu, helpMenu *gui.Menu
-	connectItem, disconnectItem                                                 *gui.MenuItem
-	recordVideoItem, stopRecordingItem                                          *gui.MenuItem
-	importTrackItem                                                             *gui.MenuItem
-	panel                                                                       *gui.Panel
-	label                                                                       *gui.Label
-	feed                                                                        *gui.Image
-	texture                                                                     *texture.Texture2D
-	picMu                                                                       sync.RWMutex
-	pic                                                                         *image.RGBA
-	picChan                                                                     chan *image.RGBA
-	videoChan                                                                   <-chan []byte
-	videoRecMu                                                                  sync.RWMutex
-	videoRecording                                                              bool
-	videoFile                                                                   *os.File
-	videoWriter                                                                 *bufio.Writer
-	flightDataMu                                                                sync.RWMutex
-	flightData                                                                  tello.FlightData
-	trackChart                                                                  *gui.Chart
+	settingsLoaded bool
+	settings       settingsT
+	menuBar        *gui.Menu
+	toolBar        *toolbar
+	mainPanel      *gui.Panel
+	tabBar         *gui.TabBar
+	statusBar      *statusbar
+	fileMenu, droneMenu, flightMenu, trackMenu,
+	videoMenu, imagesMenu, helpMenu *gui.Menu
+	connectItem, disconnectItem        *gui.MenuItem
+	recordVideoItem, stopRecordingItem *gui.MenuItem
+	importTrackItem                    *gui.MenuItem
+	panel                              *gui.Panel
+	label                              *gui.Label
+	feed                               *gui.Image
+	texture                            *texture.Texture2D
+	picMu                              sync.RWMutex
+	pic                                *image.RGBA
+	picChan                            chan *image.RGBA
+	videoChan                          <-chan []byte
+	videoRecMu                         sync.RWMutex
+	videoRecording                     bool
+	videoFile                          *os.File
+	videoWriter                        *bufio.Writer
+	flightDataMu                       sync.RWMutex
+	flightData                         tello.FlightData
+	trackChart                         *trackChartT
 }
 
 func (app *tdApp) setup() {
@@ -184,7 +185,7 @@ func (app *tdApp) buildMenu() {
 	et.Subscribe(gui.OnClick, app.exportTrackCB)
 	app.importTrackItem = app.trackMenu.AddOption("Import CSV Track")
 	app.importTrackItem.SetIcon(icon.Input)
-	app.importTrackItem.Subscribe(gui.OnClick, app.exportTrackCB)
+	app.importTrackItem.Subscribe(gui.OnClick, app.importTrackCB)
 	app.menuBar.AddMenu(" Track ", app.trackMenu)
 
 	app.videoMenu = gui.NewMenu()

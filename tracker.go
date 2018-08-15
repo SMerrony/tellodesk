@@ -1,9 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"encoding/csv"
 	"fmt"
+	"io"
 	"os"
+	"strconv"
 	"sync"
 	"time"
 
@@ -11,6 +14,8 @@ import (
 	"github.com/g3n/engine/gui"
 	"github.com/g3n/engine/math32"
 )
+
+const timeStampFmt = "20060102150405.000"
 
 type telloPosT struct {
 	timeStamp  time.Time
@@ -32,13 +37,41 @@ func newTrack() (tt *telloTrack) {
 	return tt
 }
 
+type trackChartT struct {
+	*gui.Chart
+	track *telloTrack
+}
+
+func (app *tdApp) buildTrackChart(w, h float32) (tc *trackChartT) {
+	tc = new(trackChartT)
+	tc.Chart = gui.NewChart(w, h)
+	tc.Chart.SetTitle("Live Track", 14)
+	tc.Chart.SetColor(math32.NewColor("white"))
+	tc.track = newTrack()
+	return tc
+}
+
 func (tp *telloPosT) toStrings() (strings []string) {
-	strings = append(strings, tp.timeStamp.Format("20060102150405.000"))
+	strings = append(strings, tp.timeStamp.Format(timeStampFmt))
 	strings = append(strings, fmt.Sprintf("%.3f", tp.mvoX))
 	strings = append(strings, fmt.Sprintf("%.3f", tp.mvoY))
 	strings = append(strings, fmt.Sprintf("%.1f", float64(tp.heightDm)/10))
 	strings = append(strings, fmt.Sprintf("%d", tp.imuYaw))
 	return strings
+}
+
+func toStruct(strings []string) (tp telloPosT, err error) {
+	tp.timeStamp, err = time.Parse(timeStampFmt, strings[0])
+	var f64 float64
+	f64, err = strconv.ParseFloat(strings[1], 32)
+	tp.mvoX = float32(f64)
+	f64, err = strconv.ParseFloat(strings[2], 32)
+	tp.mvoY = float32(f64)
+	f64, err = strconv.ParseFloat(strings[3], 32)
+	tp.heightDm = int16(f64 * 10)
+	i64, err := strconv.ParseInt(strings[4], 10, 16)
+	tp.imuYaw = int16(i64)
+	return tp, err
 }
 
 func (tt *telloTrack) addPositionIfChanged(fd tello.FlightData) {
@@ -92,9 +125,41 @@ func (app *tdApp) exportTrackCB(s string, ev interface{}) {
 	})
 }
 
-func (app *tdApp) buildTrackChart(w, h float32) (tc *gui.Chart) {
-	tc = gui.NewChart(w, h)
-	tc.SetTitle("Live Track", 14)
-	tc.SetColor(math32.NewColor("white"))
-	return tc
+func (app *tdApp) importTrackCB(s string, ev interface{}) {
+	var impPath string
+	cwd, _ := os.Getwd()
+	fs, _ := NewFileSelect(app.mainPanel, cwd, "Choose CSV Path for Import", ".csv")
+	fs.Subscribe("OnOK", func(n string, ev interface{}) {
+		impPath = fs.Selected()
+		if impPath != "" {
+			imp, err := os.Open(impPath)
+			if err != nil {
+				alertDialog(app.mainPanel, warningSev, "Could not open CSV file")
+			} else {
+				defer imp.Close()
+				r := csv.NewReader(bufio.NewReader(imp))
+				app.trackChart.track = newTrack()
+				for {
+					line, err := r.Read()
+					if err == io.EOF {
+						break
+					} else if err != nil {
+						alertDialog(app.mainPanel, errorSev, "Could not read CSV file")
+						return
+					}
+					tmpTrackPos, err := toStruct(line)
+					if err != nil {
+						alertDialog(app.mainPanel, errorSev, "Could not parse CSV file")
+						return
+					}
+					app.trackChart.track.positions = append(app.trackChart.track.positions, tmpTrackPos)
+				}
+				app.Log().Info("Imported %d track positions", len(app.trackChart.track.positions))
+			}
+		}
+		fs.Close()
+	})
+	fs.Subscribe("OnCancel", func(n string, ev interface{}) {
+		fs.Close()
+	})
 }
