@@ -22,9 +22,9 @@ func buildStatusbar(parent *gui.Panel) (sb *statusbar) {
 	sb.SetLayout(hbl)
 
 	labStyle := gui.PanelStyle{
-		Margin:      gui.RectBounds{3, 3, 3, 3},
-		Border:      gui.RectBounds{1, 1, 1, 1},
-		Padding:     gui.RectBounds{2, 2, 2, 2},
+		Margin:      gui.RectBounds{Top: 3, Right: 3, Bottom: 3, Left: 3},
+		Border:      gui.RectBounds{Top: 1, Right: 1, Bottom: 1, Left: 1},
+		Padding:     gui.RectBounds{Top: 2, Right: 2, Bottom: 2, Left: 2},
 		BorderColor: math32.Color4Name("black"),
 		BgColor:     math32.Color4Name("dark gray"),
 	}
