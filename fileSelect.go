@@ -12,6 +12,7 @@ import (
 
 const fileSelectWidth, fileSelectHeight = 400, 300
 
+// FileSelect is a general-purpose file selector
 type FileSelect struct {
 	*gui.Window
 	parent *gui.Panel
@@ -20,6 +21,7 @@ type FileSelect struct {
 	list   *gui.List
 }
 
+// NewFileSelect displays and returns a general-purpose file selector
 func NewFileSelect(parent *gui.Panel, initPath string, title string, suffix string) (fs *FileSelect, err error) {
 
 	fs = new(FileSelect)
@@ -75,7 +77,7 @@ func NewFileSelect(parent *gui.Panel, initPath string, title string, suffix stri
 	})
 	bc.Add(bcan)
 
-	fs.SetPath(initPath)
+	fs.setPath(initPath)
 
 	parent.Add(fs)
 	fs.SetPosition(parent.Width()/2-fileSelectWidth/2, parent.Height()/2-fileSelectHeight/2)
@@ -85,12 +87,13 @@ func NewFileSelect(parent *gui.Panel, initPath string, title string, suffix stri
 	return fs, nil
 }
 
+// Close removes a file selector from the GUI
 func (fs *FileSelect) Close() {
 	fs.Root().SetModal(nil)
 	fs.parent.Remove(fs)
 }
 
-func (fs *FileSelect) SetPath(path string) error {
+func (fs *FileSelect) setPath(path string) error {
 
 	// Open path file or dir
 	f, err := os.Open(path)
@@ -128,12 +131,12 @@ func (fs *FileSelect) SetPath(path string) error {
 	return nil
 }
 
+// Selected returns the full path of the user-selected file
 func (fs *FileSelect) Selected() string {
 	if fs.name.Text() == "" {
 		return ""
-	} else {
-		return filepath.Join(fs.path.Text(), fs.name.Text())
 	}
+	return filepath.Join(fs.path.Text(), fs.name.Text())
 }
 
 func (fs *FileSelect) onSelect() {
@@ -146,7 +149,7 @@ func (fs *FileSelect) onSelect() {
 	// Checks if previous directory
 	if text == ".." {
 		dir, _ := filepath.Split(fs.path.Text())
-		fs.SetPath(filepath.Dir(dir))
+		fs.setPath(filepath.Dir(dir))
 		fs.name.SetText("")
 		return
 	}
@@ -155,11 +158,10 @@ func (fs *FileSelect) onSelect() {
 	path := filepath.Join(fs.path.Text(), text)
 	s, err := os.Stat(path)
 	if err != nil {
-		panic(err)
-		return
+		panic(err) // FIXME don't panic!
 	}
 	if s.IsDir() {
-		fs.SetPath(path)
+		fs.setPath(path)
 		fs.name.SetText("")
 	} else {
 		fs.name.SetText(s.Name())
