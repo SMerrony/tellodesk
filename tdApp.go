@@ -28,33 +28,32 @@ const (
 // tdApp holds GUI-related data, general data is currently globally defined in main()
 type tdApp struct {
 	*application.Application
-	settingsLoaded bool
-	settings       settingsT
-	menuBar        *gui.Menu
-	toolBar        *toolbar
-	mainPanel      *gui.Panel
-	tabBar         *gui.TabBar
-	statusBar      *statusbar
-	fileMenu, droneMenu, flightMenu, trackMenu,
-	videoMenu, imagesMenu, helpMenu *gui.Menu
-	connectItem, disconnectItem        *gui.MenuItem
-	recordVideoItem, stopRecordingItem *gui.MenuItem
-	importTrackItem                    *gui.MenuItem
-	panel                              *gui.Panel
-	label                              *gui.Label
-	feed                               *gui.Image
-	texture                            *texture.Texture2D
-	picMu                              sync.RWMutex
-	pic                                *image.RGBA
-	picChan                            chan *image.RGBA
-	videoChan                          <-chan []byte
-	videoRecMu                         sync.RWMutex
-	videoRecording                     bool
-	videoFile                          *os.File
-	videoWriter                        *bufio.Writer
-	flightDataMu                       sync.RWMutex
-	flightData                         tello.FlightData
-	trackChart                         *trackChartT
+	settingsLoaded                                                              bool
+	settings                                                                    settingsT
+	menuBar                                                                     *gui.Menu
+	toolBar                                                                     *toolbar
+	mainPanel                                                                   *gui.Panel
+	tabBar                                                                      *gui.TabBar
+	statusBar                                                                   *statusbar
+	fileMenu, droneMenu, flightMenu, trackMenu, videoMenu, imagesMenu, helpMenu *gui.Menu
+	connectItem, disconnectItem                                                 *gui.MenuItem
+	recordVideoItem, stopRecordingItem                                          *gui.MenuItem
+	importTrackItem                                                             *gui.MenuItem
+	panel                                                                       *gui.Panel
+	label                                                                       *gui.Label
+	feed                                                                        *gui.Image
+	texture                                                                     *texture.Texture2D
+	picMu                                                                       sync.RWMutex
+	pic                                                                         *image.RGBA
+	picChan                                                                     chan *image.RGBA
+	videoChan                                                                   <-chan []byte
+	videoRecMu                                                                  sync.RWMutex
+	videoRecording                                                              bool
+	videoFile                                                                   *os.File
+	videoWriter                                                                 *bufio.Writer
+	flightDataMu                                                                sync.RWMutex
+	flightData                                                                  tello.FlightData
+	trackChart                                                                  *trackChartT
 }
 
 func (app *tdApp) setup() {
@@ -115,11 +114,16 @@ func (app *tdApp) setup() {
 	trackTab := app.tabBar.AddTab("Track")
 	trackTab.SetPinned(true)
 	trackTab.SetContent(app.trackChart)
+	// Subscribe to before render events to call current test Render method
+	app.Subscribe(application.OnBeforeRender, func(evname string, ev interface{}) {
+
+		app.trackChart.Render(app.Gl())
+	})
 
 	planTab := app.tabBar.AddTab("Planner")
 	planTab.SetPinned(true)
 
-	app.tabBar.SetSelected(0)
+	app.tabBar.SetSelected(1)
 
 	app.statusBar = buildStatusbar(app.mainPanel)
 	app.mainPanel.Add(app.statusBar)

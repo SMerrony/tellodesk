@@ -10,9 +10,18 @@ import (
 	"sync"
 	"time"
 
+	"github.com/g3n/engine/gls"
+
+	"github.com/g3n/engine/light"
+
+	"github.com/g3n/engine/geometry"
+	"github.com/g3n/engine/material"
+	"github.com/g3n/engine/math32"
+
+	"github.com/g3n/engine/graphic"
+
 	"github.com/SMerrony/tello"
 	"github.com/g3n/engine/gui"
-	"github.com/g3n/engine/math32"
 )
 
 const timeStampFmt = "20060102150405.000"
@@ -38,17 +47,68 @@ func newTrack() (tt *telloTrack) {
 }
 
 type trackChartT struct {
-	*gui.Chart
+	*gui.Panel
 	track *telloTrack
 }
 
 func (app *tdApp) buildTrackChart(w, h float32) (tc *trackChartT) {
 	tc = new(trackChartT)
-	tc.Chart = gui.NewChart(w, h)
-	tc.Chart.SetTitle("Live Track", 14)
-	tc.Chart.SetColor(math32.NewColor("white"))
+	tc.Panel = gui.NewPanel(w, h)
+	//tc.Panel.SetRenderable(false)
+	//tc.Panel.SetColor(math32.NewColor("green"))
+	lab := gui.NewLabel("Hello")
+	tc.Panel.Add(lab)
+	app.SetPanel3D(tc.Panel)
+
+	// Create a blue torus and add it to the scene
+	geom := geometry.NewTorus(1, .4, 12, 32, math32.Pi*2)
+	mat := material.NewPhong(math32.NewColor("DarkBlue"))
+	torusMesh := graphic.NewMesh(geom, mat)
+	app.Scene().Add(torusMesh)
+
+	// Add lights to the scene
+	ambientLight := light.NewAmbient(&math32.Color{1.0, 1.0, 1.0}, 0.8)
+	app.Scene().Add(ambientLight)
+	pointLight := light.NewPoint(&math32.Color{1, 1, 1}, 5.0)
+	pointLight.SetPosition(1, 0, 2)
+	app.Scene().Add(pointLight)
+
+	// Add an axis helper to the scene
+	axis := graphic.NewAxisHelper(0.5)
+	app.Scene().Add(axis)
+
+	app.CameraPersp().SetPosition(0, 0, 3)
+
+	// // **** Just testing ****
+	// // Adds ambient light to the test scene
+	// ambLight := light.NewAmbient(&math32.Color{1.0, 1.0, 1.0}, 0.5)
+	// app.Scene().Add(ambLight)
+
+	// // Sets perspective camera position
+	// width, height := app.Window().Size()
+	// aspect := float32(width) / float32(height)
+	// app.CameraPersp().SetPosition(0, 0, 5)
+	// app.CameraPersp().LookAt(&math32.Vector3{0, 0, 0})
+	// app.CameraPersp().SetAspect(aspect)
+
+	// // Sets orthographic camera
+	// app.CameraOrtho().SetPosition(0, 0, 3)
+	// app.CameraOrtho().LookAt(&math32.Vector3{0, 0, 0})
+	// app.CameraOrtho().SetZoom(1.0)
+
+	// // Default camera is perspective
+	// app.SetCamera(app.CameraPersp())
+	// // Adds camera to scene (important for audio demos)
+	// app.Scene().Add(app.Camera().GetCamera())
+
+	// // **** End of Test Stuff ****
+
 	tc.track = newTrack()
 	return tc
+}
+
+func (tc *trackChartT) Render(*gls.GLS) {
+
 }
 
 func (tp *telloPosT) toStrings() (strings []string) {
