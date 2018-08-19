@@ -18,7 +18,6 @@ import (
 	"github.com/g3n/engine/gui"
 	"github.com/g3n/engine/texture"
 	"github.com/g3n/engine/util/application"
-	"github.com/g3n/g3nd/app"
 )
 
 const (
@@ -94,7 +93,7 @@ func (app *tdApp) setup() {
 	app.buildMenu()
 	app.mainPanel.Add(app.menuBar)
 
-	app.toolBar = buildToolbar(app.mainPanel)
+	app.toolBar = app.buildToolbar()
 	app.mainPanel.Add(app.toolBar)
 
 	app.tabBar = gui.NewTabBar(videoWidth, videoHeight+20)
@@ -106,29 +105,22 @@ func (app *tdApp) setup() {
 	feedTab := app.tabBar.AddTab("Feed")
 	feedTab.SetPinned(true)
 	feedTab.SetContent(app.feed)
-	//app.mainPanel.Add(app.feed)
-	//app.feed.SetPosition(0, app.menuBar.Height())
 	app.Subscribe("feedUpdate", app.feedUpdateCB)
 
 	app.trackChart = app.buildTrackChart(videoWidth, videoHeight)
 	trackTab := app.tabBar.AddTab("Track")
 	trackTab.SetPinned(true)
 	trackTab.SetContent(app.trackChart)
-	// Subscribe to before render events to call current test Render method
-	app.Subscribe(application.OnBeforeRender, func(evname string, ev interface{}) {
-
-		app.trackChart.Render(app.Gl())
-	})
 
 	planTab := app.tabBar.AddTab("Planner")
 	planTab.SetPinned(true)
 
-	app.tabBar.SetSelected(1)
+	app.tabBar.SetSelected(0)
 
 	app.statusBar = buildStatusbar(app.mainPanel)
 	app.mainPanel.Add(app.statusBar)
 	//app.Subscribe("fdUpdate", app.updateStatusBar)
-	app.Gui().TimerManager.SetInterval(100*time.Millisecond, true, app.updateStatusBarTCB)
+	app.Gui().TimerManager.SetInterval(500*time.Millisecond, true, app.updateStatusBarTCB)
 
 	app.Gui().SetName(appName)
 
@@ -150,8 +142,6 @@ func (app *tdApp) buildMenu() {
 	ex.Subscribe(gui.OnClick, app.exitNicely)
 	app.menuBar.AddMenu("File ", app.fileMenu)
 
-	//app.menuBar.AddSeparator()
-
 	app.droneMenu = gui.NewMenu()
 	app.connectItem = app.droneMenu.AddOption("Connect")
 	app.connectItem.SetIcon(icon.Sync)
@@ -159,26 +149,27 @@ func (app *tdApp) buildMenu() {
 	app.disconnectItem = app.droneMenu.AddOption("Disconnect")
 	app.disconnectItem.SetIcon(icon.SyncDisabled)
 	app.disconnectItem.SetEnabled(false).Subscribe(gui.OnClick, app.diconnectCB)
-	app.menuBar.AddMenu(" Drone ", app.droneMenu)
 
-	app.flightMenu = gui.NewMenu()
-	to := app.flightMenu.AddOption("Take-off")
+	app.droneMenu.AddSeparator()
+
+	to := app.droneMenu.AddOption("Take-off")
 	to.SetIcon(icon.FlightTakeoff)
 	to.Subscribe(gui.OnClick, app.takeoffCB)
-	tto := app.flightMenu.AddOption("Throw Take-off")
+	tto := app.droneMenu.AddOption("Throw Take-off")
 	tto.SetIcon(icon.ThumbUp)
 	tto.Subscribe(gui.OnClick, app.throwTakeoffCB)
-	lnd := app.flightMenu.AddOption("Land")
+	lnd := app.droneMenu.AddOption("Land")
 	lnd.SetIcon(icon.FlightLand)
 	lnd.Subscribe(gui.OnClick, app.landCB)
-	plnd := app.flightMenu.AddOption("Palm Land")
+	plnd := app.droneMenu.AddOption("Palm Land")
 	plnd.SetIcon(icon.PanTool)
 	plnd.Subscribe(gui.OnClick, app.palmLandCB)
-	app.flightMenu.AddSeparator()
-	sm := app.flightMenu.AddOption("Sports (Fast) Mode")
+	app.droneMenu.AddSeparator()
+	sm := app.droneMenu.AddOption("Sports (Fast) Mode")
 	sm.SetIcon(icon.DirectionsRun)
 	sm.Subscribe(gui.OnClick, app.nyi)
-	app.menuBar.AddMenu(" Flight ", app.flightMenu)
+
+	app.menuBar.AddMenu(" Drone ", app.droneMenu)
 
 	app.trackMenu = gui.NewMenu()
 	ct := app.trackMenu.AddOption("Clear Track")
@@ -257,9 +248,9 @@ func (app *tdApp) nyi(s string, i interface{}) {
 	alertDialog(app.mainPanel, infoSev, "Function not yet implemented")
 }
 
-func (app *tdApp) Render(a *app.App) {
-	//app.statusBar.tm.ProcessTimers()
-}
+// func (app *tdApp) Render(a *app.App) {
+// 	//app.statusBar.tm.ProcessTimers()
+// }
 
 // helper funcs
 

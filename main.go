@@ -2,6 +2,8 @@ package main
 
 import (
 	"log"
+	//"net/http"
+	//_ "net/http/pprof"
 
 	"github.com/SMerrony/tello"
 	"github.com/g3n/engine/util/application"
@@ -31,6 +33,10 @@ var (
 
 func main() {
 	var err error
+
+	//defer profile.Start().Stop()
+	//go func() { log.Println(http.ListenAndServe("localhost:6060", nil)) }()
+
 	td := new(tdApp)
 	td.Application, err = application.Create(application.Options{
 		Title:       appName,

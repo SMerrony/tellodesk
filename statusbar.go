@@ -9,6 +9,7 @@ import (
 
 type statusbar struct {
 	*gui.Panel
+	//heightLab      *gui.Edit
 	connectionLab, heightLab,
 	batteryPctLab, wifiStrLab *gui.Label
 }
@@ -44,6 +45,7 @@ func buildStatusbar(parent *gui.Panel) (sb *statusbar) {
 	sb.Add(padder)
 
 	sb.heightLab = gui.NewLabel(" Height: 00.0 m ")
+	//sb.heightLab = gui.NewEdit(20, " Height: 00.0m ")
 	sb.heightLab.ApplyStyle(&labStyle)
 	sb.heightLab.SetPaddingsColor(&padCol)
 	sb.heightLab.SetLayoutParams(&params)
@@ -87,5 +89,5 @@ func (app *tdApp) updateStatusBarTCB(cb interface{}) {
 	app.statusBar.batteryPctLab.SetText(fmt.Sprintf(" Battery: %d%% ", app.flightData.BatteryPercentage))
 	app.statusBar.wifiStrLab.SetText(fmt.Sprintf(" Wifi Strength: %d%% ", app.flightData.WifiStrength))
 	app.flightDataMu.RUnlock()
-	app.statusBar.SetChanged(true)
+	//app.statusBar.SetChanged(true)
 }

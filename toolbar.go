@@ -9,9 +9,10 @@ type toolbar struct {
 	*gui.Panel
 }
 
-func buildToolbar(parent *gui.Panel) (tb *toolbar) {
+func (app *tdApp) buildToolbar() (tb *toolbar) {
 	tb = new(toolbar)
-	tb.Panel = gui.NewPanel(parent.Width(), 28)
+	tb.Panel = gui.NewPanel(videoWidth, 28)
+	tb.SetContentWidth(videoWidth)
 	//tb.SetBorders(1, 1, 1, 1)
 	tb.SetMargins(1, 1, 1, 1)
 
