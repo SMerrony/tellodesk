@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"image/color"
 
 	"github.com/g3n/engine/gui"
 	"github.com/g3n/engine/math32"
@@ -9,9 +10,7 @@ import (
 
 type statusbar struct {
 	*gui.Panel
-	//heightLab      *gui.Edit
-	connectionLab, heightLab,
-	batteryPctLab, wifiStrLab *gui.Label
+	connectionLab, heightLab, batteryPctLab, wifiStrLab *FixedLabel
 }
 
 func buildStatusbar(parent *gui.Panel) (sb *statusbar) {
@@ -33,9 +32,13 @@ func buildStatusbar(parent *gui.Panel) (sb *statusbar) {
 	params := gui.HBoxLayoutParams{Expand: 0}
 	padParams := gui.HBoxLayoutParams{Expand: 1}
 
-	sb.connectionLab = gui.NewLabel(" Connection Status ")
+	// sb.connectionLab = gui.NewLabel(" Connection Status ")
+	// sb.connectionLab.ApplyStyle(&labStyle)
+	// sb.connectionLab.SetColor(math32.NewColor("white"))
+	// sb.connectionLab.SetPaddingsColor(&padCol)
+	// sb.connectionLab.SetLayoutParams(&params)
+	sb.connectionLab = NewFixedLabel(14, " Disconnected ", color.RGBA{255, 255, 255, 255})
 	sb.connectionLab.ApplyStyle(&labStyle)
-	sb.connectionLab.SetColor(math32.NewColor("white"))
 	sb.connectionLab.SetPaddingsColor(&padCol)
 	sb.connectionLab.SetLayoutParams(&params)
 	sb.Add(sb.connectionLab)
@@ -44,8 +47,7 @@ func buildStatusbar(parent *gui.Panel) (sb *statusbar) {
 	padder.SetLayoutParams(&padParams)
 	sb.Add(padder)
 
-	sb.heightLab = gui.NewLabel(" Height: 00.0 m ")
-	//sb.heightLab = gui.NewEdit(20, " Height: 00.0m ")
+	sb.heightLab = NewFixedLabel(15, " Height: 00.0m ", color.RGBA{255, 255, 255, 255})
 	sb.heightLab.ApplyStyle(&labStyle)
 	sb.heightLab.SetPaddingsColor(&padCol)
 	sb.heightLab.SetLayoutParams(&params)
@@ -55,7 +57,7 @@ func buildStatusbar(parent *gui.Panel) (sb *statusbar) {
 	padder2.SetLayoutParams(&padParams)
 	sb.Add(padder2)
 
-	sb.batteryPctLab = gui.NewLabel(" Battery: 000% ")
+	sb.batteryPctLab = NewFixedLabel(15, " Battery: 000% ", color.RGBA{255, 255, 255, 255})
 	sb.batteryPctLab.ApplyStyle(&labStyle)
 	sb.batteryPctLab.SetPaddingsColor(&padCol)
 	sb.batteryPctLab.SetLayoutParams(&params)
@@ -65,7 +67,7 @@ func buildStatusbar(parent *gui.Panel) (sb *statusbar) {
 	padder3.SetLayoutParams(&padParams)
 	sb.Add(padder3)
 
-	sb.wifiStrLab = gui.NewLabel(" Wifi Strength: 000% ")
+	sb.wifiStrLab = NewFixedLabel(21, " Wifi Strength: 000% ", color.RGBA{255, 255, 255, 255})
 	sb.wifiStrLab.ApplyStyle(&labStyle)
 	sb.wifiStrLab.SetPaddingsColor(&padCol)
 	sb.wifiStrLab.SetLayoutParams(&params)

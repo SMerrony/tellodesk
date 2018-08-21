@@ -20,6 +20,7 @@ to the Tello network.`)
 	app.startVideo()
 
 	app.Gui().TimerManager.SetInterval(33*time.Millisecond, true, app.updateFeedTCB)
+	//app.Subscribe("feedUpdate", app.feedUpdateCB)
 
 	stickChan, _ = drone.StartStickListener()
 	go readJoystick(false, jsStopChan) // FIXME - if defined & opened ok!
@@ -29,6 +30,8 @@ to the Tello network.`)
 
 	fdChan, _ = drone.StreamFlightData(false, fdPeriodMs)
 	go app.fdListener()
+
+	app.statusBar.connectionLab.SetText(" Connected ")
 }
 
 func (app *tdApp) diconnectCB(s string, i interface{}) {
@@ -37,4 +40,5 @@ func (app *tdApp) diconnectCB(s string, i interface{}) {
 	app.connectItem.SetEnabled(true)
 	app.importTrackItem.SetEnabled(true)
 	jsStopChan <- true // stop the joystick listener goroutine
+	app.statusBar.connectionLab.SetText(" Disconnected ")
 }

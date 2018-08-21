@@ -105,7 +105,6 @@ func (app *tdApp) setup() {
 	feedTab := app.tabBar.AddTab("Feed")
 	feedTab.SetPinned(true)
 	feedTab.SetContent(app.feed)
-	app.Subscribe("feedUpdate", app.feedUpdateCB)
 
 	app.trackChart = app.buildTrackChart(videoWidth, videoHeight)
 	trackTab := app.tabBar.AddTab("Track")
@@ -120,7 +119,7 @@ func (app *tdApp) setup() {
 	app.statusBar = buildStatusbar(app.mainPanel)
 	app.mainPanel.Add(app.statusBar)
 	//app.Subscribe("fdUpdate", app.updateStatusBar)
-	app.Gui().TimerManager.SetInterval(500*time.Millisecond, true, app.updateStatusBarTCB)
+	app.Gui().TimerManager.SetInterval(250*time.Millisecond, true, app.updateStatusBarTCB)
 
 	app.Gui().SetName(appName)
 

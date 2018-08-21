@@ -238,13 +238,15 @@ func (app *tdApp) updateFeedTCB(cb interface{}) {
 	app.picMu.RLock()
 	app.texture.SetFromRGBA(app.pic)
 	app.picMu.RUnlock()
+	app.feed.SetChanged(true)
 }
 
 // func (app *tdApp) feedUpdateCB(s string, ev interface{}) {
 // 	app.texture.SetFromRGBA(ev.(*image.RGBA))
 // }
-func (app *tdApp) feedUpdateCB(s string, ev interface{}) {
-	app.picMu.RLock()
-	app.texture.SetFromRGBA(app.pic)
-	app.picMu.RUnlock()
-}
+// func (app *tdApp) feedUpdateCB(s string, ev interface{}) {
+// 	app.picMu.RLock()
+// 	app.texture.SetFromRGBA(app.pic)
+// 	app.picMu.RUnlock()
+// 	app.feed.SetChanged(true)
+// }
