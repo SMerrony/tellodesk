@@ -37,7 +37,7 @@ func buildStatusbar(parent *gui.Panel) (sb *statusbar) {
 	// sb.connectionLab.SetColor(math32.NewColor("white"))
 	// sb.connectionLab.SetPaddingsColor(&padCol)
 	// sb.connectionLab.SetLayoutParams(&params)
-	sb.connectionLab = NewFixedLabel(14, " Disconnected ", color.RGBA{255, 255, 255, 255})
+	sb.connectionLab = NewFixedLabel(" Disconnected ", color.RGBA{255, 255, 255, 255})
 	sb.connectionLab.ApplyStyle(&labStyle)
 	sb.connectionLab.SetPaddingsColor(&padCol)
 	sb.connectionLab.SetLayoutParams(&params)
@@ -47,7 +47,7 @@ func buildStatusbar(parent *gui.Panel) (sb *statusbar) {
 	padder.SetLayoutParams(&padParams)
 	sb.Add(padder)
 
-	sb.heightLab = NewFixedLabel(15, " Height: 00.0m ", color.RGBA{255, 255, 255, 255})
+	sb.heightLab = NewFixedLabel(" Height: 00.0m ", color.RGBA{255, 255, 255, 255})
 	sb.heightLab.ApplyStyle(&labStyle)
 	sb.heightLab.SetPaddingsColor(&padCol)
 	sb.heightLab.SetLayoutParams(&params)
@@ -57,7 +57,7 @@ func buildStatusbar(parent *gui.Panel) (sb *statusbar) {
 	padder2.SetLayoutParams(&padParams)
 	sb.Add(padder2)
 
-	sb.batteryPctLab = NewFixedLabel(15, " Battery: 000% ", color.RGBA{255, 255, 255, 255})
+	sb.batteryPctLab = NewFixedLabel(" Battery: 000% ", color.RGBA{255, 255, 255, 255})
 	sb.batteryPctLab.ApplyStyle(&labStyle)
 	sb.batteryPctLab.SetPaddingsColor(&padCol)
 	sb.batteryPctLab.SetLayoutParams(&params)
@@ -67,7 +67,7 @@ func buildStatusbar(parent *gui.Panel) (sb *statusbar) {
 	padder3.SetLayoutParams(&padParams)
 	sb.Add(padder3)
 
-	sb.wifiStrLab = NewFixedLabel(21, " Wifi Strength: 000% ", color.RGBA{255, 255, 255, 255})
+	sb.wifiStrLab = NewFixedLabel(" Wifi Strength: 000% ", color.RGBA{255, 255, 255, 255})
 	sb.wifiStrLab.ApplyStyle(&labStyle)
 	sb.wifiStrLab.SetPaddingsColor(&padCol)
 	sb.wifiStrLab.SetLayoutParams(&params)

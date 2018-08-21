@@ -25,11 +25,11 @@ type FixedLabel struct {
 }
 
 // NewFixedLabel creates a fixed-size label which uses the built-in 7x13 font.
-func NewFixedLabel(charLength int, initial string, col color.Color) (l *FixedLabel) {
+func NewFixedLabel(initial string, col color.Color) (l *FixedLabel) {
 	l = new(FixedLabel)
-	l.length = charLength
+	l.length = len(initial)
 	l.height = 15
-	l.width = 9 * charLength
+	l.width = 9 * l.length
 	l.rect = image.Rectangle{image.Point{0, 0}, image.Point{l.width, l.height}}
 	l.Panel.Initialize(float32(l.width), float32(l.height))
 	l.rgba = image.NewRGBA(l.rect)

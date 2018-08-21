@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/csv"
 	"fmt"
+	"image"
 	"io"
 	"os"
 	"strconv"
@@ -37,14 +38,18 @@ func newTrack() (tt *telloTrack) {
 }
 
 type trackChartT struct {
-	*gui.Panel
+	*gui.Image
 	track *telloTrack
+	//tex          *texture.Texture2D
+	backingImage *image.RGBA
 }
 
-func (app *tdApp) buildTrackChart(w, h float32) (tc *trackChartT) {
+func (app *tdApp) buildTrackChart(w, h int) (tc *trackChartT) {
 	tc = new(trackChartT)
-	tc.Panel = gui.NewPanel(w, h)
-
+	tc.backingImage = image.NewRGBA(image.Rect(0, 0, w, h))
+	//tc.tex = texture.NewTexture2DFromRGBA(tc.backingImage)
+	//tc.Image = gui.NewImageFromTex(tc.tex)
+	tc.Image = gui.NewImageFromRGBA(tc.backingImage) 
 	tc.track = newTrack()
 	return tc
 }
