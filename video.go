@@ -115,24 +115,31 @@ func assert(i interface{}, err error) interface{} {
 //func (app *tdApp) videoListener() {
 func videoListener(app *tdApp) {
 
+	//app.Log().Info("Videolistener started")
+
 	iCtx := gmf.NewCtx()
 	defer iCtx.CloseInputAndRelease()
 
 	if err := iCtx.SetInputFormat("h264"); err != nil {
 		log.Fatalf("iCtx SetInputFormat %v", err)
 	}
-
+	//app.Log().Info("Input format set")
 	avioCtx, err := gmf.NewAVIOContext(iCtx, &gmf.AVIOHandlers{ReadPacket: app.customReader})
 	defer gmf.Release(avioCtx)
 	if err != nil {
 		log.Fatalf("NewAVIOContext %v", err)
 	}
 
-	iCtx.SetPb(avioCtx).OpenInput("")
+	//app.Log().Info("Setting Pb...")
+	iCtx.SetPb(avioCtx)
+
+	//app.Log().Info("Opening input...")
+	err = iCtx.OpenInput("")
 	if err != nil {
 		log.Fatalf("iCtx OpenInput %v", err)
 	}
 
+	//app.Log().Info("Getting best stream...")
 	srcVideoStream, err := iCtx.GetBestStream(gmf.AVMEDIA_TYPE_VIDEO)
 	if err != nil {
 		log.Fatalf("GetBestStream %v", err)
@@ -155,7 +162,7 @@ func videoListener(app *tdApp) {
 		SetWidth(videoWidth).
 		SetHeight(videoHeight).
 		SetTimeBase(gmf.AVR{Num: 1, Den: 1})
-
+	//app.Log().Info("Opening cc")
 	if err := cc.Open(nil); err != nil {
 		log.Fatalf("cc Open %v", err)
 	}
@@ -178,6 +185,8 @@ func videoListener(app *tdApp) {
 
 	codecCtx := ist.CodecCtx()
 	defer gmf.Release(codecCtx)
+
+	//app.Log().Info("Entering get video packets loop...")
 
 	for pkt := range iCtx.GetNewPackets() {
 
@@ -235,6 +244,7 @@ func (app *tdApp) updateFeedTCB(cb interface{}) {
 	// 	app.feed.SetChanged(true)
 	// default:
 	// }
+
 	app.picMu.RLock()
 	app.texture.SetFromRGBA(app.pic)
 	app.picMu.RUnlock()
