@@ -4,15 +4,14 @@ import (
 	"bufio"
 	"encoding/csv"
 	"fmt"
-	"image"
 	"io"
+	"math"
 	"os"
 	"strconv"
 	"sync"
 	"time"
 
 	"github.com/SMerrony/tello"
-	"github.com/g3n/engine/gui"
 )
 
 const timeStampFmt = "20060102150405.000"
@@ -25,9 +24,10 @@ type telloPosT struct {
 }
 
 type telloTrack struct {
-	trackMu            sync.RWMutex
-	startTime, endTime time.Time
-	positions          []telloPosT
+	trackMu                sync.RWMutex
+	startTime, endTime     time.Time
+	maxX, maxY, minX, minY float32
+	positions              []telloPosT
 }
 
 func newTrack() (tt *telloTrack) {
@@ -35,23 +35,6 @@ func newTrack() (tt *telloTrack) {
 	tt.positions = make([]telloPosT, 0, 1000)
 
 	return tt
-}
-
-type trackChartT struct {
-	*gui.Image
-	track *telloTrack
-	//tex          *texture.Texture2D
-	backingImage *image.RGBA
-}
-
-func (app *tdApp) buildTrackChart(w, h int) (tc *trackChartT) {
-	tc = new(trackChartT)
-	tc.backingImage = image.NewRGBA(image.Rect(0, 0, w, h))
-	//tc.tex = texture.NewTexture2DFromRGBA(tc.backingImage)
-	//tc.Image = gui.NewImageFromTex(tc.tex)
-	tc.Image = gui.NewImageFromRGBA(tc.backingImage) 
-	tc.track = newTrack()
-	return tc
 }
 
 func (tp *telloPosT) toStrings() (strings []string) {
@@ -97,6 +80,16 @@ func (tt *telloTrack) addPositionIfChanged(fd tello.FlightData) {
 			tt.positions = append(tt.positions, pos)
 			tt.trackMu.Unlock()
 		}
+		switch {
+		case pos.mvoX < tt.minX:
+			tt.minX = pos.mvoX
+		case pos.mvoX > tt.maxX:
+			tt.maxX = pos.mvoX
+		case pos.mvoY < tt.minY:
+			tt.minY = pos.mvoY
+		case pos.mvoY > tt.maxY:
+			tt.maxY = pos.mvoY
+		}
 	}
 }
 
@@ -141,28 +134,77 @@ func (app *tdApp) importTrackCB(s string, ev interface{}) {
 			} else {
 				defer imp.Close()
 				r := csv.NewReader(bufio.NewReader(imp))
-				app.trackChart.track = newTrack()
-				for {
-					line, err := r.Read()
-					if err == io.EOF {
-						break
-					} else if err != nil {
-						alertDialog(app.mainPanel, errorSev, "Could not read CSV file")
-						return
-					}
-					tmpTrackPos, err := toStruct(line)
-					if err != nil {
-						alertDialog(app.mainPanel, errorSev, "Could not parse CSV file")
-						return
-					}
-					app.trackChart.track.positions = append(app.trackChart.track.positions, tmpTrackPos)
-				}
-				app.Log().Info("Imported %d track positions", len(app.trackChart.track.positions))
+				tmpTrack := app.readTrack(r)
+				app.trackChart = buildTrackChart(videoWidth, videoHeight, tmpTrack.deriveScale())
+				app.trackChart.track = tmpTrack
+				//app.trackChart.Panel.SetChanged(true)
+				//app.trackChart.Image.SetChanged(true)
+				//app.tabBar.SetChanged(true)
+				app.Log().Info("Track redrawn?")
+				app.trackChart.clearChart()
 			}
 		}
 		fs.Close()
+		app.trackChart.clearChart()
+		app.trackChart = buildTrackChart(videoWidth, videoHeight, app.trackChart.track.deriveScale())
 	})
 	fs.Subscribe("OnCancel", func(n string, ev interface{}) {
 		fs.Close()
 	})
+}
+
+func (app *tdApp) readTrack(r *csv.Reader) (trk *telloTrack) {
+	trk = newTrack()
+	for {
+		line, err := r.Read()
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			alertDialog(app.mainPanel, errorSev, "Could not read CSV file")
+			return
+		}
+		tmpTrackPos, err := toStruct(line)
+		if err != nil {
+			alertDialog(app.mainPanel, errorSev, "Could not parse CSV file")
+			return
+		}
+		trk.positions = append(trk.positions, tmpTrackPos)
+		switch {
+		case tmpTrackPos.mvoX < trk.minX:
+			trk.minX = tmpTrackPos.mvoX
+		case tmpTrackPos.mvoX > trk.maxX:
+			trk.maxX = tmpTrackPos.mvoX
+		case tmpTrackPos.mvoY < trk.minY:
+			trk.minY = tmpTrackPos.mvoY
+		case tmpTrackPos.mvoY > trk.maxY:
+			trk.maxY = tmpTrackPos.mvoY
+		}
+	}
+	app.Log().Info("Imported %d track positions", len(trk.positions))
+	app.Log().Info("Min X: %f, Max X:, %f", trk.minX, trk.maxX)
+	app.Log().Info("Min Y: %f, Max Y:, %f", trk.minY, trk.maxY)
+	app.Log().Info("Derived scale is %f", trk.deriveScale())
+	return trk
+}
+
+func (tt *telloTrack) deriveScale() (scale float32) {
+
+	scale = 1.0 // minimum scale value
+
+	if tt.maxX > scale {
+		scale = tt.maxX
+	}
+	if -tt.minX > scale {
+		scale = -tt.minX
+	}
+	if tt.maxY > scale {
+		scale = tt.maxY
+	}
+	if -tt.minY > scale {
+		scale = -tt.minY
+	}
+
+	scale = float32(math.Ceil(float64(scale)))
+
+	return scale
 }

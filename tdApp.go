@@ -73,7 +73,7 @@ func (app *tdApp) setup() {
 	var err error
 	app.settings, err = loadSettings(appSettingsFile)
 	if err != nil {
-		if strings.Contains(err.Error(), "cannot find") {
+		if strings.Contains(err.Error(), "cannot find") || strings.Contains(err.Error(), "no such") {
 			alertDialog(app.mainPanel, warningSev, "Could not open settings file\n\n"+appSettingsFile+"\n\n"+
 				"This is normal on a first run,\nor until you have saved your settings")
 		} else {
@@ -106,7 +106,7 @@ func (app *tdApp) setup() {
 	feedTab.SetPinned(true)
 	feedTab.SetContent(app.feed)
 
-	app.trackChart = app.buildTrackChart(videoWidth, videoHeight)
+	app.trackChart = buildTrackChart(videoWidth, videoHeight, defaultTrackScale)
 	trackTab := app.tabBar.AddTab("Track")
 	trackTab.SetPinned(true)
 	trackTab.SetContent(app.trackChart)
