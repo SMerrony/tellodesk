@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/csv"
 	"fmt"
+	"image/color"
 	"io"
 	"math"
 	"os"
@@ -137,16 +138,17 @@ func (app *tdApp) importTrackCB(s string, ev interface{}) {
 				tmpTrack := app.readTrack(r)
 				app.trackChart = buildTrackChart(videoWidth, videoHeight, tmpTrack.deriveScale())
 				app.trackChart.track = tmpTrack
-				//app.trackChart.Panel.SetChanged(true)
-				//app.trackChart.Image.SetChanged(true)
-				//app.tabBar.SetChanged(true)
-				app.Log().Info("Track redrawn?")
-				app.trackChart.clearChart()
+				var lastX, lastY float32
+				for _, pos := range tmpTrack.positions {
+					app.trackChart.drawPos(pos.mvoX, pos.mvoY, pos.imuYaw)
+					app.trackChart.line(lastX, lastY, pos.mvoX, pos.mvoY, color.Black)
+					lastX = pos.mvoX
+					lastY = pos.mvoY
+				}
+				app.trackTab.SetContent(app.trackChart)
 			}
 		}
 		fs.Close()
-		app.trackChart.clearChart()
-		app.trackChart = buildTrackChart(videoWidth, videoHeight, app.trackChart.track.deriveScale())
 	})
 	fs.Subscribe("OnCancel", func(n string, ev interface{}) {
 		fs.Close()

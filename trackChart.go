@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
@@ -18,13 +17,13 @@ import (
 
 type trackChartT struct {
 	gui.Panel
-	track                           *telloTrack
-	tex                             *texture.Texture2D
-	backingImage                    *image.RGBA
-	width, height, xOrigin, yOrigin int
-	bgCol, axesCol, labelCol        color.Color
-	maxOffset                       float32
-	scalePPM                        float32 // scale factor expressed as Pixels Per Metre
+	track                              *telloTrack
+	tex                                *texture.Texture2D
+	backingImage                       *image.RGBA
+	width, height, xOrigin, yOrigin    int
+	bgCol, axesCol, labelCol, droneCol color.Color
+	maxOffset                          float32
+	scalePPM                           float32 // scale factor expressed as Pixels Per Metre
 }
 
 const defaultTrackScale float32 = 10.0
@@ -39,6 +38,7 @@ func buildTrackChart(w, h int, scale float32) (tc *trackChartT) {
 	tc.bgCol = color.White
 	tc.axesCol = color.RGBA{128, 128, 128, 255} // color.Black
 	tc.labelCol = color.RGBA{128, 128, 128, 255}
+	tc.droneCol = color.RGBA{255, 0, 0, 255}
 	tc.maxOffset = scale
 	tc.scalePPM = float32(tc.yOrigin) / scale // TODO - we assume here that height <= width
 	tc.backingImage = image.NewRGBA(image.Rectangle{image.Point{0, 0}, image.Point{w, h}})
@@ -46,7 +46,7 @@ func buildTrackChart(w, h int, scale float32) (tc *trackChartT) {
 	tc.tex.SetMagFilter(gls.NEAREST)
 	tc.tex.SetMinFilter(gls.NEAREST)
 	tc.Panel.Material().AddTexture(tc.tex)
-	tc.track = newTrack()
+	//tc.track = newTrack()
 	tc.drawEmptyChart()
 	return tc
 }
@@ -57,6 +57,7 @@ func (tc *trackChartT) clearChart() {
 }
 
 func (tc *trackChartT) drawEmptyChart() {
+	tc.tex.Dispose()
 	tc.clearChart()
 	// blank vertical axis
 	for y := 0; y < tc.height; y++ {
@@ -77,7 +78,7 @@ func (tc *trackChartT) drawEmptyChart() {
 		tc.backingImage.Set(tc.xOrigin-1, tc.yOrigin+int(y*tc.scalePPM), tc.axesCol)
 		tc.backingImage.Set(tc.xOrigin+1, tc.yOrigin+int(y*tc.scalePPM), tc.axesCol)
 		tc.drawLabel(0, y, strconv.Itoa(int(y)))
-		fmt.Printf("Y label drawn at: %f\n", y)
+		//fmt.Printf("Y label drawn at: %f\n", y)
 	}
 	tc.tex.SetFromRGBA(tc.backingImage)
 }
@@ -103,4 +104,68 @@ func (tc *trackChartT) xToOrd(x float32) (xOrd int) {
 func (tc *trackChartT) yToOrd(y float32) (yOrd int) {
 	yOrd = tc.height - (int(float32(tc.yOrigin) + y*tc.scalePPM))
 	return yOrd
+}
+
+func (tc *trackChartT) drawPos(x, y float32, hdg int16) {
+	tc.backingImage.Set(tc.xToOrd(x), tc.yToOrd(y), tc.droneCol)
+	switch {
+	case hdg >= -45 && hdg <= 45: // N
+		tc.backingImage.Set(tc.xToOrd(x), tc.yToOrd(y)-1, tc.droneCol)
+		tc.backingImage.Set(tc.xToOrd(x), tc.yToOrd(y)-2, tc.droneCol)
+		tc.backingImage.Set(tc.xToOrd(x), tc.yToOrd(y)-3, tc.droneCol)
+	case hdg >= -135 && hdg < -45: // W
+		tc.backingImage.Set(tc.xToOrd(x)+1, tc.yToOrd(y), tc.droneCol)
+		tc.backingImage.Set(tc.xToOrd(x)+2, tc.yToOrd(y), tc.droneCol)
+		tc.backingImage.Set(tc.xToOrd(x)+3, tc.yToOrd(y), tc.droneCol)
+	case hdg > 45 && hdg < 135: // E
+		tc.backingImage.Set(tc.xToOrd(x)-1, tc.yToOrd(y), tc.droneCol)
+		tc.backingImage.Set(tc.xToOrd(x)-2, tc.yToOrd(y), tc.droneCol)
+		tc.backingImage.Set(tc.xToOrd(x)-3, tc.yToOrd(y), tc.droneCol)
+	default: // S
+		tc.backingImage.Set(tc.xToOrd(x), tc.yToOrd(y)+1, tc.droneCol)
+		tc.backingImage.Set(tc.xToOrd(x), tc.yToOrd(y)+2, tc.droneCol)
+		tc.backingImage.Set(tc.xToOrd(x), tc.yToOrd(y)+3, tc.droneCol)
+	}
+}
+
+func (tc *trackChartT) line(x0, y0, x1, y1 float32, col color.Color) {
+	tc.physLine(tc.xToOrd(x0), tc.yToOrd(y0), tc.xToOrd(x1), tc.yToOrd(y1), col)
+}
+
+func (tc *trackChartT) physLine(x0, y0, x1, y1 int, col color.Color) {
+	dx := x1 - x0
+	if dx < 0 {
+		dx = -dx
+	}
+	dy := y1 - y0
+	if dy < 0 {
+		dy = -dy
+	}
+	var sx, sy int
+	if x0 < x1 {
+		sx = 1
+	} else {
+		sx = -1
+	}
+	if y0 < y1 {
+		sy = 1
+	} else {
+		sy = -1
+	}
+	err := dx - dy
+	for {
+		tc.backingImage.Set(x0, y0, col)
+		if x0 == x1 && y0 == y1 {
+			break
+		}
+		e2 := 2 * err
+		if e2 > -dy {
+			err -= dy
+			x0 += sx
+		}
+		if e2 < dx {
+			err += dx
+			y0 += sy
+		}
+	}
 }

@@ -53,6 +53,7 @@ type tdApp struct {
 	flightDataMu                                                                sync.RWMutex
 	flightData                                                                  tello.FlightData
 	trackChart                                                                  *trackChartT
+	trackTab                                                                    *gui.Tab
 }
 
 func (app *tdApp) setup() {
@@ -107,9 +108,9 @@ func (app *tdApp) setup() {
 	feedTab.SetContent(app.feed)
 
 	app.trackChart = buildTrackChart(videoWidth, videoHeight, defaultTrackScale)
-	trackTab := app.tabBar.AddTab("Track")
-	trackTab.SetPinned(true)
-	trackTab.SetContent(app.trackChart)
+	app.trackTab = app.tabBar.AddTab("Track")
+	app.trackTab.SetPinned(true)
+	app.trackTab.SetContent(app.trackChart)
 
 	planTab := app.tabBar.AddTab("Planner")
 	planTab.SetPinned(true)
