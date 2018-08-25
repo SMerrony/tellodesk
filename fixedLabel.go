@@ -13,6 +13,8 @@ import (
 	"golang.org/x/image/math/fixed"
 )
 
+// FixedLabel is a simple fixed-length, fixed-font textual label suitable
+// for frequent updating.  The length is taken from the initial string.
 type FixedLabel struct {
 	gui.Panel
 	contents      string             // value to be displayed
@@ -57,7 +59,7 @@ func (l *FixedLabel) SetText(newString string) {
 		Dst:  l.rgba,
 		Src:  l.uniCol,
 		Face: basicfont.Face7x13,
-		Dot:  fixed.Point26_6{fixed.Int26_6(90), fixed.Int26_6(750)},
+		Dot:  fixed.Point26_6{X: fixed.Int26_6(90), Y: fixed.Int26_6(750)},
 	}
 	d.DrawString(text)
 	l.tex.SetFromRGBA(l.rgba)
