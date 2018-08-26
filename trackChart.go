@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
@@ -94,6 +95,13 @@ func (tc *trackChartT) drawLabel(x, y float32, lab string) {
 		Dot:  point,
 	}
 	d.DrawString(lab)
+}
+
+func (tc *trackChartT) drawTitles() {
+	const dateFmt = "Jan 2 2006 15:04:05"
+	tc.drawLabel(-tc.maxOffset-0.5, -tc.maxOffset+0.5, fmt.Sprintf("Flight from %s to %s",
+		tc.track.positions[1].timeStamp.Format(dateFmt),
+		tc.track.positions[len(tc.track.positions)-1].timeStamp.Format("15:04:05")))
 }
 
 func (tc *trackChartT) xToOrd(x float32) (xOrd int) {

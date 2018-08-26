@@ -181,6 +181,9 @@ func (app *tdApp) buildMenu() {
 	app.importTrackItem = app.trackMenu.AddOption("Import CSV Track")
 	app.importTrackItem.SetIcon(icon.Input)
 	app.importTrackItem.Subscribe(gui.OnClick, app.importTrackCB)
+	st := app.trackMenu.AddOption("Save Track as PNG")
+	st.SetIcon(icon.Image)
+	st.Subscribe(gui.OnClick, app.exportTrackImageCB)
 	app.menuBar.AddMenu(" Track ", app.trackMenu)
 
 	app.videoMenu = gui.NewMenu()

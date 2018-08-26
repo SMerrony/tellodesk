@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/csv"
 	"fmt"
+	"image/png"
 	"io"
 	"math"
 	"os"
@@ -25,7 +26,6 @@ type telloPosT struct {
 
 type telloTrack struct {
 	trackMu                sync.RWMutex
-	startTime, endTime     time.Time
 	maxX, maxY, minX, minY float32
 	positions              []telloPosT
 }
@@ -101,7 +101,7 @@ func (tt *telloTrack) addPositionIfChanged(fd tello.FlightData) {
 func (app *tdApp) exportTrackCB(s string, ev interface{}) {
 	var expPath string
 	cwd, _ := os.Getwd()
-	fs, _ := NewFileSelect(app.mainPanel, cwd, "Choose File for Path Export", "*.csv")
+	fs, _ := NewFileSelect(app.mainPanel, cwd, "Choose File for Track Export", "*.csv")
 	fs.Subscribe("OnOK", func(n string, ev interface{}) {
 		expPath = fs.Selected()
 		if expPath != "" {
@@ -117,6 +117,30 @@ func (app *tdApp) exportTrackCB(s string, ev interface{}) {
 				}
 				currentTrack.trackMu.RUnlock()
 				w.Flush()
+			}
+		}
+		fs.Close()
+	})
+	fs.Subscribe("OnCancel", func(n string, ev interface{}) {
+		fs.Close()
+	})
+}
+
+func (app *tdApp) exportTrackImageCB(s string, ev interface{}) {
+	var expPath string
+	cwd, _ := os.Getwd()
+	fs, _ := NewFileSelect(app.mainPanel, cwd, "Choose File for Track Image", "*.png")
+	fs.Subscribe("OnOK", func(n string, ev interface{}) {
+		expPath = fs.Selected()
+		if expPath != "" {
+			exp, err := os.Create(expPath)
+			if err != nil {
+				alertDialog(app.mainPanel, warningSev, "Could not create image file")
+			} else {
+				defer exp.Close()
+				if err := png.Encode(exp, app.trackChart.backingImage); err != nil {
+					alertDialog(app.mainPanel, errorSev, "Could not export track image")
+				}
 			}
 		}
 		fs.Close()
@@ -149,6 +173,7 @@ func (app *tdApp) importTrackCB(s string, ev interface{}) {
 					//lastX = pos.mvoX
 					//lastY = pos.mvoY
 				}
+				app.trackChart.drawTitles()
 				app.trackTab.SetContent(app.trackChart)
 			}
 		}
