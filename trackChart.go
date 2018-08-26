@@ -106,25 +106,24 @@ func (tc *trackChartT) yToOrd(y float32) (yOrd int) {
 	return yOrd
 }
 
-func (tc *trackChartT) drawPos(x, y float32, hdg int16) {
-	tc.backingImage.Set(tc.xToOrd(x), tc.yToOrd(y), tc.droneCol)
+func (tc *trackChartT) drawPos(x, y float32, yaw int16) {
 	switch {
-	case hdg >= -45 && hdg <= 45: // N
-		tc.backingImage.Set(tc.xToOrd(x), tc.yToOrd(y)-1, tc.droneCol)
-		tc.backingImage.Set(tc.xToOrd(x), tc.yToOrd(y)-2, tc.droneCol)
-		tc.backingImage.Set(tc.xToOrd(x), tc.yToOrd(y)-3, tc.droneCol)
-	case hdg >= -135 && hdg < -45: // W
-		tc.backingImage.Set(tc.xToOrd(x)+1, tc.yToOrd(y), tc.droneCol)
-		tc.backingImage.Set(tc.xToOrd(x)+2, tc.yToOrd(y), tc.droneCol)
-		tc.backingImage.Set(tc.xToOrd(x)+3, tc.yToOrd(y), tc.droneCol)
-	case hdg > 45 && hdg < 135: // E
-		tc.backingImage.Set(tc.xToOrd(x)-1, tc.yToOrd(y), tc.droneCol)
-		tc.backingImage.Set(tc.xToOrd(x)-2, tc.yToOrd(y), tc.droneCol)
-		tc.backingImage.Set(tc.xToOrd(x)-3, tc.yToOrd(y), tc.droneCol)
+	case yaw >= -45 && yaw <= 45: // N
+		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)-4, tc.yToOrd(y)+4, tc.droneCol)
+		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)+4, tc.yToOrd(y)+4, tc.droneCol)
+		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x), tc.yToOrd(y)+8, tc.droneCol)
+	case yaw >= -135 && yaw < -45: // W
+		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)-4, tc.yToOrd(y)+4, tc.droneCol)
+		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)-4, tc.yToOrd(y)-4, tc.droneCol)
+		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)-8, tc.yToOrd(y), tc.droneCol)
+	case yaw > 45 && yaw < 135: // E
+		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)+4, tc.yToOrd(y)+4, tc.droneCol)
+		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)+4, tc.yToOrd(y)-4, tc.droneCol)
+		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)+8, tc.yToOrd(y), tc.droneCol)
 	default: // S
-		tc.backingImage.Set(tc.xToOrd(x), tc.yToOrd(y)+1, tc.droneCol)
-		tc.backingImage.Set(tc.xToOrd(x), tc.yToOrd(y)+2, tc.droneCol)
-		tc.backingImage.Set(tc.xToOrd(x), tc.yToOrd(y)+3, tc.droneCol)
+		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)-4, tc.yToOrd(y)-4, tc.droneCol)
+		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)+4, tc.yToOrd(y)-4, tc.droneCol)
+		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x), tc.yToOrd(y)-8, tc.droneCol)
 	}
 }
 

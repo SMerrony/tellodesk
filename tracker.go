@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"encoding/csv"
 	"fmt"
-	"image/color"
 	"io"
 	"math"
 	"os"
@@ -62,35 +61,40 @@ func toStruct(strings []string) (tp telloPosT, err error) {
 }
 
 func (tt *telloTrack) addPositionIfChanged(fd tello.FlightData) {
-	var pos telloPosT
+	var newPos telloPosT
 
-	pos.heightDm = fd.Height
-	pos.mvoX = fd.MVO.PositionX
-	pos.mvoY = fd.MVO.PositionY
-	pos.imuYaw = fd.IMU.Yaw
+	newPos.heightDm = fd.Height
+	newPos.mvoX = fd.MVO.PositionX
+	newPos.mvoY = fd.MVO.PositionY
+	newPos.imuYaw = fd.IMU.Yaw
 
 	if len(tt.positions) == 0 {
 		tt.trackMu.Lock()
-		tt.positions = append(tt.positions, pos)
+		tt.positions = append(tt.positions, newPos)
 		tt.trackMu.Unlock()
 	} else {
 		lastPos := tt.positions[len(tt.positions)-1]
-		if lastPos.heightDm != pos.heightDm || lastPos.mvoX != pos.mvoX || lastPos.mvoY != pos.mvoY || lastPos.imuYaw != pos.imuYaw {
-			pos.timeStamp = time.Now()
-			tt.trackMu.Lock()
-			tt.positions = append(tt.positions, pos)
-			tt.trackMu.Unlock()
+		if lastPos.heightDm == newPos.heightDm && lastPos.mvoX == newPos.mvoX && lastPos.mvoY == newPos.mvoY && lastPos.imuYaw == newPos.imuYaw {
+			// nothing has changed - just return
+			return
 		}
-		switch {
-		case pos.mvoX < tt.minX:
-			tt.minX = pos.mvoX
-		case pos.mvoX > tt.maxX:
-			tt.maxX = pos.mvoX
-		case pos.mvoY < tt.minY:
-			tt.minY = pos.mvoY
-		case pos.mvoY > tt.maxY:
-			tt.maxY = pos.mvoY
-		}
+		newPos.timeStamp = time.Now()
+		tt.trackMu.Lock()
+		tt.positions = append(tt.positions, newPos)
+		tt.trackMu.Unlock()
+	}
+
+	if newPos.mvoX < tt.minX {
+		tt.minX = newPos.mvoX
+	}
+	if newPos.mvoX > tt.maxX {
+		tt.maxX = newPos.mvoX
+	}
+	if newPos.mvoY < tt.minY {
+		tt.minY = newPos.mvoY
+	}
+	if newPos.mvoY > tt.maxY {
+		tt.maxY = newPos.mvoY
 	}
 }
 
@@ -138,12 +142,12 @@ func (app *tdApp) importTrackCB(s string, ev interface{}) {
 				tmpTrack := app.readTrack(r)
 				app.trackChart = buildTrackChart(videoWidth, videoHeight, tmpTrack.deriveScale())
 				app.trackChart.track = tmpTrack
-				var lastX, lastY float32
+				//var lastX, lastY float32
 				for _, pos := range tmpTrack.positions {
 					app.trackChart.drawPos(pos.mvoX, pos.mvoY, pos.imuYaw)
-					app.trackChart.line(lastX, lastY, pos.mvoX, pos.mvoY, color.Black)
-					lastX = pos.mvoX
-					lastY = pos.mvoY
+					//app.trackChart.line(lastX, lastY, pos.mvoX, pos.mvoY, color.Black)
+					//lastX = pos.mvoX
+					//lastY = pos.mvoY
 				}
 				app.trackTab.SetContent(app.trackChart)
 			}
@@ -171,16 +175,20 @@ func (app *tdApp) readTrack(r *csv.Reader) (trk *telloTrack) {
 			return
 		}
 		trk.positions = append(trk.positions, tmpTrackPos)
-		switch {
-		case tmpTrackPos.mvoX < trk.minX:
+
+		if tmpTrackPos.mvoX < trk.minX {
 			trk.minX = tmpTrackPos.mvoX
-		case tmpTrackPos.mvoX > trk.maxX:
+		}
+		if tmpTrackPos.mvoX > trk.maxX {
 			trk.maxX = tmpTrackPos.mvoX
-		case tmpTrackPos.mvoY < trk.minY:
+		}
+		if tmpTrackPos.mvoY < trk.minY {
 			trk.minY = tmpTrackPos.mvoY
-		case tmpTrackPos.mvoY > trk.maxY:
+		}
+		if tmpTrackPos.mvoY > trk.maxY {
 			trk.maxY = tmpTrackPos.mvoY
 		}
+
 	}
 	app.Log().Info("Imported %d track positions", len(trk.positions))
 	app.Log().Info("Min X: %f, Max X:, %f", trk.minX, trk.maxX)
@@ -190,9 +198,7 @@ func (app *tdApp) readTrack(r *csv.Reader) (trk *telloTrack) {
 }
 
 func (tt *telloTrack) deriveScale() (scale float32) {
-
 	scale = 1.0 // minimum scale value
-
 	if tt.maxX > scale {
 		scale = tt.maxX
 	}
@@ -205,8 +211,6 @@ func (tt *telloTrack) deriveScale() (scale float32) {
 	if -tt.minY > scale {
 		scale = -tt.minY
 	}
-
 	scale = float32(math.Ceil(float64(scale)))
-
 	return scale
 }
