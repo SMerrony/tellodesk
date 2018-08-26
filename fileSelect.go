@@ -1,9 +1,11 @@
 package main
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 
 	"github.com/g3n/engine/gui"
 	"github.com/g3n/engine/gui/assets/icon"
@@ -19,9 +21,12 @@ type FileSelect struct {
 	path   *gui.Label
 	name   *gui.Edit
 	list   *gui.List
+	filter string
 }
 
-// NewFileSelect displays and returns a general-purpose file selector
+// NewFileSelect displays and returns a general-purpose file selector.
+// The suffix should either be empty, or of the exact form "*.suff" and if present will cause
+// non-directory files to be filtered according the suffix.
 func NewFileSelect(parent *gui.Panel, initPath string, title string, suffix string) (fs *FileSelect, err error) {
 
 	fs = new(FileSelect)
@@ -31,6 +36,10 @@ func NewFileSelect(parent *gui.Panel, initPath string, title string, suffix stri
 	fs.SetTitle(title)
 	fs.SetColor(math32.NewColor("Gray"))
 	fs.SetCloseButton(false)
+	if suffix != "" && suffix[0] != '*' {
+		return nil, errors.New("Suffix must start with '*' or be omitted")
+	}
+	fs.filter = suffix
 
 	// Set vertical box layout for the whole panel
 	vbl := gui.NewVBoxLayout()
@@ -120,13 +129,19 @@ func (fs *FileSelect) setPath(path string) error {
 	fs.list.Add(prev)
 	// Adds directory files
 	for i := 0; i < len(files); i++ {
-		item := gui.NewImageLabel(files[i].Name())
 		if files[i].IsDir() {
+			item := gui.NewImageLabel(files[i].Name())
 			item.SetIcon(icon.FolderOpen)
+			fs.list.Add(item)
 		} else {
-			item.SetIcon(icon.InsertPhoto)
+			if fs.filter != "" {
+				if strings.HasSuffix(files[i].Name(), fs.filter[1:]) {
+					item := gui.NewImageLabel(files[i].Name())
+					item.SetIcon(icon.Note)
+					fs.list.Add(item)
+				}
+			}
 		}
-		fs.list.Add(item)
 	}
 	return nil
 }
