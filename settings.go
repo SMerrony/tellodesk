@@ -72,7 +72,7 @@ func (app *tdApp) settingsDialog() (win *settingsDlg) {
 
 	win.Add(gui.NewLabel("Joystick"))
 	dDrop := gui.NewDropDown(200, gui.NewImageLabel(""))
-	dDrop.SetMargins(3, 3, 3, 3)
+	// dDrop.SetMargins(3, 3, 3, 3)
 	found := listJoysticks()
 	for _, j := range found {
 		dDrop.Add(gui.NewImageLabel(j.Name))
@@ -83,7 +83,7 @@ func (app *tdApp) settingsDialog() (win *settingsDlg) {
 	win.Add(dDrop)
 
 	tDrop := gui.NewDropDown(150, gui.NewImageLabel(""))
-	tDrop.SetMargins(3, 3, 3, 3)
+	// tDrop.SetMargins(3, 3, 3, 3)
 	known := listKnownJoystickTypes()
 	for _, k := range known {
 		il := gui.NewImageLabel(k.Name)
@@ -108,13 +108,13 @@ func (app *tdApp) settingsDialog() (win *settingsDlg) {
 	// buttons...
 	win.Add(gui.NewLabel(""))
 	cancel := gui.NewButton("Cancel")
-	cancel.SetBorders(1, 1, 1, 1)
-	cancel.SetPaddings(3, 3, 3, 3)
-	cancel.SetMargins(3, 3, 3, 3)
+	// cancel.SetBorders(1, 1, 1, 1)
+	// cancel.SetPaddings(3, 3, 3, 3)
+	// cancel.SetMargins(3, 3, 3, 3)
 	ok := gui.NewButton("OK")
-	ok.SetBorders(1, 1, 1, 1)
-	ok.SetPaddings(3, 3, 3, 3)
-	ok.SetMargins(3, 3, 3, 3)
+	// ok.SetBorders(1, 1, 1, 1)
+	// ok.SetPaddings(3, 3, 3, 3)
+	// ok.SetMargins(3, 3, 3, 3)
 	win.Add(cancel)
 	cancel.Subscribe(gui.OnClick, func(e string, ev interface{}) {
 		app.Log().Info("Settings Cancelled")
