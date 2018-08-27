@@ -22,27 +22,35 @@ func (app *tdApp) buildToolbar() (tb *toolbar) {
 
 	stopBtn := gui.NewButton("")
 	stopBtn.SetIcon(icon.Pause)
-	//stopBtn.SubscrBtne(gui.OnCursorEnter, tooltip)
+	stopBtn.Subscribe(gui.OnClick, func(e string, ev interface{}) {
+		drone.Hover()
+	})
 	tb.Add(stopBtn)
 
 	cameraBtn := gui.NewButton("")
-	// cameraBtn.SetIcon(icon.Warning)
 	cameraBtn.SetIcon(icon.CameraAlt)
+	cameraBtn.Subscribe(gui.OnClick, func(e string, ev interface{}) {
+		drone.TakePicture()
+	})
 	tb.Add(cameraBtn)
 
 	setHomeBtn := gui.NewButton("")
-	// setHomeBtn.SetIcon(icon.Stop)
 	setHomeBtn.SetIcon(icon.AddLocation)
+	setHomeBtn.Subscribe(gui.OnClick, func(e string, ev interface{}) {
+		drone.SetHome()
+	})
 	tb.Add(setHomeBtn)
 
-	goHome3Btn := gui.NewButton("")
-	goHome3Btn.SetIcon(icon.Place)
-	goHome3Btn.SetEnabled(false)
-	tb.Add(goHome3Btn)
-
-	next4Btn := gui.NewButton("")
-	next4Btn.SetIcon(icon.Error)
-	tb.Add(next4Btn)
+	goHomeBtn := gui.NewButton("")
+	goHomeBtn.SetIcon(icon.Place)
+	goHomeBtn.Subscribe(gui.OnClick, func(e string, ev interface{}) {
+		if drone.IsHomeSet() {
+			drone.AutoFlyToXY(0, 0)
+		} else {
+			alertDialog(app.mainPanel, warningSev, "Home position not set")
+		}
+	})
+	tb.Add(goHomeBtn)
 
 	return tb
 }

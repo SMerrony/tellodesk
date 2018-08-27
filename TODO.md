@@ -11,10 +11,10 @@
 * Help | Online Help
 
 ### Toolbar
-* Pause/Panic
-* Take Photo
-* Set Home Position
-* Return to Home
+* ~~Pause/Panic~~
+* ~~Take Photo~~
+* ~~Set Home Position~~
+* ~~Return to Home~~
 
 ### General
 * Convert Video(s) to MP4 or similar
