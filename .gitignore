@@ -14,5 +14,6 @@
 *.h264
 *.mp4
 *.csv
+*.jpg
 
 tellodesktop.yaml

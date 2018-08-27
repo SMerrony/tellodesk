@@ -199,10 +199,10 @@ func (app *tdApp) buildMenu() {
 	app.imagesMenu = gui.NewMenu()
 	tp := app.imagesMenu.AddOption("Take Photo")
 	tp.SetIcon(icon.CameraAlt)
-	tp.Subscribe(gui.OnClick, app.nyi)
+	tp.Subscribe(gui.OnClick, app.takePhotoCB)
 	sp := app.imagesMenu.AddOption("Save Photo(s)")
 	sp.SetIcon(icon.Save)
-	sp.SetEnabled(false).Subscribe(gui.OnClick, app.nyi)
+	sp.Subscribe(gui.OnClick, app.saveAllPhotosCB)
 	app.menuBar.AddMenu(" Images ", app.imagesMenu)
 
 	app.helpMenu = gui.NewMenu()
@@ -233,6 +233,9 @@ func (app *tdApp) buildFeed() {
 func (app *tdApp) exitNicely(s string, i interface{}) {
 	app.UnsubscribeID(application.OnQuit, nil) // prevent this being called again due to window app.Quit subscription
 	app.Log().Info("Tidying-up and exiting")
+	if drone.NumPics() > 0 {
+		drone.SaveAllPics(fmt.Sprintf("tello_pic_%s", time.Now().Format("2006Jan2150405")))
+	}
 	app.Quit()
 }
 

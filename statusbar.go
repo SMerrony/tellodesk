@@ -10,7 +10,7 @@ import (
 
 type statusbar struct {
 	*gui.Panel
-	connectionLab, heightLab, batteryPctLab, wifiStrLab *FixedLabel
+	connectionLab, heightLab, batteryPctLab, wifiStrLab, photosLab *FixedLabel
 }
 
 func buildStatusbar(parent *gui.Panel) (sb *statusbar) {
@@ -73,6 +73,16 @@ func buildStatusbar(parent *gui.Panel) (sb *statusbar) {
 	sb.wifiStrLab.SetLayoutParams(&params)
 	sb.Add(sb.wifiStrLab)
 
+	padder4 := gui.NewLabel("")
+	padder4.SetLayoutParams(&padParams)
+	sb.Add(padder4)
+
+	sb.photosLab = NewFixedLabel(" Buffered Photos: 00 ", color.RGBA{255, 255, 255, 255})
+	sb.photosLab.ApplyStyle(&labStyle)
+	sb.photosLab.SetPaddingsColor((&padCol))
+	sb.photosLab.SetLayoutParams(&params)
+	sb.Add(sb.photosLab)
+
 	return sb
 }
 
@@ -91,5 +101,6 @@ func (app *tdApp) updateStatusBarTCB(cb interface{}) {
 	app.statusBar.batteryPctLab.SetText(fmt.Sprintf(" Battery: %d%% ", app.flightData.BatteryPercentage))
 	app.statusBar.wifiStrLab.SetText(fmt.Sprintf(" Wifi Strength: %d%% ", app.flightData.WifiStrength))
 	app.flightDataMu.RUnlock()
+	app.statusBar.photosLab.SetText(fmt.Sprintf(" Buffered Photos: %d", drone.NumPics()))
 	//app.statusBar.SetChanged(true)
 }
