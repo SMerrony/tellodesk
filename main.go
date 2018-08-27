@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	appName               = "Tello Desktop"
+	appName               = "Tello® Desktop"
 	appVersion            = "0.1.0"
 	appAuthor             = "S.Merrony"
 	appCopyright          = "©2018 S.Merrony"
