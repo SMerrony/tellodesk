@@ -47,7 +47,7 @@ func buildTrackChart(w, h int, scale float32) (tc *trackChartT) {
 	tc.tex.SetMagFilter(gls.NEAREST)
 	tc.tex.SetMinFilter(gls.NEAREST)
 	tc.Panel.Material().AddTexture(tc.tex)
-	//tc.track = newTrack()
+	tc.track = newTrack()
 	tc.drawEmptyChart()
 	return tc
 }
@@ -105,33 +105,33 @@ func (tc *trackChartT) drawTitles() {
 }
 
 func (tc *trackChartT) xToOrd(x float32) (xOrd int) {
-	xOrd = (int(float32(tc.xOrigin) + x*tc.scalePPM))
+	xOrd = int(float32(tc.xOrigin) + x*tc.scalePPM)
 	return xOrd
 }
 
 func (tc *trackChartT) yToOrd(y float32) (yOrd int) {
-	yOrd = tc.height - (int(float32(tc.yOrigin) + y*tc.scalePPM))
+	yOrd = int(float32(tc.yOrigin) - y*tc.scalePPM)
 	return yOrd
 }
 
 func (tc *trackChartT) drawPos(x, y float32, yaw int16) {
 	switch {
 	case yaw >= -45 && yaw <= 45: // N
-		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)-4, tc.yToOrd(y)+4, tc.droneCol)
-		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)+4, tc.yToOrd(y)+4, tc.droneCol)
-		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x), tc.yToOrd(y)+8, tc.droneCol)
-	case yaw >= -135 && yaw < -45: // W
-		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)-4, tc.yToOrd(y)+4, tc.droneCol)
-		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)-4, tc.yToOrd(y)-4, tc.droneCol)
-		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)-8, tc.yToOrd(y), tc.droneCol)
-	case yaw > 45 && yaw < 135: // E
-		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)+4, tc.yToOrd(y)+4, tc.droneCol)
-		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)+4, tc.yToOrd(y)-4, tc.droneCol)
-		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)+8, tc.yToOrd(y), tc.droneCol)
-	default: // S
 		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)-4, tc.yToOrd(y)-4, tc.droneCol)
 		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)+4, tc.yToOrd(y)-4, tc.droneCol)
 		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x), tc.yToOrd(y)-8, tc.droneCol)
+	case yaw >= -135 && yaw < -45: // W
+		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)-4, tc.yToOrd(y)-4, tc.droneCol)
+		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)-4, tc.yToOrd(y)+4, tc.droneCol)
+		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)-8, tc.yToOrd(y), tc.droneCol)
+	case yaw > 45 && yaw < 135: // E
+		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)+4, tc.yToOrd(y)-4, tc.droneCol)
+		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)+4, tc.yToOrd(y)+4, tc.droneCol)
+		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)+8, tc.yToOrd(y), tc.droneCol)
+	default: // S
+		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)-4, tc.yToOrd(y)+4, tc.droneCol)
+		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)+4, tc.yToOrd(y)+4, tc.droneCol)
+		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x), tc.yToOrd(y)+8, tc.droneCol)
 	}
 }
 

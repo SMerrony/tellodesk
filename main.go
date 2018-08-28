@@ -26,9 +26,6 @@ var (
 	stickChan  chan<- tello.StickMessage
 	jsStopChan chan bool
 	fdChan     <-chan tello.FlightData
-	// flightDataMu sync.RWMutex
-	// flightData   tello.FlightData
-	currentTrack *telloTrack
 )
 
 func main() {

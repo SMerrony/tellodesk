@@ -8,7 +8,7 @@ func (app *tdApp) fdListener() {
 		app.flightDataMu.Lock()
 		app.flightData = tmpFd
 		app.flightDataMu.Unlock()
-		currentTrack.addPositionIfChanged(tmpFd)
+		app.trackChart.track.addPositionIfChanged(tmpFd)
 		//app.Dispatch("fdUpdate", nil)
 	}
 }

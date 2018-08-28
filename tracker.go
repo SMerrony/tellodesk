@@ -111,11 +111,11 @@ func (app *tdApp) exportTrackCB(s string, ev interface{}) {
 			} else {
 				defer exp.Close()
 				w := csv.NewWriter(exp)
-				currentTrack.trackMu.RLock()
-				for _, k := range currentTrack.positions {
+				app.trackChart.track.trackMu.RLock()
+				for _, k := range app.trackChart.track.positions {
 					w.Write(k.toStrings())
 				}
-				currentTrack.trackMu.RUnlock()
+				app.trackChart.track.trackMu.RUnlock()
 				w.Flush()
 			}
 		}

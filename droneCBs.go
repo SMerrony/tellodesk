@@ -26,7 +26,7 @@ to the Tello network.`)
 	go readJoystick(false, jsStopChan) // FIXME - if defined & opened ok!
 
 	app.importTrackItem.SetEnabled(false)
-	currentTrack = newTrack()
+	app.trackChart.track = newTrack()
 
 	fdChan, _ = drone.StreamFlightData(false, fdPeriodMs)
 	go app.fdListener()
