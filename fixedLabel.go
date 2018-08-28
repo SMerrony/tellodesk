@@ -31,7 +31,7 @@ func NewFixedLabel(initial string, col color.Color) (l *FixedLabel) {
 	l = new(FixedLabel)
 	l.length = len(initial)
 	l.height = 15
-	l.width = 9 * l.length
+	l.width = 7 * l.length
 	l.rect = image.Rectangle{image.Point{0, 0}, image.Point{l.width, l.height}}
 	l.Panel.Initialize(float32(l.width), float32(l.height))
 	l.rgba = image.NewRGBA(l.rect)
