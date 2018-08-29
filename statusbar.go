@@ -32,11 +32,6 @@ func buildStatusbar(parent *gui.Panel) (sb *statusbar) {
 	params := gui.HBoxLayoutParams{Expand: 0}
 	padParams := gui.HBoxLayoutParams{Expand: 1}
 
-	// sb.connectionLab = gui.NewLabel(" Connection Status ")
-	// sb.connectionLab.ApplyStyle(&labStyle)
-	// sb.connectionLab.SetColor(math32.NewColor("white"))
-	// sb.connectionLab.SetPaddingsColor(&padCol)
-	// sb.connectionLab.SetLayoutParams(&params)
 	sb.connectionLab = NewFixedLabel(" Disconnected ", color.RGBA{255, 255, 255, 255})
 	sb.connectionLab.ApplyStyle(&labStyle)
 	sb.connectionLab.SetPaddingsColor(&padCol)
@@ -85,15 +80,6 @@ func buildStatusbar(parent *gui.Panel) (sb *statusbar) {
 
 	return sb
 }
-
-// func (app *tdApp) updateStatusBar(s string, ev interface{}) {
-// 	app.flightDataMu.RLock()
-// 	app.statusBar.heightLab.SetText(fmt.Sprintf(" Height: %.1fm ", float32(app.flightData.Height)/10))
-// 	app.statusBar.batteryPctLab.SetText(fmt.Sprintf(" Battery: %d%% ", app.flightData.BatteryPercentage))
-// 	app.statusBar.wifiStrLab.SetText(fmt.Sprintf(" Wifi Strength: %d%% ", app.flightData.WifiStrength))
-// 	app.flightDataMu.RUnlock()
-// 	app.statusBar.SetChanged(true)
-// }
 
 func (app *tdApp) updateStatusBarTCB(cb interface{}) {
 	app.flightDataMu.RLock()

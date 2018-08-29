@@ -148,7 +148,7 @@ func (app *tdApp) buildMenu() {
 	app.connectItem.Subscribe(gui.OnClick, app.connectCB)
 	app.disconnectItem = app.droneMenu.AddOption("Disconnect")
 	app.disconnectItem.SetIcon(icon.SyncDisabled)
-	app.disconnectItem.SetEnabled(false).Subscribe(gui.OnClick, app.diconnectCB)
+	app.disconnectItem.SetEnabled(false).Subscribe(gui.OnClick, app.disconnectCB)
 
 	app.droneMenu.AddSeparator()
 

@@ -274,7 +274,6 @@ func readJoystick(test bool, stopChan chan bool) {
 		select {
 		case <-stopChan:
 			js.Close()
-			fmt.Println("Debug - joystick listener stopping")
 			return
 		default:
 		}

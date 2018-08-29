@@ -22,10 +22,10 @@ const (
 )
 
 var (
-	drone      tello.Tello
-	stickChan  chan<- tello.StickMessage
-	jsStopChan chan bool
-	fdChan     <-chan tello.FlightData
+	drone                  tello.Tello
+	stickChan              chan<- tello.StickMessage
+	jsStopChan, fdStopChan chan bool
+	fdChan                 <-chan tello.FlightData
 )
 
 func main() {
@@ -45,7 +45,10 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error creating application: %v", err)
 	}
+
 	jsStopChan = make(chan bool) // not buffered
+	fdStopChan = make(chan bool) // not buffered
+
 	td.setup()
 
 	td.Run()

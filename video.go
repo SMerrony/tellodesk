@@ -236,6 +236,7 @@ func videoListener(app *tdApp) {
 	}
 }
 
+// updateFeedTCB runs periodically to update the video feed image on the GUI.
 func (app *tdApp) updateFeedTCB(cb interface{}) {
 	// no race, but slower...
 	// select {

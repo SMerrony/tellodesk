@@ -4,11 +4,14 @@ package main
 // It is started by connectCB() in droneCBs.go when the Tello is connected
 func (app *tdApp) fdListener() {
 	for {
-		tmpFd := <-fdChan
-		app.flightDataMu.Lock()
-		app.flightData = tmpFd
-		app.flightDataMu.Unlock()
-		app.trackChart.track.addPositionIfChanged(tmpFd)
-		//app.Dispatch("fdUpdate", nil)
+		select {
+		case tmpFd := <-fdChan:
+			app.flightDataMu.Lock()
+			app.flightData = tmpFd
+			app.flightDataMu.Unlock()
+			app.trackChart.track.addPositionIfChanged(tmpFd)
+		case <-fdStopChan:
+			return
+		}
 	}
 }
