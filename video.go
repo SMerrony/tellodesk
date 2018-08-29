@@ -80,16 +80,19 @@ func (app *tdApp) startVideo() {
 		alertDialog(app.mainPanel, errorSev, err.Error())
 	}
 
-	// start video feed when drone connects
+	// start video feed restarter when drone connects
 	drone.StartVideo()
 	go func() {
 		for {
 			drone.StartVideo()
+			select {
+			case <-vrStopChan:
+				return
+			default:
+			}
 			time.Sleep(500 * time.Millisecond)
 		}
 	}()
-
-	//app.videoStopChan = make(chan bool) // unbuffered
 
 	go videoListener(app)
 }

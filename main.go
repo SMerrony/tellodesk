@@ -22,10 +22,10 @@ const (
 )
 
 var (
-	drone                  tello.Tello
-	stickChan              chan<- tello.StickMessage
-	jsStopChan, fdStopChan chan bool
-	fdChan                 <-chan tello.FlightData
+	drone                              tello.Tello
+	stickChan                          chan<- tello.StickMessage
+	jsStopChan, fdStopChan, vrStopChan chan bool
+	fdChan                             <-chan tello.FlightData
 )
 
 func main() {
@@ -48,6 +48,7 @@ func main() {
 
 	jsStopChan = make(chan bool) // not buffered
 	fdStopChan = make(chan bool) // not buffered
+	vrStopChan = make(chan bool) // not buffered
 
 	td.setup()
 

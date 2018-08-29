@@ -8,6 +8,7 @@
   * stopped in disconnectCB()
 * Video Restarter 
   * started in video.go:startVideo()
+  * stopped in disconnectCB()
 * Video listener 
   * started in video.go:startVideo()
 

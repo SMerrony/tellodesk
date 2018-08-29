@@ -43,6 +43,7 @@ func (app *tdApp) disconnectCB(s string, i interface{}) {
 	app.importTrackItem.SetEnabled(true)
 	jsStopChan <- true // stop the joystick listener goroutine
 	fdStopChan <- true // stop the flight data listener goroutine
+	vrStopChan <- true // stop the video restarter goroutine
 	app.Gui().TimerManager.ClearTimeout(feedUpdateTimer)
 	app.statusBar.connectionLab.SetText(" Disconnected ")
 }
