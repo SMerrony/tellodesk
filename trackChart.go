@@ -135,6 +135,23 @@ func (tc *trackChartT) drawPos(x, y float32, yaw int16) {
 	}
 }
 
+func (tc *trackChartT) drawTrack(showDrone, showPath bool) {
+	var lastX, lastY float32
+	for _, pos := range tc.track.positions {
+		if showDrone {
+			tc.drawPos(pos.mvoX, pos.mvoY, pos.imuYaw)
+		}
+		if showPath {
+			tc.line(lastX, lastY, pos.mvoX, pos.mvoY, tc.droneCol)
+			lastX = pos.mvoX
+			lastY = pos.mvoY
+		}
+	}
+	tc.drawTitles()
+}
+
+// helper funcs...
+
 func (tc *trackChartT) line(x0, y0, x1, y1 float32, col color.Color) {
 	tc.physLine(tc.xToOrd(x0), tc.yToOrd(y0), tc.xToOrd(x1), tc.yToOrd(y1), col)
 }

@@ -166,14 +166,7 @@ func (app *tdApp) importTrackCB(s string, ev interface{}) {
 				tmpTrack := app.readTrack(r)
 				app.trackChart = buildTrackChart(videoWidth, videoHeight, tmpTrack.deriveScale())
 				app.trackChart.track = tmpTrack
-				//var lastX, lastY float32
-				for _, pos := range tmpTrack.positions {
-					app.trackChart.drawPos(pos.mvoX, pos.mvoY, pos.imuYaw)
-					//app.trackChart.line(lastX, lastY, pos.mvoX, pos.mvoY, color.Black)
-					//lastX = pos.mvoX
-					//lastY = pos.mvoY
-				}
-				app.trackChart.drawTitles()
+				app.trackChart.drawTrack(true, true)
 				app.trackTab.SetContent(app.trackChart)
 			}
 		}
