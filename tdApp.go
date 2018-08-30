@@ -54,6 +54,7 @@ type tdApp struct {
 	flightData                                                                  tello.FlightData
 	trackChart                                                                  *trackChartT
 	trackTab                                                                    *gui.Tab
+	trackShowDrone, trackShowPath                                               bool
 }
 
 func (app *tdApp) setup() {
@@ -107,8 +108,8 @@ func (app *tdApp) setup() {
 	feedTab.SetPinned(true)
 	feedTab.SetContent(app.feed)
 
-	app.trackChart = buildTrackChart(videoWidth, videoHeight, defaultTrackScale)
-	app.trackTab = app.tabBar.AddTab("Track")
+	app.trackChart = buildTrackChart(videoWidth, videoHeight, defaultTrackScale, app.trackShowDrone, app.trackShowPath)
+	app.trackTab = app.tabBar.AddTab("Tracker")
 	app.trackTab.SetPinned(true)
 	app.trackTab.SetContent(app.trackChart)
 
@@ -175,7 +176,7 @@ func (app *tdApp) buildMenu() {
 	ct := app.trackMenu.AddOption("Clear Track")
 	ct.SetIcon(icon.Delete)
 	ct.Subscribe(gui.OnClick, app.nyi)
-	et := app.trackMenu.AddOption("Export Track as CSV")
+	et := app.trackMenu.AddOption("Export Current Track as CSV")
 	et.SetIcon(icon.Save)
 	et.Subscribe(gui.OnClick, app.exportTrackCB)
 	app.importTrackItem = app.trackMenu.AddOption("Import CSV Track")
@@ -184,6 +185,37 @@ func (app *tdApp) buildMenu() {
 	st := app.trackMenu.AddOption("Save Track as PNG")
 	st.SetIcon(icon.Image)
 	st.Subscribe(gui.OnClick, app.exportTrackImageCB)
+	trackSubMenu := gui.NewMenu()
+	tsmShowDrone := trackSubMenu.AddOption("Show Drone Positions")
+	tsmShowDrone.SetIcon(icon.CheckBox)
+	app.trackShowDrone = true
+	tsmShowDrone.Subscribe(gui.OnClick, func(s string, i interface{}) {
+		app.trackShowDrone = !app.trackShowDrone
+		if app.trackShowDrone {
+			tsmShowDrone.SetIcon(icon.CheckBox)
+		} else {
+			tsmShowDrone.SetIcon(icon.CheckBoxOutlineBlank)
+		}
+		app.trackChart.setShowDrone(app.trackShowDrone)
+		app.trackChart.drawTrack()
+		app.trackTab.SetContent(app.trackChart)
+	})
+	tsmShowPath := trackSubMenu.AddOption("Show Track Path")
+	tsmShowPath.SetIcon(icon.CheckBox)
+	app.trackShowPath = true
+	tsmShowPath.Subscribe(gui.OnClick, func(s string, i interface{}) {
+		app.trackShowPath = !app.trackShowPath
+		if app.trackShowPath {
+			tsmShowPath.SetIcon(icon.CheckBox)
+		} else {
+			tsmShowPath.SetIcon(icon.CheckBoxOutlineBlank)
+		}
+		app.trackChart.setShowPath(app.trackShowPath)
+		app.trackChart.drawTrack()
+		app.trackTab.SetContent(app.trackChart)
+	})
+	app.trackMenu.AddMenu("Display", trackSubMenu)
+
 	app.menuBar.AddMenu(" Track ", app.trackMenu)
 
 	app.videoMenu = gui.NewMenu()

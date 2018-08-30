@@ -164,9 +164,9 @@ func (app *tdApp) importTrackCB(s string, ev interface{}) {
 				defer imp.Close()
 				r := csv.NewReader(bufio.NewReader(imp))
 				tmpTrack := app.readTrack(r)
-				app.trackChart = buildTrackChart(videoWidth, videoHeight, tmpTrack.deriveScale())
+				app.trackChart = buildTrackChart(videoWidth, videoHeight, tmpTrack.deriveScale(), app.trackShowDrone, app.trackShowPath)
 				app.trackChart.track = tmpTrack
-				app.trackChart.drawTrack(true, true)
+				app.trackChart.drawTrack()
 				app.trackTab.SetContent(app.trackChart)
 			}
 		}

@@ -25,14 +25,16 @@ type trackChartT struct {
 	bgCol, axesCol, labelCol, droneCol color.Color
 	maxOffset                          float32
 	scalePPM                           float32 // scale factor expressed as Pixels Per Metre
+	showDrone, showPath                bool
 }
 
 const defaultTrackScale float32 = 10.0
 
-func buildTrackChart(w, h int, scale float32) (tc *trackChartT) {
+func buildTrackChart(w, h int, scale float32, showDrone, showPath bool) (tc *trackChartT) {
 	tc = new(trackChartT)
 	tc.width = w
 	tc.height = h
+	tc.showDrone, tc.showPath = showDrone, showPath
 	tc.Panel.Initialize(float32(tc.width), float32(tc.height))
 	tc.xOrigin = w / 2
 	tc.yOrigin = h / 2
@@ -55,6 +57,14 @@ func buildTrackChart(w, h int, scale float32) (tc *trackChartT) {
 func (tc *trackChartT) clearChart() {
 	draw.Draw(tc.backingImage, tc.backingImage.Bounds(), image.NewUniform(tc.bgCol), image.ZP, draw.Src)
 	tc.tex.SetFromRGBA(tc.backingImage)
+}
+
+func (tc *trackChartT) setShowDrone(show bool) {
+	tc.showDrone = show
+}
+
+func (tc *trackChartT) setShowPath(show bool) {
+	tc.showPath = show
 }
 
 func (tc *trackChartT) drawEmptyChart() {
@@ -135,13 +145,14 @@ func (tc *trackChartT) drawPos(x, y float32, yaw int16) {
 	}
 }
 
-func (tc *trackChartT) drawTrack(showDrone, showPath bool) {
+func (tc *trackChartT) drawTrack() {
+	tc.drawEmptyChart()
 	var lastX, lastY float32
 	for _, pos := range tc.track.positions {
-		if showDrone {
+		if tc.showDrone {
 			tc.drawPos(pos.mvoX, pos.mvoY, pos.imuYaw)
 		}
-		if showPath {
+		if tc.showPath {
 			tc.line(lastX, lastY, pos.mvoX, pos.mvoY, tc.droneCol)
 			lastX = pos.mvoX
 			lastY = pos.mvoY
