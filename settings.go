@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
 	"strconv"
 	"strings"
 
@@ -16,11 +17,12 @@ import (
 type settingsT struct {
 	JoystickID   int
 	JoystickType string
+	DataDir      string
 }
 
 const (
 	dialogTitle                           = appName + " Settings"
-	settingsWidth, settingsHeight float32 = 500, 200
+	settingsWidth, settingsHeight float32 = 550, 200
 )
 
 func saveSettings(s settingsT, filename string) error {
@@ -70,8 +72,11 @@ func (app *tdApp) settingsDialog() (win *settingsDlg) {
 	win.Add(gui.NewLabel("Detected"))
 	win.Add(gui.NewLabel("Type"))
 
-	win.Add(gui.NewLabel("Joystick"))
+	jsLab := gui.NewLabel("Joystick:")
+	jsLab.SetLayoutParams(&gui.GridLayoutParams{ColSpan: 0, AlignH: gui.AlignRight})
+	win.Add(jsLab)
 	dDrop := gui.NewDropDown(200, gui.NewImageLabel(""))
+	dDrop.SetWidth(250.0)
 	// dDrop.SetMargins(3, 3, 3, 3)
 	found := listJoysticks()
 	for _, j := range found {
@@ -94,11 +99,28 @@ func (app *tdApp) settingsDialog() (win *settingsDlg) {
 	}
 	win.Add(tDrop)
 
-	warningLab := gui.NewLabel("You must reconnect to the drone after changing joystick settings")
+	win.Add(gui.NewLabel(""))
+	warningLab := gui.NewLabel(" You must reconnect to the drone after changing joystick settings ")
 	warningLab.SetMargins(3, 3, 3, 3)
-	warningLab.SetLayoutParams(&gui.GridLayoutParams{ColSpan: 3, AlignH: gui.AlignCenter})
-	warningLab.SetBgColor(math32.NewColor("Red"))
+	warningLab.SetLayoutParams(&gui.GridLayoutParams{ColSpan: 2, AlignH: gui.AlignCenter})
+	//warningLab.SetBgColor(math32.NewColor("Red"))
 	win.Add(warningLab)
+
+	// empty row...
+	win.Add(gui.NewLabel(""))
+	win.Add(gui.NewLabel(""))
+	win.Add(gui.NewLabel(""))
+
+	ddLab := gui.NewLabel("Data Directory:")
+	ddLab.SetLayoutParams(&gui.GridLayoutParams{ColSpan: 0, AlignH: gui.AlignRight})
+	win.Add(ddLab)
+	if app.settings.DataDir == "" {
+		app.settings.DataDir = "."
+	}
+	ddd, _ := NewDirectoryDropDown(400.0, app.settings.DataDir)
+
+	ddd.SetLayoutParams(&gui.GridLayoutParams{ColSpan: 2})
+	win.Add(ddd)
 
 	// empty row...
 	win.Add(gui.NewLabel(""))
@@ -108,20 +130,14 @@ func (app *tdApp) settingsDialog() (win *settingsDlg) {
 	// buttons...
 	win.Add(gui.NewLabel(""))
 	cancel := gui.NewButton("Cancel")
-	// cancel.SetBorders(1, 1, 1, 1)
-	// cancel.SetPaddings(3, 3, 3, 3)
-	// cancel.SetMargins(3, 3, 3, 3)
-	ok := gui.NewButton("OK")
-	// ok.SetBorders(1, 1, 1, 1)
-	// ok.SetPaddings(3, 3, 3, 3)
-	// ok.SetMargins(3, 3, 3, 3)
 	win.Add(cancel)
+	ok := gui.NewButton("OK")
+	win.Add(ok)
 	cancel.Subscribe(gui.OnClick, func(e string, ev interface{}) {
 		app.Log().Info("Settings Cancelled")
 		app.Gui().Root().SetModal(nil)
 		app.mainPanel.Remove(win)
 	})
-	win.Add(ok)
 	ok.Subscribe(gui.OnClick, func(e string, ev interface{}) {
 		app.Log().Info("Settings Okayed")
 		fmt.Printf("Debug: found ID: %s, chosen ID: %s\n", dDrop.Selected().Text(), tDrop.Selected().Text())
@@ -132,6 +148,7 @@ func (app *tdApp) settingsDialog() (win *settingsDlg) {
 		} else {
 			app.settings.JoystickID = sID
 			app.settings.JoystickType = tDrop.Selected().Text()
+			app.settings.DataDir = ddd.Selected().Text()
 			if err = saveSettings(app.settings, appSettingsFile); err != nil {
 				app.Log().Error(err.Error())
 				alertDialog(app.mainPanel, errorSev, err.Error())
@@ -147,4 +164,17 @@ func (app *tdApp) settingsDialog() (win *settingsDlg) {
 	app.Gui().SetModal(win)
 
 	return win
+}
+
+func (app *tdApp) settingsCDirCB(e string, ev interface{}) {
+	var cwd string
+	if app.settings.DataDir != "" {
+		cwd = app.settings.DataDir
+	} else {
+		cwd, _ = os.Getwd()
+	}
+	fs, _ := NewFileSelect(app.mainPanel, cwd, "Choose Directory for Image & Track Storage", "")
+	fs.Subscribe("OnCancel", func(n string, ev interface{}) {
+		fs.Close()
+	})
 }

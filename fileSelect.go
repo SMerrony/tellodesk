@@ -25,7 +25,7 @@ type FileSelect struct {
 }
 
 // NewFileSelect displays and returns a general-purpose file selector.
-// The suffix should either be empty, or of the exact form "*.suff" and if present will cause
+// The suffix should either be empty, or of the exact form "*.<suff>" and if present will cause
 // non-directory files to be filtered according the suffix.
 func NewFileSelect(parent *gui.Panel, initPath string, title string, suffix string) (fs *FileSelect, err error) {
 
@@ -60,6 +60,9 @@ func NewFileSelect(parent *gui.Panel, initPath string, title string, suffix stri
 
 	// create name edit
 	fs.name = gui.NewEdit(fileSelectWidth, suffix)
+	fs.name.SetLayoutParams(&gui.VBoxLayoutParams{Expand: 0, AlignH: gui.AlignWidth})
+	// fs.name.SetBgColor(math32.NewColor("Gray"))
+	// fs.name.SetColor(math32.NewColor("White"))
 	fs.Add(fs.name)
 
 	// Button container panel

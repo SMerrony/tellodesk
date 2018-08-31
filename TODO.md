@@ -25,7 +25,7 @@
 ## Improvements
 
 ### Track Tab
-* Better scaling - actually, just better centering
+* Better scaling - actually, just better vertical centering
 
 ### Settings
 * Add data directory/path for saved pix/tracks/videos

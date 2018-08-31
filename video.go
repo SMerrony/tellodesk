@@ -35,8 +35,7 @@ import (
 
 func (app *tdApp) recordVideoCB(s string, i interface{}) {
 	var vidPath string
-	cwd, _ := os.Getwd()
-	fs, _ := NewFileSelect(app.mainPanel, cwd, "Choose File for Video Recording", "*.h264")
+	fs, _ := NewFileSelect(app.mainPanel, app.settings.DataDir, "Choose File for Video Recording", "*.h264")
 	fs.Subscribe("OnOK", func(n string, ev interface{}) {
 		vidPath = fs.Selected()
 		//app.Log().Info("Selected: %s", vidPath)

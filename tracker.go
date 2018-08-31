@@ -100,8 +100,7 @@ func (tt *telloTrack) addPositionIfChanged(fd tello.FlightData) {
 
 func (app *tdApp) exportTrackCB(s string, ev interface{}) {
 	var expPath string
-	cwd, _ := os.Getwd()
-	fs, _ := NewFileSelect(app.mainPanel, cwd, "Choose File for Track Export", "*.csv")
+	fs, _ := NewFileSelect(app.mainPanel, app.settings.DataDir, "Choose File for Track Export", "*.csv")
 	fs.Subscribe("OnOK", func(n string, ev interface{}) {
 		expPath = fs.Selected()
 		if expPath != "" {
@@ -128,8 +127,7 @@ func (app *tdApp) exportTrackCB(s string, ev interface{}) {
 
 func (app *tdApp) exportTrackImageCB(s string, ev interface{}) {
 	var expPath string
-	cwd, _ := os.Getwd()
-	fs, _ := NewFileSelect(app.mainPanel, cwd, "Choose File for Track Image", "*.png")
+	fs, _ := NewFileSelect(app.mainPanel, app.settings.DataDir, "Choose File for Track Image", "*.png")
 	fs.Subscribe("OnOK", func(n string, ev interface{}) {
 		expPath = fs.Selected()
 		if expPath != "" {
@@ -152,8 +150,7 @@ func (app *tdApp) exportTrackImageCB(s string, ev interface{}) {
 
 func (app *tdApp) importTrackCB(s string, ev interface{}) {
 	var impPath string
-	cwd, _ := os.Getwd()
-	fs, _ := NewFileSelect(app.mainPanel, cwd, "Choose CSV Path for Import", "*.csv")
+	fs, _ := NewFileSelect(app.mainPanel, app.settings.DataDir, "Choose CSV Path for Import", "*.csv")
 	fs.Subscribe("OnOK", func(n string, ev interface{}) {
 		impPath = fs.Selected()
 		if impPath != "" {
