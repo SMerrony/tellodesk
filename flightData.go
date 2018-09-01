@@ -9,7 +9,15 @@ func (app *tdApp) fdListener() {
 			app.flightDataMu.Lock()
 			app.flightData = tmpFd
 			app.flightDataMu.Unlock()
-			app.trackChart.track.addPositionIfChanged(tmpFd)
+			if tmpFd.DownVisualState {
+				app.Log().Info("Down visual state")
+			}
+			if tmpFd.OnGround {
+				app.Log().Info("On Ground")
+			}
+			if tmpFd.LightStrength == 0 {
+				app.trackChart.track.addPositionIfChanged(tmpFd)
+			}
 		case <-fdStopChan:
 			return
 		}
