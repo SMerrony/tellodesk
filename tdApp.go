@@ -36,6 +36,7 @@ type tdApp struct {
 	statusBar                                                                   *statusbar
 	fileMenu, droneMenu, flightMenu, trackMenu, videoMenu, imagesMenu, helpMenu *gui.Menu
 	connectItem, disconnectItem                                                 *gui.MenuItem
+	tsmShowDrone, tsmShowPath                                                   *gui.MenuItem
 	recordVideoItem, stopRecordingItem                                          *gui.MenuItem
 	importTrackItem                                                             *gui.MenuItem
 	panel                                                                       *gui.Panel
@@ -186,34 +187,14 @@ func (app *tdApp) buildMenu() {
 	st.SetIcon(icon.Image)
 	st.Subscribe(gui.OnClick, app.exportTrackImageCB)
 	trackSubMenu := gui.NewMenu()
-	tsmShowDrone := trackSubMenu.AddOption("Show Drone Positions")
-	tsmShowDrone.SetIcon(icon.CheckBox)
+	app.tsmShowDrone = trackSubMenu.AddOption("Show Drone Positions")
+	app.tsmShowDrone.SetIcon(icon.CheckBox)
 	app.trackShowDrone = true
-	tsmShowDrone.Subscribe(gui.OnClick, func(s string, i interface{}) {
-		app.trackShowDrone = !app.trackShowDrone
-		if app.trackShowDrone {
-			tsmShowDrone.SetIcon(icon.CheckBox)
-		} else {
-			tsmShowDrone.SetIcon(icon.CheckBoxOutlineBlank)
-		}
-		app.trackChart.setShowDrone(app.trackShowDrone)
-		app.trackChart.drawTrack()
-		app.trackTab.SetContent(app.trackChart)
-	})
-	tsmShowPath := trackSubMenu.AddOption("Show Track Path")
-	tsmShowPath.SetIcon(icon.CheckBox)
+	app.tsmShowDrone.Subscribe(gui.OnClick, app.trackShowDroneCB)
+	app.tsmShowPath = trackSubMenu.AddOption("Show Track Path")
+	app.tsmShowPath.SetIcon(icon.CheckBox)
 	app.trackShowPath = true
-	tsmShowPath.Subscribe(gui.OnClick, func(s string, i interface{}) {
-		app.trackShowPath = !app.trackShowPath
-		if app.trackShowPath {
-			tsmShowPath.SetIcon(icon.CheckBox)
-		} else {
-			tsmShowPath.SetIcon(icon.CheckBoxOutlineBlank)
-		}
-		app.trackChart.setShowPath(app.trackShowPath)
-		app.trackChart.drawTrack()
-		app.trackTab.SetContent(app.trackChart)
-	})
+	app.tsmShowPath.Subscribe(gui.OnClick, app.trackShowPathCB)
 	app.trackMenu.AddMenu("Display", trackSubMenu)
 
 	app.menuBar.AddMenu(" Track ", app.trackMenu)

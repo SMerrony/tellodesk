@@ -28,7 +28,7 @@
 * Better scaling - actually, just better vertical centering
 
 ### Settings
-* Add data directory/path for saved pix/tracks/videos
+* ~~Add data directory/path for saved pix/tracks/videos~~
 
 ## To Consider
 * Switch video mode?

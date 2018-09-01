@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/SMerrony/tello"
+	"github.com/g3n/engine/gui/assets/icon"
 )
 
 const timeStampFmt = "20060102150405.000"
@@ -172,6 +173,30 @@ func (app *tdApp) importTrackCB(s string, ev interface{}) {
 	fs.Subscribe("OnCancel", func(n string, ev interface{}) {
 		fs.Close()
 	})
+}
+
+func (app *tdApp) trackShowDroneCB(s string, ev interface{}) {
+	app.trackShowDrone = !app.trackShowDrone
+	if app.trackShowDrone {
+		app.tsmShowDrone.SetIcon(icon.CheckBox)
+	} else {
+		app.tsmShowDrone.SetIcon(icon.CheckBoxOutlineBlank)
+	}
+	app.trackChart.setShowDrone(app.trackShowDrone)
+	app.trackChart.drawTrack()
+	app.trackTab.SetContent(app.trackChart)
+}
+
+func (app *tdApp) trackShowPathCB(s string, ev interface{}) {
+	app.trackShowPath = !app.trackShowPath
+	if app.trackShowPath {
+		app.tsmShowPath.SetIcon(icon.CheckBox)
+	} else {
+		app.tsmShowPath.SetIcon(icon.CheckBoxOutlineBlank)
+	}
+	app.trackChart.setShowPath(app.trackShowPath)
+	app.trackChart.drawTrack()
+	app.trackTab.SetContent(app.trackChart)
 }
 
 func (app *tdApp) readTrack(r *csv.Reader) (trk *telloTrack) {
