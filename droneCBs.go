@@ -18,6 +18,7 @@ to the Tello network.`)
 	}
 	app.disconnectItem.SetEnabled(true)
 	app.connectItem.SetEnabled(false)
+	app.flightSubMenu.SetEnabled(true)
 
 	app.startVideo()
 
@@ -40,6 +41,7 @@ func (app *tdApp) disconnectCB(s string, i interface{}) {
 	drone.ControlDisconnect()
 	app.disconnectItem.SetEnabled(false)
 	app.connectItem.SetEnabled(true)
+	app.flightSubMenu.SetEnabled(false)
 	app.importTrackItem.SetEnabled(true)
 	jsStopChan <- true // stop the joystick listener goroutine
 	fdStopChan <- true // stop the flight data listener goroutine

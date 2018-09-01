@@ -27,35 +27,34 @@ const (
 // tdApp holds GUI-related data, general data is currently globally defined in main()
 type tdApp struct {
 	*application.Application
-	settingsLoaded                                                              bool
-	settings                                                                    settingsT
-	menuBar                                                                     *gui.Menu
-	toolBar                                                                     *toolbar
-	mainPanel                                                                   *gui.Panel
-	tabBar                                                                      *gui.TabBar
-	statusBar                                                                   *statusbar
-	fileMenu, droneMenu, flightMenu, trackMenu, videoMenu, imagesMenu, helpMenu *gui.Menu
-	connectItem, disconnectItem                                                 *gui.MenuItem
-	tsmShowDrone, tsmShowPath                                                   *gui.MenuItem
-	recordVideoItem, stopRecordingItem                                          *gui.MenuItem
-	importTrackItem                                                             *gui.MenuItem
-	panel                                                                       *gui.Panel
-	label                                                                       *gui.Label
-	feed                                                                        *gui.Image
-	texture                                                                     *texture.Texture2D
-	picMu                                                                       sync.RWMutex
-	pic                                                                         *image.RGBA
-	picChan                                                                     chan *image.RGBA
-	videoChan                                                                   <-chan []byte
-	videoRecMu                                                                  sync.RWMutex
-	videoRecording                                                              bool
-	videoFile                                                                   *os.File
-	videoWriter                                                                 *bufio.Writer
-	flightDataMu                                                                sync.RWMutex
-	flightData                                                                  tello.FlightData
-	trackChart                                                                  *trackChartT
-	trackTab                                                                    *gui.Tab
-	trackShowDrone, trackShowPath                                               bool
+	settingsLoaded                       bool
+	settings                             settingsT
+	menuBar                              *gui.Menu
+	toolBar                              *toolbar
+	mainPanel                            *gui.Panel
+	tabBar                               *gui.TabBar
+	statusBar                            *statusbar
+	trackMenu, imagesMenu, flightSubMenu *gui.Menu     // just menus we need to access
+	connectItem, disconnectItem          *gui.MenuItem // just the items we need to access
+	tsmShowDrone, tsmShowPath            *gui.MenuItem
+	recordVideoItem, stopRecordingItem   *gui.MenuItem
+	importTrackItem                      *gui.MenuItem
+	panel                                *gui.Panel
+	feed                                 *gui.Image
+	texture                              *texture.Texture2D
+	picMu                                sync.RWMutex
+	pic                                  *image.RGBA
+	picChan                              chan *image.RGBA
+	videoChan                            <-chan []byte
+	videoRecMu                           sync.RWMutex
+	videoRecording                       bool
+	videoFile                            *os.File
+	videoWriter                          *bufio.Writer
+	flightDataMu                         sync.RWMutex
+	flightData                           tello.FlightData
+	trackChart                           *trackChartT
+	trackTab                             *gui.Tab
+	trackShowDrone, trackShowPath        bool
 }
 
 func (app *tdApp) setup() {
@@ -130,48 +129,54 @@ func (app *tdApp) setup() {
 }
 
 func (app *tdApp) buildMenu() {
+
 	app.menuBar = gui.NewMenuBar()
-	app.fileMenu = gui.NewMenu()
-	settings := app.fileMenu.AddOption("Settings")
+
+	fileMenu := gui.NewMenu()
+	settings := fileMenu.AddOption("Settings")
 	settings.SetIcon(icon.Settings)
 	settings.Subscribe(gui.OnClick, app.settingsCB)
 
-	app.fileMenu.AddSeparator()
-	//app.fileMenu.AddOption("Exit").SetId("exit").Subscribe(gui.OnClick, func(s string, i interface{}) { app.Quit() })
-	ex := app.fileMenu.AddOption("Exit")
+	fileMenu.AddSeparator()
+
+	ex := fileMenu.AddOption("Exit")
 	ex.SetId("exit")
 	ex.SetIcon(icon.Close)
 	ex.Subscribe(gui.OnClick, app.exitNicely)
-	app.menuBar.AddMenu("File ", app.fileMenu)
 
-	app.droneMenu = gui.NewMenu()
-	app.connectItem = app.droneMenu.AddOption("Connect")
+	app.menuBar.AddMenu("File ", fileMenu)
+
+	droneMenu := gui.NewMenu()
+	app.connectItem = droneMenu.AddOption("Connect")
 	app.connectItem.SetIcon(icon.Sync)
 	app.connectItem.Subscribe(gui.OnClick, app.connectCB)
-	app.disconnectItem = app.droneMenu.AddOption("Disconnect")
+	app.disconnectItem = droneMenu.AddOption("Disconnect")
 	app.disconnectItem.SetIcon(icon.SyncDisabled)
 	app.disconnectItem.SetEnabled(false).Subscribe(gui.OnClick, app.disconnectCB)
 
-	app.droneMenu.AddSeparator()
+	app.flightSubMenu = gui.NewMenu()
 
-	to := app.droneMenu.AddOption("Take-off")
+	to := app.flightSubMenu.AddOption("Take-off")
 	to.SetIcon(icon.FlightTakeoff)
 	to.Subscribe(gui.OnClick, app.takeoffCB)
-	tto := app.droneMenu.AddOption("Throw Take-off")
+	tto := app.flightSubMenu.AddOption("Throw Take-off")
 	tto.SetIcon(icon.ThumbUp)
 	tto.Subscribe(gui.OnClick, app.throwTakeoffCB)
-	lnd := app.droneMenu.AddOption("Land")
+	lnd := app.flightSubMenu.AddOption("Land")
 	lnd.SetIcon(icon.FlightLand)
 	lnd.Subscribe(gui.OnClick, app.landCB)
-	plnd := app.droneMenu.AddOption("Palm Land")
+	plnd := app.flightSubMenu.AddOption("Palm Land")
 	plnd.SetIcon(icon.PanTool)
 	plnd.Subscribe(gui.OnClick, app.palmLandCB)
-	app.droneMenu.AddSeparator()
-	sm := app.droneMenu.AddOption("Sports (Fast) Mode")
+	app.flightSubMenu.AddSeparator()
+	sm := app.flightSubMenu.AddOption("Sports (Fast) Mode")
 	sm.SetIcon(icon.DirectionsRun)
 	sm.Subscribe(gui.OnClick, app.nyi)
 
-	app.menuBar.AddMenu(" Drone ", app.droneMenu)
+	droneMenu.AddMenu("Flight", app.flightSubMenu)
+	app.flightSubMenu.SetEnabled(false)
+
+	app.menuBar.AddMenu(" Drone ", droneMenu)
 
 	app.trackMenu = gui.NewMenu()
 	ct := app.trackMenu.AddOption("Clear Track")
@@ -186,7 +191,9 @@ func (app *tdApp) buildMenu() {
 	st := app.trackMenu.AddOption("Save Track as PNG")
 	st.SetIcon(icon.Image)
 	st.Subscribe(gui.OnClick, app.exportTrackImageCB)
+
 	trackSubMenu := gui.NewMenu()
+
 	app.tsmShowDrone = trackSubMenu.AddOption("Show Drone Positions")
 	app.tsmShowDrone.SetIcon(icon.CheckBox)
 	app.trackShowDrone = true
@@ -195,19 +202,20 @@ func (app *tdApp) buildMenu() {
 	app.tsmShowPath.SetIcon(icon.CheckBox)
 	app.trackShowPath = true
 	app.tsmShowPath.Subscribe(gui.OnClick, app.trackShowPathCB)
+
 	app.trackMenu.AddMenu("Display", trackSubMenu)
 
 	app.menuBar.AddMenu(" Track ", app.trackMenu)
 
-	app.videoMenu = gui.NewMenu()
-	app.recordVideoItem = app.videoMenu.AddOption("Record Video")
+	videoMenu := gui.NewMenu()
+	app.recordVideoItem = videoMenu.AddOption("Record Video")
 	app.recordVideoItem.SetIcon(icon.Videocam)
 	app.recordVideoItem.Subscribe(gui.OnClick, app.recordVideoCB)
-	app.stopRecordingItem = app.videoMenu.AddOption("Stop Recording")
+	app.stopRecordingItem = videoMenu.AddOption("Stop Recording")
 	app.stopRecordingItem.SetIcon(icon.VideocamOff)
 	app.stopRecordingItem.Subscribe(gui.OnClick, app.stopRecordingCB)
 	app.stopRecordingItem.SetEnabled(false)
-	app.menuBar.AddMenu(" Video ", app.videoMenu)
+	app.menuBar.AddMenu(" Video ", videoMenu)
 
 	app.imagesMenu = gui.NewMenu()
 	tp := app.imagesMenu.AddOption("Take Photo")
@@ -218,15 +226,15 @@ func (app *tdApp) buildMenu() {
 	sp.Subscribe(gui.OnClick, app.saveAllPhotosCB)
 	app.menuBar.AddMenu(" Images ", app.imagesMenu)
 
-	app.helpMenu = gui.NewMenu()
-	oh := app.helpMenu.AddOption("Online Help")
+	helpMenu := gui.NewMenu()
+	oh := helpMenu.AddOption("Online Help")
 	oh.SetIcon(icon.Help)
 	oh.Subscribe(gui.OnClick, app.onlineHelpCB)
-	app.helpMenu.AddSeparator()
-	ab := app.helpMenu.AddOption("About")
+	helpMenu.AddSeparator()
+	ab := helpMenu.AddOption("About")
 	ab.SetIcon(icon.Info)
 	ab.Subscribe(gui.OnClick, app.aboutCB)
-	app.menuBar.AddMenu(" Help", app.helpMenu)
+	app.menuBar.AddMenu(" Help", helpMenu)
 
 	app.menuBar.SetWidth(videoWidth)
 }
