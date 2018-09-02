@@ -143,7 +143,7 @@ func (app *tdApp) exitNicely(s string, i interface{}) {
 	app.UnsubscribeID(application.OnQuit, nil) // prevent this being called again due to window app.Quit subscription
 	app.Log().Info("Tidying-up and exiting")
 	if drone.NumPics() > 0 {
-		drone.SaveAllPics(fmt.Sprintf("tello_pic_%s", time.Now().Format("2006Jan2150405")))
+		app.saveAllPhotosCB("dummy", nil)
 	}
 	app.Quit()
 }
