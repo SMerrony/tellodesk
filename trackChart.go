@@ -43,7 +43,11 @@ func buildTrackChart(w, h int, scale float32, showDrone, showPath bool) (tc *tra
 	tc.labelCol = color.RGBA{128, 128, 128, 255}
 	tc.droneCol = color.RGBA{255, 0, 0, 255}
 	tc.maxOffset = scale
-	tc.scalePPM = float32(tc.yOrigin) / scale // TODO - we assume here that height <= width
+	if w >= h { // scale to the shortest axis
+		tc.scalePPM = float32(tc.yOrigin) / scale
+	} else {
+		tc.scalePPM = float32(tc.xOrigin) / scale
+	}
 	tc.backingImage = image.NewRGBA(image.Rectangle{image.Point{0, 0}, image.Point{w, h}})
 	tc.tex = texture.NewTexture2DFromRGBA(tc.backingImage)
 	tc.tex.SetMagFilter(gls.NEAREST)

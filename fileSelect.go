@@ -176,7 +176,7 @@ func (fs *FileSelect) onSelect() {
 	path := filepath.Join(fs.path.Text(), text)
 	s, err := os.Stat(path)
 	if err != nil {
-		panic(err) // FIXME don't panic!
+		return
 	}
 	if s.IsDir() {
 		fs.setPath(path)
