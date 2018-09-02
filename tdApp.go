@@ -43,7 +43,8 @@ type tdApp struct {
 	texture                              *texture.Texture2D
 	picMu                                sync.RWMutex
 	pic                                  *image.RGBA
-	picChan                              chan *image.RGBA
+	newPicChan                           chan bool
+	stopNewPicChan                       chan bool
 	videoChan                            <-chan []byte
 	videoRecMu                           sync.RWMutex
 	videoRecording                       bool

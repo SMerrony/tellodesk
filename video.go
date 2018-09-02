@@ -10,29 +10,6 @@ import (
 	"github.com/3d0c/gmf"
 )
 
-// func (app *tdApp) startVideoCB(s string, i interface{}) {
-
-// 	var err error
-
-// 	app.videoChan, err = drone.VideoConnectDefault()
-// 	if err != nil {
-// 		alertDialog(app, errorSev, err.Error())
-// 	}
-
-// 	// start video feed when drone connects
-// 	drone.StartVideo()
-// 	go func() {
-// 		for {
-// 			drone.StartVideo()
-// 			time.Sleep(500 * time.Millisecond)
-// 		}
-// 	}()
-
-// 	app.videoStopChan = make(chan bool) // unbuffered
-
-// 	go app.videoListener()
-// }
-
 func (app *tdApp) recordVideoCB(s string, i interface{}) {
 	var vidPath string
 	fs, _ := NewFileSelect(app.mainPanel, app.settings.DataDir, "Choose File for Video Recording", "*.h264")
@@ -93,7 +70,10 @@ func (app *tdApp) startVideo() {
 		}
 	}()
 
+	app.stopNewPicChan = make(chan bool)
+	app.newPicChan = make(chan bool)
 	go videoListener(app)
+	go app.updateFeed()
 }
 
 func (app *tdApp) customReader() ([]byte, int) {
@@ -215,21 +195,15 @@ func videoListener(app *tdApp) {
 		rgba.Rect = image.Rect(0, 0, videoWidth, videoHeight)
 		rgba.Pix = p.Data()
 
-		// NO RACE, but slow...
-		// select {
-		// case app.picChan <- rgba:
-		// default:
-		// }
-
-		// RACE...
-		//app.Dispatch("feedUpdate", rgba)
-
 		app.picMu.Lock()
 		app.pic = rgba
 		app.picMu.Unlock()
 
-		// RAce...
-		//app.Dispatch("feedUpdate", nil)
+		// non-blocking send to tell updateFeed() a new pic is ready
+		select {
+		case app.newPicChan <- true:
+		default:
+		}
 
 		gmf.Release(p)
 		gmf.Release(frame)
@@ -238,28 +212,16 @@ func videoListener(app *tdApp) {
 	}
 }
 
-// updateFeedTCB runs periodically to update the video feed image on the GUI.
-func (app *tdApp) updateFeedTCB(cb interface{}) {
-	// no race, but slower...
-	// select {
-	// case tmpPic := <-app.picChan:
-	// 	app.texture.SetFromRGBA(tmpPic)
-	// 	app.feed.SetChanged(true)
-	// default:
-	// }
-
-	app.picMu.RLock()
-	app.texture.SetFromRGBA(app.pic)
-	app.picMu.RUnlock()
-	app.feed.SetChanged(true)
+func (app *tdApp) updateFeed() {
+	for {
+		select {
+		case _ = <-app.newPicChan:
+			app.picMu.RLock()
+			app.texture.SetFromRGBA(app.pic)
+			app.picMu.RUnlock()
+			app.feed.SetChanged(true)
+		case _ = <-app.stopNewPicChan:
+			return
+		}
+	}
 }
-
-// func (app *tdApp) feedUpdateCB(s string, ev interface{}) {
-// 	app.texture.SetFromRGBA(ev.(*image.RGBA))
-// }
-// func (app *tdApp) feedUpdateCB(s string, ev interface{}) {
-// 	app.picMu.RLock()
-// 	app.texture.SetFromRGBA(app.pic)
-// 	app.picMu.RUnlock()
-// 	app.feed.SetChanged(true)
-// }

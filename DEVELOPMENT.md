@@ -11,11 +11,11 @@
   * stopped in disconnectCB()
 * Video listener 
   * started in video.go:startVideo()
+* Video display updater
+  * started in video.go:startVideo()
+  * stopped in disconnectCB()
 
 ## Regularly-Run Funcs
-* Video display image updater - video.go:updateFeedTCB()
-  * Timer started in droneCBs.go:connectCB() - 33ms
-  * Timer stopped in droneCBs.go:disconnectCB()
 * StatusBar updater - statusbar.go:updateStatusBarTCB()
   * Timer started in tdApp.go:setup() - 250ms
   * (No need to stop)

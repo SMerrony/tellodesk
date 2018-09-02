@@ -1,9 +1,5 @@
 package main
 
-import "time"
-
-var feedUpdateTimer int
-
 func (app *tdApp) connectCB(s string, i interface{}) {
 	err := drone.ControlConnectDefault()
 	if err != nil {
@@ -18,8 +14,6 @@ to the Tello network.`)
 	}
 
 	app.startVideo()
-	feedUpdateTimer = app.Gui().TimerManager.SetInterval(33*time.Millisecond, true, app.updateFeedTCB)
-	//app.Subscribe("feedUpdate", app.feedUpdateCB)
 
 	stickChan, _ = drone.StartStickListener()
 	go readJoystick(false, jsStopChan) // FIXME - if defined & opened ok!
@@ -35,10 +29,10 @@ to the Tello network.`)
 
 func (app *tdApp) disconnectCB(s string, i interface{}) {
 	drone.ControlDisconnect()
-	jsStopChan <- true // stop the joystick listener goroutine
-	fdStopChan <- true // stop the flight data listener goroutine
-	vrStopChan <- true // stop the video restarter goroutine
-	app.Gui().TimerManager.ClearTimeout(feedUpdateTimer)
+	jsStopChan <- true         // stop the joystick listener goroutine
+	fdStopChan <- true         // stop the flight data listener goroutine
+	vrStopChan <- true         // stop the video restarter goroutine
+	app.stopNewPicChan <- true // stop the video image updater goroutine
 	app.disableFlightMenus()
 	app.statusBar.connectionLab.SetText(" Disconnected ")
 }
