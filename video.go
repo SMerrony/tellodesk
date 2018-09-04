@@ -53,6 +53,7 @@ func (app *tdApp) startVideo() {
 
 	app.videoChan, err = drone.VideoConnectDefault()
 	if err != nil {
+		app.Log().Warn(err.Error())
 		alertDialog(app.mainPanel, errorSev, err.Error())
 	}
 

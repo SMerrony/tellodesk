@@ -55,6 +55,7 @@ type tdApp struct {
 	trackChart                           *trackChartT
 	trackTab                             *gui.Tab
 	trackShowDrone, trackShowPath        bool
+	liveTrackerTimer                     int
 }
 
 func (app *tdApp) setup() {

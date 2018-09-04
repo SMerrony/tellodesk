@@ -17,3 +17,6 @@
 *.jpg
 
 tellodesktop.yaml
+debug
+
+.vscode/

@@ -199,6 +199,13 @@ func (app *tdApp) trackShowPathCB(s string, ev interface{}) {
 	app.trackTab.SetContent(app.trackChart)
 }
 
+// liveTracker is to be run at intervals (not as a goroutine)
+func (app *tdApp) liveTrackerTCB(cb interface{}) {
+	app.trackChart.drawEmptyChart()
+	app.trackChart.drawTrack()
+	app.trackTab.SetContent(app.trackChart)
+}
+
 func (app *tdApp) readTrack(r *csv.Reader) (trk *telloTrack) {
 	trk = newTrack()
 	for {
