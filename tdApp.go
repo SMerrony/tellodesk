@@ -53,7 +53,7 @@ type tdApp struct {
 	flightDataMu                         sync.RWMutex
 	flightData                           tello.FlightData
 	trackChart                           *trackChartT
-	trackTab                             *gui.Tab
+	feedTab, trackTab                    *gui.Tab
 	trackShowDrone, trackShowPath        bool
 	liveTrackerTimer                     int
 }
@@ -105,9 +105,9 @@ func (app *tdApp) setup() {
 	//app.picChan = make(chan *image.RGBA, 1)
 
 	app.buildFeed()
-	feedTab := app.tabBar.AddTab("Feed")
-	feedTab.SetPinned(true)
-	feedTab.SetContent(app.feed)
+	app.feedTab = app.tabBar.AddTab("Feed")
+	app.feedTab.SetPinned(true)
+	app.feedTab.SetContent(app.feed)
 
 	app.trackChart = buildTrackChart(videoWidth, videoHeight, defaultTrackScale, app.trackShowDrone, app.trackShowPath)
 	app.trackTab = app.tabBar.AddTab("Tracker")

@@ -42,4 +42,6 @@ func (app *tdApp) disconnectCB(s string, i interface{}) {
 	app.stopNewPicChan <- true // stop the video image updater goroutine
 	app.disableFlightMenus()
 	app.statusBar.connectionLab.SetText(" Disconnected ")
+	app.buildFeed()
+	app.feedTab.SetContent(app.feed)
 }
