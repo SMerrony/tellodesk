@@ -173,7 +173,7 @@ func readJoystick(test bool, stopChan chan bool) {
 		jsState, prevState joystick.State
 		err                error
 	)
-
+	log.Println("Debug: Joystick listener starting")
 	for {
 		jsState, err = js.Read()
 
@@ -274,6 +274,7 @@ func readJoystick(test bool, stopChan chan bool) {
 		select {
 		case <-stopChan:
 			js.Close()
+			log.Println("Debug: Joystick listener closed")
 			return
 		default:
 		}

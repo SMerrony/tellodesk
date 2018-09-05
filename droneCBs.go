@@ -19,6 +19,10 @@ to the Tello network.`)
 
 	app.startVideo()
 
+	jsStopChan = make(chan bool) // not buffered
+	fdStopChan = make(chan bool) // not buffered
+	vrStopChan = make(chan bool) // not buffered
+
 	stickChan, _ = drone.StartStickListener()
 	go readJoystick(false, jsStopChan) // FIXME - if defined & opened ok!
 
@@ -36,10 +40,24 @@ func (app *tdApp) disconnectCB(s string, i interface{}) {
 	drone.VideoDisconnect()
 	drone.ControlDisconnect()
 	app.Gui().TimerManager.ClearTimeout(app.liveTrackerTimer)
-	jsStopChan <- true         // stop the joystick listener goroutine
-	fdStopChan <- true         // stop the flight data listener goroutine
-	vrStopChan <- true         // stop the video restarter goroutine
-	app.stopNewPicChan <- true // stop the video image updater goroutine
+
+	select {
+	case jsStopChan <- true: // stop the joystick listener goroutine
+	default:
+	}
+	select {
+	case fdStopChan <- true: // stop the flight data listener goroutine
+	default:
+	}
+	select {
+	case vrStopChan <- true: // stop the video restarter goroutine
+	default:
+	}
+	select {
+	case app.stopNewPicChan <- true: // stop the video image updater goroutine
+	default:
+	}
+
 	app.disableFlightMenus()
 	app.statusBar.connectionLab.SetText(" Disconnected ")
 	app.buildFeed()
