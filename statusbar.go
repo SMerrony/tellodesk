@@ -8,13 +8,13 @@ import (
 	"github.com/g3n/engine/math32"
 )
 
-type statusbar struct {
+type statusbarT struct {
 	*gui.Panel
 	connectionLab, heightLab, batteryPctLab, wifiStrLab, photosLab *FixedLabel
 }
 
-func buildStatusbar(parent *gui.Panel) (sb *statusbar) {
-	sb = new(statusbar)
+func buildStatusbar(parent *gui.Panel) (sb *statusbarT) {
+	sb = new(statusbarT)
 	sb.Panel = gui.NewPanel(parent.Width(), 30)
 
 	hbl := gui.NewHBoxLayout()

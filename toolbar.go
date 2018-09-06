@@ -3,14 +3,20 @@ package main
 import (
 	"github.com/g3n/engine/gui"
 	"github.com/g3n/engine/gui/assets/icon"
+	"github.com/g3n/engine/math32"
 )
 
-type toolbar struct {
+// toolbarT also holds a single message label for urgent notifications to appear at
+// the top of the screen.
+type toolbarT struct {
 	*gui.Panel
+	messageLabel *gui.ImageLabel
 }
 
-func (app *tdApp) buildToolbar() (tb *toolbar) {
-	tb = new(toolbar)
+const msgBoxWidth = 350.0
+
+func (app *tdApp) buildToolbar() (tb *toolbarT) {
+	tb = new(toolbarT)
 	tb.Panel = gui.NewPanel(videoWidth, 28)
 	tb.SetContentWidth(videoWidth)
 	//tb.SetBorders(1, 1, 1, 1)
@@ -52,5 +58,38 @@ func (app *tdApp) buildToolbar() (tb *toolbar) {
 	})
 	tb.Add(goHomeBtn)
 
+	spacer := gui.NewPanel(1, 1)
+	spacer.SetLayoutParams(&gui.HBoxLayoutParams{Expand: 2})
+	tb.Add(spacer)
+
+	tb.messageLabel = gui.NewImageLabel("")
+	tb.messageLabel.SetLayoutParams(&gui.HBoxLayoutParams{Expand: 0, AlignV: gui.AlignCenter})
+	tb.messageLabel.SetWidth(msgBoxWidth)
+	tb.messageLabel.SetBorders(2, 2, 2, 2)
+	tb.clearMessage()
+
+	tb.Add(tb.messageLabel)
+
 	return tb
+}
+
+func (tb *toolbarT) clearMessage() {
+	tb.messageLabel.SetText("")
+	tb.messageLabel.SetBgColor(math32.NewColor("white"))
+}
+
+func (tb *toolbarT) setMessage(msg string, severity severityType) {
+	tb.messageLabel.SetText(msg)
+	switch severity {
+	case infoSev:
+		tb.messageLabel.SetBgColor(math32.NewColor("white"))
+		tb.messageLabel.SetColor(math32.NewColor("black"))
+	case warningSev:
+		tb.messageLabel.SetBgColor(math32.NewColor("yellow"))
+		tb.messageLabel.SetColor(math32.NewColor("black"))
+	case errorSev, criticalSev:
+		tb.messageLabel.SetBgColor(math32.NewColor("red"))
+		tb.messageLabel.SetColor(math32.NewColor("white"))
+	}
+	tb.messageLabel.SetWidth(msgBoxWidth)
 }

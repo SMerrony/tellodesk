@@ -29,10 +29,10 @@ type tdApp struct {
 	settingsLoaded                       bool
 	settings                             settingsT
 	menuBar                              *gui.Menu
-	toolBar                              *toolbar
+	toolBar                              *toolbarT
 	mainPanel                            *gui.Panel
 	tabBar                               *gui.TabBar
-	statusBar                            *statusbar
+	statusBar                            *statusbarT
 	trackMenu, imagesMenu, flightSubMenu *gui.Menu     // just menus we need to access
 	connectItem, disconnectItem          *gui.MenuItem // just the items we need to access
 	tsmShowDrone, tsmShowPath            *gui.MenuItem
@@ -101,6 +101,7 @@ func (app *tdApp) setup() {
 
 	app.tabBar = gui.NewTabBar(videoWidth, videoHeight+20)
 	app.mainPanel.Add(app.tabBar)
+	app.Gui().TimerManager.SetInterval(500*time.Millisecond, true, app.updateMessage)
 
 	//app.picChan = make(chan *image.RGBA, 1)
 
