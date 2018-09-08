@@ -2,91 +2,52 @@ package main
 
 import (
 	"fmt"
-	"image/color"
 
-	"github.com/g3n/engine/gui"
-	"github.com/g3n/engine/math32"
+	"github.com/mattn/go-gtk/gtk"
 )
 
-type statusbarT struct {
-	*gui.Panel
-	connectionLab, heightLab, batteryPctLab, wifiStrLab, photosLab *FixedLabel
+type statusBarT struct {
+	*gtk.HBox
+	connectionLab, heightLab, batteryPctLab, wifiStrLab, photosLab *gtk.Label
 }
 
-func buildStatusbar(parent *gui.Panel) (sb *statusbarT) {
-	sb = new(statusbarT)
-	sb.Panel = gui.NewPanel(parent.Width(), 30)
+func buildStatusbar() (sb *statusBarT) {
+	sb = new(statusBarT)
+	sb.HBox = gtk.NewHBox(true, 2)
 
-	hbl := gui.NewHBoxLayout()
-	hbl.SetSpacing(4)
-	sb.SetLayout(hbl)
+	clf := gtk.NewFrame("")
+	sb.connectionLab = gtk.NewLabel("Disconnected") //NewFixedLabel(" Disconnected ", color.RGBA{255, 255, 255, 255})
+	clf.Add(sb.connectionLab)
+	sb.Add(clf)
 
-	labStyle := gui.PanelStyle{
-		Margin:      gui.RectBounds{Top: 3, Right: 3, Bottom: 3, Left: 3},
-		Border:      gui.RectBounds{Top: 1, Right: 1, Bottom: 1, Left: 1},
-		Padding:     gui.RectBounds{Top: 2, Right: 2, Bottom: 2, Left: 2},
-		BorderColor: math32.Color4Name("black"),
-		BgColor:     math32.Color4Name("dark gray"),
-	}
-	padCol := math32.ColorName("gray")
-	params := gui.HBoxLayoutParams{Expand: 0}
-	padParams := gui.HBoxLayoutParams{Expand: 1}
+	hlf := gtk.NewFrame("")
+	sb.heightLab = gtk.NewLabel("Height: 00.0m")
+	hlf.Add(sb.heightLab)
+	sb.Add(hlf)
 
-	sb.connectionLab = NewFixedLabel(" Disconnected ", color.RGBA{255, 255, 255, 255})
-	sb.connectionLab.ApplyStyle(&labStyle)
-	sb.connectionLab.SetPaddingsColor(&padCol)
-	sb.connectionLab.SetLayoutParams(&params)
-	sb.Add(sb.connectionLab)
+	blf := gtk.NewFrame("")
+	sb.batteryPctLab = gtk.NewLabel("Battery: 000%")
+	blf.Add(sb.batteryPctLab)
+	sb.Add(blf)
 
-	padder := gui.NewLabel("")
-	padder.SetLayoutParams(&padParams)
-	sb.Add(padder)
+	wlf := gtk.NewFrame("")
+	sb.wifiStrLab = gtk.NewLabel("Wifi Strength: 000%")
+	wlf.Add(sb.wifiStrLab)
+	sb.Add(wlf)
 
-	sb.heightLab = NewFixedLabel(" Height: 00.0m ", color.RGBA{255, 255, 255, 255})
-	sb.heightLab.ApplyStyle(&labStyle)
-	sb.heightLab.SetPaddingsColor(&padCol)
-	sb.heightLab.SetLayoutParams(&params)
-	sb.Add(sb.heightLab)
-
-	padder2 := gui.NewLabel("")
-	padder2.SetLayoutParams(&padParams)
-	sb.Add(padder2)
-
-	sb.batteryPctLab = NewFixedLabel(" Battery: 000% ", color.RGBA{255, 255, 255, 255})
-	sb.batteryPctLab.ApplyStyle(&labStyle)
-	sb.batteryPctLab.SetPaddingsColor(&padCol)
-	sb.batteryPctLab.SetLayoutParams(&params)
-	sb.Add(sb.batteryPctLab)
-
-	padder3 := gui.NewLabel("")
-	padder3.SetLayoutParams(&padParams)
-	sb.Add(padder3)
-
-	sb.wifiStrLab = NewFixedLabel(" Wifi Strength: 000% ", color.RGBA{255, 255, 255, 255})
-	sb.wifiStrLab.ApplyStyle(&labStyle)
-	sb.wifiStrLab.SetPaddingsColor(&padCol)
-	sb.wifiStrLab.SetLayoutParams(&params)
-	sb.Add(sb.wifiStrLab)
-
-	padder4 := gui.NewLabel("")
-	padder4.SetLayoutParams(&padParams)
-	sb.Add(padder4)
-
-	sb.photosLab = NewFixedLabel(" Buffered Photos: 00 ", color.RGBA{255, 255, 255, 255})
-	sb.photosLab.ApplyStyle(&labStyle)
-	sb.photosLab.SetPaddingsColor((&padCol))
-	sb.photosLab.SetLayoutParams(&params)
-	sb.Add(sb.photosLab)
+	plf := gtk.NewFrame("")
+	sb.photosLab = gtk.NewLabel("Buffered Photos: 00")
+	plf.Add(sb.photosLab)
+	sb.Add(plf)
 
 	return sb
 }
 
-func (app *tdApp) updateStatusBarTCB(cb interface{}) {
-	app.flightDataMu.RLock()
-	app.statusBar.heightLab.SetText(fmt.Sprintf(" Height: %.1fm ", float32(app.flightData.Height)/10))
-	app.statusBar.batteryPctLab.SetText(fmt.Sprintf(" Battery: %d%% ", app.flightData.BatteryPercentage))
-	app.statusBar.wifiStrLab.SetText(fmt.Sprintf(" Wifi Strength: %d%% ", app.flightData.WifiStrength))
-	app.flightDataMu.RUnlock()
-	app.statusBar.photosLab.SetText(fmt.Sprintf(" Buffered Photos: %d", drone.NumPics()))
-	//app.statusBar.SetChanged(true)
+func (sb *statusBarT) updateStatusBarTCB() {
+	flightDataMu.RLock()
+	sb.heightLab.SetLabel(fmt.Sprintf(" Height: %.1fm ", float32(flightData.Height)/10))
+	sb.batteryPctLab.SetLabel(fmt.Sprintf(" Battery: %d%% ", flightData.BatteryPercentage))
+	sb.wifiStrLab.SetLabel(fmt.Sprintf(" Wifi Strength: %d%% ", flightData.WifiStrength))
+	flightDataMu.RUnlock()
+	sb.photosLab.SetLabel(fmt.Sprintf(" Buffered Photos: %d", drone.NumPics()))
 }

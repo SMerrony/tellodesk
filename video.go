@@ -7,59 +7,79 @@ import (
 	"os"
 	"time"
 
+	"github.com/mattn/go-gtk/glib"
+
 	"github.com/3d0c/gmf"
+	"github.com/mattn/go-gtk/gdkpixbuf"
+	"github.com/mattn/go-gtk/gtk"
 )
 
-func (app *tdApp) recordVideoCB(s string, i interface{}) {
+func buildFeedWgt() (wgt *gtk.Image) {
+	wgt = gtk.NewImageFromFile(bluesky)
+	return wgt
+}
+
+func recordVideoCB() {
 	var vidPath string
-	fs, _ := NewFileSelect(app.mainPanel, app.settings.DataDir, "Choose File for Video Recording", "*.h264")
-	fs.Subscribe("OnOK", func(n string, ev interface{}) {
-		vidPath = fs.Selected()
-		//app.Log().Info("Selected: %s", vidPath)
+	fs := gtk.NewFileChooserDialog(
+		"Save Video Recording to...",
+		win,
+		gtk.FILE_CHOOSER_ACTION_SAVE, "_Cancel", gtk.RESPONSE_CANCEL, "_Save", gtk.RESPONSE_ACCEPT)
+	fs.SetCurrentFolder(settings.DataDir)
+	ff := gtk.NewFileFilter()
+	ff.AddPattern("*.h264")
+	fs.SetFilter(ff)
+	res := fs.Run()
+	if res == gtk.RESPONSE_ACCEPT {
+		vidPath = fs.GetFilename()
 		if vidPath != "" {
 			var err error
-			app.videoFile, err = os.OpenFile(vidPath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
+			videoFile, err = os.OpenFile(vidPath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
 			if err != nil {
-				alertDialog(app.mainPanel, errorSev, "Could not open video file")
+				alert := gtk.NewMessageDialog(win, gtk.DIALOG_MODAL, gtk.MESSAGE_INFO, gtk.BUTTONS_CLOSE,
+					"Could not create video file.")
+				alert.SetTitle(appName)
+				alert.Run()
+				alert.Destroy()
 			} else {
-				app.videoWriter = bufio.NewWriter(app.videoFile)
-				app.videoRecMu.Lock()
-				app.videoRecording = true
-				app.videoRecMu.Unlock()
-				app.recordVideoItem.SetEnabled(false)
-				app.stopRecordingItem.SetEnabled(true)
+				videoWriter = bufio.NewWriter(videoFile)
+				videoRecMu.Lock()
+				videoRecording = true
+				videoRecMu.Unlock()
+				menuBar.recVidItem.SetSensitive(false)
+				menuBar.stopRecVidItem.SetSensitive(true)
 			}
 		}
-		fs.Close()
-	})
-	fs.Subscribe("OnCancel", func(n string, ev interface{}) {
-		fs.Close()
-	})
+	}
+	fs.Destroy()
 }
 
-func (app *tdApp) stopRecordingCB(s string, i interface{}) {
-	app.videoRecMu.Lock()
-	app.videoRecording = false
-	app.videoRecMu.Unlock()
-	app.videoWriter.Flush()
-	app.videoFile.Close()
-	app.recordVideoItem.SetEnabled(true)
-	app.stopRecordingItem.SetEnabled(false)
+func stopRecordingVideoCB() {
+	videoRecMu.Lock()
+	videoRecording = false
+	videoRecMu.Unlock()
+	videoWriter.Flush()
+	videoFile.Close()
+	menuBar.recVidItem.SetSensitive(true)
+	menuBar.stopRecVidItem.SetSensitive(false)
 }
 
-func (app *tdApp) startVideo() {
+func startVideo() {
 
 	var err error
 
-	app.videoChan, err = drone.VideoConnectDefault()
+	videoChan, err = drone.VideoConnectDefault()
 	if err != nil {
-		app.Log().Warn(err.Error())
-		alertDialog(app.mainPanel, errorSev, err.Error())
+		log.Print(err.Error())
+		alert := gtk.NewMessageDialog(win, gtk.DIALOG_MODAL, gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE, err.Error())
+		alert.SetTitle(appName)
+		alert.Run()
+		alert.Destroy()
 	}
 
 	// start video feed restarter when drone connects
 	drone.StartVideo()
-	go func() {
+	go func() { // no GTK stuff in here...
 		for {
 			drone.StartVideo()
 			select {
@@ -71,19 +91,25 @@ func (app *tdApp) startVideo() {
 		}
 	}()
 
-	app.stopNewPicChan = make(chan bool)
-	app.newPicChan = make(chan bool)
-	go videoListener(app)
-	go app.updateFeed()
+	stopNewPicChan = make(chan bool)
+	newPicChan = make(chan bool)
+	go videoListener()
+
+	//go updateFeed()
+
+	glib.TimeoutAdd(30, func() bool {
+		updateFeed()
+		return true
+	})
 }
 
-func (app *tdApp) customReader() ([]byte, int) {
-	pkt := <-app.videoChan
-	app.videoRecMu.RLock()
-	if app.videoRecording {
-		app.videoWriter.Write(pkt)
+func customReader() ([]byte, int) {
+	pkt := <-videoChan
+	videoRecMu.RLock()
+	if videoRecording {
+		videoWriter.Write(pkt)
 	}
-	app.videoRecMu.RUnlock()
+	videoRecMu.RUnlock()
 	return pkt, len(pkt)
 }
 
@@ -96,9 +122,9 @@ func assert(i interface{}, err error) interface{} {
 }
 
 //func (app *tdApp) videoListener() {
-func videoListener(app *tdApp) {
+func videoListener() {
 
-	//app.Log().Info("Videolistener started")
+	//Log().Info("Videolistener started")
 
 	iCtx := gmf.NewCtx()
 	defer iCtx.CloseInputAndRelease()
@@ -106,23 +132,23 @@ func videoListener(app *tdApp) {
 	if err := iCtx.SetInputFormat("h264"); err != nil {
 		log.Fatalf("iCtx SetInputFormat %v", err)
 	}
-	//app.Log().Info("Input format set")
-	avioCtx, err := gmf.NewAVIOContext(iCtx, &gmf.AVIOHandlers{ReadPacket: app.customReader})
+	//Log().Info("Input format set")
+	avioCtx, err := gmf.NewAVIOContext(iCtx, &gmf.AVIOHandlers{ReadPacket: customReader})
 	defer gmf.Release(avioCtx)
 	if err != nil {
 		log.Fatalf("NewAVIOContext %v", err)
 	}
 
-	//app.Log().Info("Setting Pb...")
+	//Log().Info("Setting Pb...")
 	iCtx.SetPb(avioCtx)
 
-	//app.Log().Info("Opening input...")
+	//Log().Info("Opening input...")
 	err = iCtx.OpenInput("")
 	if err != nil {
 		log.Fatalf("iCtx OpenInput %v", err)
 	}
 
-	//app.Log().Info("Getting best stream...")
+	//Log().Info("Getting best stream...")
 	srcVideoStream, err := iCtx.GetBestStream(gmf.AVMEDIA_TYPE_VIDEO)
 	if err != nil {
 		log.Fatalf("GetBestStream %v", err)
@@ -145,7 +171,7 @@ func videoListener(app *tdApp) {
 		SetWidth(videoWidth).
 		SetHeight(videoHeight).
 		SetTimeBase(gmf.AVR{Num: 1, Den: 1})
-	//app.Log().Info("Opening cc")
+	//Log().Info("Opening cc")
 	if err := cc.Open(nil); err != nil {
 		log.Fatalf("cc Open %v", err)
 	}
@@ -169,18 +195,18 @@ func videoListener(app *tdApp) {
 	codecCtx := ist.CodecCtx()
 	defer gmf.Release(codecCtx)
 
-	//app.Log().Info("Entering get video packets loop...")
+	//Log().Info("Entering get video packets loop...")
 
 	for pkt := range iCtx.GetNewPackets() {
 
 		if pkt.StreamIndex() != srcVideoStream.Index() {
-			app.Log().Info("Skipping wrong stream packet")
+			log.Println("Skipping wrong stream packet")
 			continue
 		}
 
 		frame, err := pkt.Frames(codecCtx)
 		if err != nil {
-			app.Log().Info("CodeCtx %v", err)
+			log.Printf("CodeCtx %v", err)
 			continue
 		}
 
@@ -189,22 +215,17 @@ func videoListener(app *tdApp) {
 		p, err := dstFrame.Encode(cc)
 
 		if err != nil {
-			app.Log().Fatal("Encode %v", err)
+			log.Fatalf("Encode %v", err)
 		}
 		rgba := new(image.RGBA)
 		rgba.Stride = 4 * videoWidth
 		rgba.Rect = image.Rect(0, 0, videoWidth, videoHeight)
 		rgba.Pix = p.Data()
 
-		app.picMu.Lock()
-		app.pic = rgba
-		app.picMu.Unlock()
-
-		// non-blocking send to tell updateFeed() a new pic is ready
-		select {
-		case app.newPicChan <- true:
-		default:
-		}
+		newFeedImageMu.Lock()
+		feedImage = rgba
+		newFeedImage = true
+		newFeedImageMu.Unlock()
 
 		gmf.Release(p)
 		gmf.Release(frame)
@@ -213,16 +234,26 @@ func videoListener(app *tdApp) {
 	}
 }
 
-func (app *tdApp) updateFeed() {
-	for {
-		select {
-		case _ = <-app.newPicChan:
-			app.picMu.RLock()
-			app.texture.SetFromRGBA(app.pic)
-			app.picMu.RUnlock()
-			app.feed.SetChanged(true)
-		case _ = <-app.stopNewPicChan:
-			return
-		}
+// updateFeed actually updates the video image in the feed tab.
+// It must be run on the main thread, so there is a little mutex dance to
+// check if a new image is ready for display.
+func updateFeed() {
+	newFeedImageMu.Lock()
+	if newFeedImage {
+		var pbd gdkpixbuf.PixbufData
+		pbd.Colorspace = gdkpixbuf.GDK_COLORSPACE_RGB
+		pbd.HasAlpha = true
+		pbd.BitsPerSample = 8
+		pbd.Width = videoWidth
+		pbd.Height = videoHeight
+		pbd.RowStride = videoWidth * 4 // RGBA
+
+		pbd.Data = feedImage.Pix
+
+		pb := gdkpixbuf.NewPixbufFromData(pbd)
+		feedWgt.SetFromPixbuf(pb)
+
+		newFeedImage = false
 	}
+	newFeedImageMu.Unlock()
 }

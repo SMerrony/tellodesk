@@ -1,45 +1,47 @@
 package main
 
 import (
-	"time"
+	"github.com/mattn/go-gtk/gtk"
 )
 
-func (app *tdApp) connectCB(s string, i interface{}) {
+func connectCB() {
+
 	err := drone.ControlConnectDefault()
 	if err != nil {
-		alertDialog(
-			app.mainPanel,
-			errorSev,
+		alert := gtk.NewMessageDialog(win, gtk.DIALOG_MODAL, gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
 			`Could not connect to Drone.
 
 Check that you have a Wifi connection 
 to the Tello network.`)
+		alert.SetTitle(appName)
+		alert.Run()
+		alert.Destroy()
 		return // Comment this for GUI testing
 	}
 
-	app.startVideo()
+	startVideo()
 
-	jsStopChan = make(chan bool) // not buffered
-	fdStopChan = make(chan bool) // not buffered
-	vrStopChan = make(chan bool) // not buffered
+	// jsStopChan = make(chan bool) // not buffered
+	// fdStopChan = make(chan bool) // not buffered
+	// vrStopChan = make(chan bool) // not buffered
 
 	stickChan, _ = drone.StartStickListener()
 	go readJoystick(false, jsStopChan) // FIXME - if defined & opened ok!
 
-	app.trackChart.track = newTrack()
-	app.liveTrackerTimer = app.Gui().TimerManager.SetInterval(500*time.Millisecond, true, app.liveTrackerTCB)
+	trackChart.track = newTrack()
+	// liveTrackerTimer = Gui().TimerManager.SetInterval(500*time.Millisecond, true, liveTrackerTCB)
 
 	fdChan, _ = drone.StreamFlightData(false, fdPeriodMs)
-	go app.fdListener()
+	go fdListener()
 
-	app.enableFlightMenus()
-	app.statusBar.connectionLab.SetText(" Connected ")
+	menuBar.enableFlightMenus()
+	statusBar.connectionLab.SetText("Connected")
 }
 
-func (app *tdApp) disconnectCB(s string, i interface{}) {
+func disconnectCB() {
 	drone.VideoDisconnect()
 	drone.ControlDisconnect()
-	app.Gui().TimerManager.ClearTimeout(app.liveTrackerTimer)
+	//Gui().TimerManager.ClearTimeout(liveTrackerTimer)
 
 	select {
 	case jsStopChan <- true: // stop the joystick listener goroutine
@@ -54,12 +56,12 @@ func (app *tdApp) disconnectCB(s string, i interface{}) {
 	default:
 	}
 	select {
-	case app.stopNewPicChan <- true: // stop the video image updater goroutine
+	case stopNewPicChan <- true: // stop the video image updater goroutine
 	default:
 	}
 
-	app.disableFlightMenus()
-	app.statusBar.connectionLab.SetText(" Disconnected ")
-	app.buildFeed()
-	app.feedTab.SetContent(app.feed)
+	menuBar.disableFlightMenus()
+	statusBar.connectionLab.SetText(" Disconnected ")
+	feedWgt = buildFeedWgt()
+	//feedTab.SetContent(feed)
 }

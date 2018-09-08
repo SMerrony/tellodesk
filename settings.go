@@ -1,15 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
-	"os"
-	"strconv"
-	"strings"
+	"log"
 
-	"github.com/g3n/engine/math32"
-
-	"github.com/g3n/engine/gui"
+	"github.com/mattn/go-gtk/gtk"
 	"gopkg.in/yaml.v2"
 )
 
@@ -19,11 +14,6 @@ type settingsT struct {
 	JoystickType string
 	DataDir      string
 }
-
-const (
-	dialogTitle                           = appName + " Settings"
-	settingsWidth, settingsHeight float32 = 550, 200
-)
 
 func saveSettings(s settingsT, filename string) error {
 	bytes, err := yaml.Marshal(s)
@@ -46,135 +36,79 @@ func loadSettings(filename string) (settingsT, error) {
 	return s, nil
 }
 
-type settingsDlg struct {
-	*gui.Window
-}
+func settingsCB() {
+	sd := gtk.NewDialog()
+	sd.SetTitle(appName + " Settings")
 
-func (app *tdApp) settingsCB(s string, i interface{}) {
-	app.settingsDialog()
-}
+	table := gtk.NewTable(6, 3, false)
+	table.SetColSpacings(5)
+	table.SetRowSpacings(5)
 
-func (app *tdApp) settingsDialog() (win *settingsDlg) {
-	win = new(settingsDlg)
-	win.Window = gui.NewWindow(settingsWidth, settingsHeight)
-	win.SetResizable(false)
-	win.SetPaddings(4, 4, 4, 4)
-	win.SetTitle(dialogTitle)
-	win.SetCloseButton(false)
-	win.SetColor(math32.NewColor("Gray"))
+	table.AttachDefaults(gtk.NewLabel("Detected"), 1, 2, 0, 1)
+	table.AttachDefaults(gtk.NewLabel("Type"), 2, 3, 0, 1)
+	table.AttachDefaults(gtk.NewLabel("Joystick :"), 0, 1, 1, 2)
 
-	lay := gui.NewGridLayout(3)
-	lay.SetAlignH(gui.AlignCenter)
-	lay.SetExpandH(true)
-	win.SetLayout(lay)
-
-	win.Add(gui.NewLabel(""))
-	win.Add(gui.NewLabel("Detected"))
-	win.Add(gui.NewLabel("Type"))
-
-	jsLab := gui.NewLabel("Joystick:")
-	jsLab.SetLayoutParams(&gui.GridLayoutParams{ColSpan: 0, AlignH: gui.AlignRight})
-	win.Add(jsLab)
-	dDrop := gui.NewDropDown(200, gui.NewImageLabel(""))
-	dDrop.SetWidth(250.0)
-	// dDrop.SetMargins(3, 3, 3, 3)
+	// display all joysticks detected on the system
+	foundCombo := gtk.NewComboBoxText()
 	found := listJoysticks()
 	for _, j := range found {
-		dDrop.Add(gui.NewImageLabel(j.Name))
+		foundCombo.AppendText(j.Name)
 	}
-	if app.settingsLoaded {
-		dDrop.SelectPos(app.settings.JoystickID)
+	if settingsLoaded {
+		foundCombo.SetActive(settings.JoystickID)
 	}
-	win.Add(dDrop)
+	table.AttachDefaults(foundCombo, 1, 2, 1, 2)
 
-	tDrop := gui.NewDropDown(150, gui.NewImageLabel(""))
-	// tDrop.SetMargins(3, 3, 3, 3)
+	// display all known joystick types
+	chosenTypeCombo := gtk.NewComboBoxText()
 	known := listKnownJoystickTypes()
-	for _, k := range known {
-		il := gui.NewImageLabel(k.Name)
-		tDrop.Add(il)
-		if app.settings.JoystickType == k.Name {
-			tDrop.SetSelected(il)
+	for i, k := range known {
+		chosenTypeCombo.AppendText(k.Name)
+		if settings.JoystickType == k.Name {
+			chosenTypeCombo.SetActive(i)
 		}
 	}
-	win.Add(tDrop)
+	table.AttachDefaults(chosenTypeCombo, 2, 3, 1, 2)
 
-	win.Add(gui.NewLabel(""))
-	warningLab := gui.NewLabel(" You must reconnect to the drone after changing joystick settings ")
-	warningLab.SetMargins(3, 3, 3, 3)
-	warningLab.SetLayoutParams(&gui.GridLayoutParams{ColSpan: 2, AlignH: gui.AlignCenter})
-	//warningLab.SetBgColor(math32.NewColor("Red"))
-	win.Add(warningLab)
-
-	// empty row...
-	win.Add(gui.NewLabel(""))
-	win.Add(gui.NewLabel(""))
-	win.Add(gui.NewLabel(""))
-
-	ddLab := gui.NewLabel("Data Directory:")
-	ddLab.SetLayoutParams(&gui.GridLayoutParams{ColSpan: 0, AlignH: gui.AlignRight})
-	win.Add(ddLab)
-	if app.settings.DataDir == "" {
-		app.settings.DataDir = "."
+	table.AttachDefaults(gtk.NewLabel("Data Directory :"), 0, 1, 2, 3)
+	if settings.DataDir == "" {
+		settings.DataDir = "."
 	}
-	ddd, _ := NewDirectoryDropDown(400.0, app.settings.DataDir)
-
-	ddd.SetLayoutParams(&gui.GridLayoutParams{ColSpan: 2})
-	win.Add(ddd)
-
-	// empty row...
-	win.Add(gui.NewLabel(""))
-	win.Add(gui.NewLabel(""))
-	win.Add(gui.NewLabel(""))
-
-	// buttons...
-	win.Add(gui.NewLabel(""))
-	cancel := gui.NewButton("Cancel")
-	win.Add(cancel)
-	ok := gui.NewButton("OK")
-	win.Add(ok)
-	cancel.Subscribe(gui.OnClick, func(e string, ev interface{}) {
-		app.Log().Info("Settings Cancelled")
-		app.Gui().Root().SetModal(nil)
-		app.mainPanel.Remove(win)
-	})
-	ok.Subscribe(gui.OnClick, func(e string, ev interface{}) {
-		app.Log().Info("Settings Okayed")
-		fmt.Printf("Debug: found ID: %s, chosen ID: %s\n", dDrop.Selected().Text(), tDrop.Selected().Text())
-		sID, _ := strconv.Atoi(strings.Split(dDrop.Selected().Text(), ":")[0])
-		err := openJoystick(sID, tDrop.Selected().Text())
-		if err != nil {
-			alertDialog(app.mainPanel, errorSev, err.Error())
-		} else {
-			app.settings.JoystickID = sID
-			app.settings.JoystickType = tDrop.Selected().Text()
-			app.settings.DataDir = ddd.Selected().Text()
-			if err = saveSettings(app.settings, appSettingsFile); err != nil {
-				app.Log().Error(err.Error())
-				alertDialog(app.mainPanel, errorSev, err.Error())
-			}
+	ddLabel := gtk.NewLabel(settings.DataDir)
+	table.AttachDefaults(ddLabel, 1, 2, 2, 3)
+	cdirBtn := gtk.NewButtonWithLabel("Change Dir.")
+	table.AttachDefaults(cdirBtn, 2, 3, 2, 3)
+	cdirBtn.Connect("clicked", func() {
+		dc := gtk.NewFileChooserDialog(
+			"Directory for Data Files",
+			win, gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER, "_Cancel", gtk.RESPONSE_CANCEL, "_OK", gtk.RESPONSE_ACCEPT)
+		dc.SetCurrentFolder(settings.DataDir)
+		res := dc.Run()
+		if res == gtk.RESPONSE_ACCEPT {
+			settings.DataDir = dc.GetCurrentFolder()
+			ddLabel.SetText(settings.DataDir)
 		}
-		app.Gui().Root().SetModal(nil)
-		app.mainPanel.Remove(win)
+		dc.Destroy()
 	})
 
-	root := app.mainPanel
-	root.Add(win)
-	win.SetPosition(root.Width()/2-settingsWidth/2, root.Height()/2-settingsHeight/2)
-	app.Gui().SetModal(win)
+	sd.GetVBox().PackStart(table, true, true, 5)
+	sd.AddButton("Cancel", gtk.RESPONSE_CANCEL)
+	sd.AddButton("OK", gtk.RESPONSE_OK)
+	sd.SetDefaultResponse(gtk.RESPONSE_OK)
+	sd.ShowAll()
 
-	return win
-}
-
-func (app *tdApp) settingsCDirCB(e string, ev interface{}) {
-	var cwd string
-	if app.settings.DataDir != "" {
-		cwd = app.settings.DataDir
-	} else {
-		cwd, _ = os.Getwd()
+	response := sd.Run()
+	if response == gtk.RESPONSE_OK {
+		settings.JoystickID = foundCombo.GetActive()
+		settings.JoystickType = chosenTypeCombo.GetActiveText()
+		if err := saveSettings(settings, appSettingsFile); err != nil {
+			alert := gtk.NewMessageDialog(win, gtk.DIALOG_MODAL, gtk.MESSAGE_INFO, gtk.BUTTONS_CLOSE,
+				"Could not save settings.")
+			alert.SetTitle(appName)
+			alert.Run()
+			alert.Destroy()
+			log.Printf("Could not save settings: %v", err)
+		}
 	}
-	fs, _ := NewFileSelect(app.mainPanel, cwd, "Choose Directory for Image & Track Storage", "")
-	fs.Subscribe("OnCancel", func(n string, ev interface{}) {
-		fs.Close()
-	})
+	sd.Destroy()
 }

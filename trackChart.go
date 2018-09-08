@@ -7,20 +7,19 @@ import (
 	"image/draw"
 	"strconv"
 
+	"github.com/mattn/go-gtk/gdkpixbuf"
+	"github.com/mattn/go-gtk/gtk"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/basicfont"
 	"golang.org/x/image/math/fixed"
-
-	"github.com/g3n/engine/gls"
-	"github.com/g3n/engine/gui"
-	"github.com/g3n/engine/texture"
 )
 
 type trackChartT struct {
-	gui.Panel
+	*gtk.Image
 	track                              *telloTrack
-	tex                                *texture.Texture2D
 	backingImage                       *image.RGBA
+	pbd                                gdkpixbuf.PixbufData
+	pixBuf                             *gdkpixbuf.Pixbuf
 	width, height, xOrigin, yOrigin    int
 	bgCol, axesCol, labelCol, droneCol color.Color
 	maxOffset                          float32
@@ -32,10 +31,10 @@ const defaultTrackScale float32 = 10.0
 
 func buildTrackChart(w, h int, scale float32, showDrone, showPath bool) (tc *trackChartT) {
 	tc = new(trackChartT)
+	tc.Image = gtk.NewImage()
 	tc.width = w
 	tc.height = h
 	tc.showDrone, tc.showPath = showDrone, showPath
-	tc.Panel.Initialize(float32(tc.width), float32(tc.height))
 	tc.xOrigin = w / 2
 	tc.yOrigin = h / 2
 	tc.bgCol = color.White
@@ -49,30 +48,47 @@ func buildTrackChart(w, h int, scale float32, showDrone, showPath bool) (tc *tra
 		tc.scalePPM = float32(tc.xOrigin) / scale
 	}
 	tc.backingImage = image.NewRGBA(image.Rectangle{image.Point{0, 0}, image.Point{w, h}})
-	tc.tex = texture.NewTexture2DFromRGBA(tc.backingImage)
-	tc.tex.SetMagFilter(gls.NEAREST)
-	tc.tex.SetMinFilter(gls.NEAREST)
-	tc.Panel.Material().AddTexture(tc.tex)
+	tc.pbd.Colorspace = gdkpixbuf.GDK_COLORSPACE_RGB
+	tc.pbd.HasAlpha = true
+	tc.pbd.BitsPerSample = 8
+	tc.pbd.Width = w
+	tc.pbd.Height = h
+	tc.pbd.RowStride = tc.backingImage.Stride
+	tc.pbd.Data = tc.backingImage.Pix
+	tc.pixBuf = gdkpixbuf.NewPixbufFromData(tc.pbd)
 	tc.track = newTrack()
 	tc.drawEmptyChart()
+	//tc.Image = gtk.NewImageFromPixbuf(tc.pixBuf)
+	tc.SetFromPixbuf(tc.pixBuf)
 	return tc
+}
+
+func (tc *trackChartT) resetScale() {
+	tc.maxOffset = tc.track.deriveScale()
+	if tc.width >= tc.height { // scale to the shortest axis
+		tc.scalePPM = float32(tc.yOrigin) / tc.maxOffset
+	} else {
+		tc.scalePPM = float32(tc.xOrigin) / tc.maxOffset
+	}
 }
 
 func (tc *trackChartT) clearChart() {
 	draw.Draw(tc.backingImage, tc.backingImage.Bounds(), image.NewUniform(tc.bgCol), image.ZP, draw.Src)
-	tc.tex.SetFromRGBA(tc.backingImage)
+	tc.pbd.Data = tc.backingImage.Pix
+	tc.pixBuf = gdkpixbuf.NewPixbufFromData(tc.pbd)
+	tc.SetFromPixbuf(tc.pixBuf)
+	//tc.Image = gtk.NewImageFromPixbuf(tc.pixBuf)
 }
 
-func (tc *trackChartT) setShowDrone(show bool) {
-	tc.showDrone = show
-}
+// func (tc *trackChartT) setShowDrone(show bool) {
+// 	tc.showDrone = show
+// }
 
-func (tc *trackChartT) setShowPath(show bool) {
-	tc.showPath = show
-}
+// func (tc *trackChartT) setShowPath(show bool) {
+// 	tc.showPath = show
+// }
 
 func (tc *trackChartT) drawEmptyChart() {
-	tc.tex.Dispose()
 	tc.clearChart()
 	// blank vertical axis
 	for y := 0; y < tc.height; y++ {
@@ -102,7 +118,10 @@ func (tc *trackChartT) drawEmptyChart() {
 		tc.drawLabel(0, y, strconv.Itoa(int(y)))
 		//fmt.Printf("Y label drawn at: %f\n", y)
 	}
-	tc.tex.SetFromRGBA(tc.backingImage)
+	tc.pbd.Data = tc.backingImage.Pix
+	tc.pixBuf = gdkpixbuf.NewPixbufFromData(tc.pbd)
+	tc.SetFromPixbuf(tc.pixBuf)
+	//tc.Image = gtk.NewImageFromPixbuf(tc.pixBuf)
 }
 
 func (tc *trackChartT) drawLabel(x, y float32, lab string) {
@@ -159,6 +178,9 @@ func (tc *trackChartT) drawPos(x, y float32, yaw int16) {
 }
 
 func (tc *trackChartT) drawTrack() {
+	if tc.track != nil {
+		tc.resetScale()
+	}
 	tc.drawEmptyChart()
 	var lastX, lastY float32
 	for _, pos := range tc.track.positions {
@@ -172,6 +194,9 @@ func (tc *trackChartT) drawTrack() {
 		}
 	}
 	tc.drawTitles()
+	tc.pbd.Data = tc.backingImage.Pix
+	tc.SetFromPixbuf(tc.pixBuf)
+
 }
 
 // helper funcs...

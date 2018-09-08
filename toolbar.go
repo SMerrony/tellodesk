@@ -1,95 +1,71 @@
 package main
 
 import (
-	"github.com/g3n/engine/gui"
-	"github.com/g3n/engine/gui/assets/icon"
-	"github.com/g3n/engine/math32"
+	"github.com/mattn/go-gtk/gdk"
+	"github.com/mattn/go-gtk/gtk"
 )
 
-// toolbarT also holds a single message label for urgent notifications to appear at
+// toolBarT also holds a single message label for urgent notifications to appear at
 // the top of the screen.
-type toolbarT struct {
-	*gui.Panel
-	messageLabel *gui.ImageLabel
+type toolBarT struct {
+	*gtk.Toolbar
+	goHomeBtn    *gtk.ToolButton
+	messageLabel *gtk.Label
 }
 
-const msgBoxWidth = 350.0
+func buildToolBar() (tb *toolBarT) {
+	tb = new(toolBarT)
+	tb.Toolbar = gtk.NewToolbar()
+	tb.SetStyle(gtk.TOOLBAR_ICONS)
 
-func (app *tdApp) buildToolbar() (tb *toolbarT) {
-	tb = new(toolbarT)
-	tb.Panel = gui.NewPanel(videoWidth, 28)
-	tb.SetContentWidth(videoWidth)
-	//tb.SetBorders(1, 1, 1, 1)
-	tb.SetMargins(1, 1, 1, 1)
-
-	hbl := gui.NewHBoxLayout()
-	hbl.SetSpacing(4)
-	tb.SetLayout(hbl)
-
-	stopBtn := gui.NewButton("")
-	stopBtn.SetIcon(icon.Pause)
-	stopBtn.Subscribe(gui.OnClick, func(e string, ev interface{}) {
-		drone.Hover()
-	})
+	stopBtn := gtk.NewToolButtonFromStock(gtk.STOCK_MEDIA_PAUSE)
+	stopBtn.SetLabel("Hover")
+	stopBtn.Connect("clicked", func() { drone.Hover() })
 	tb.Add(stopBtn)
 
-	cameraBtn := gui.NewButton("")
-	cameraBtn.SetIcon(icon.CameraAlt)
-	cameraBtn.Subscribe(gui.OnClick, func(e string, ev interface{}) {
-		drone.TakePicture()
-	})
-	tb.Add(cameraBtn)
-
-	setHomeBtn := gui.NewButton("")
-	setHomeBtn.SetIcon(icon.AddLocation)
-	setHomeBtn.Subscribe(gui.OnClick, func(e string, ev interface{}) {
+	setHomeBtn := gtk.NewToolButtonFromStock(gtk.STOCK_HOME)
+	setHomeBtn.SetLabel("Set Home")
+	setHomeBtn.Connect("clicked", func() {
 		drone.SetHome()
+		tb.goHomeBtn.SetSensitive(true)
 	})
 	tb.Add(setHomeBtn)
 
-	goHomeBtn := gui.NewButton("")
-	goHomeBtn.SetIcon(icon.Place)
-	goHomeBtn.Subscribe(gui.OnClick, func(e string, ev interface{}) {
-		if drone.IsHomeSet() {
-			drone.AutoFlyToXY(0, 0)
-		} else {
-			alertDialog(app.mainPanel, warningSev, "Home position not set")
-		}
-	})
-	tb.Add(goHomeBtn)
+	tb.goHomeBtn = gtk.NewToolButtonFromStock(gtk.STOCK_GO_BACK)
+	tb.goHomeBtn.SetLabel("Return Home")
+	tb.goHomeBtn.Connect("clicked", func() { drone.AutoFlyToXY(0, 0) })
+	tb.goHomeBtn.SetSensitive(false)
+	tb.Add(tb.goHomeBtn)
 
-	spacer := gui.NewPanel(1, 1)
-	spacer.SetLayoutParams(&gui.HBoxLayoutParams{Expand: 2})
-	tb.Add(spacer)
+	tb.Add(gtk.NewSeparatorToolItem())
 
-	tb.messageLabel = gui.NewImageLabel("")
-	tb.messageLabel.SetLayoutParams(&gui.HBoxLayoutParams{Expand: 0, AlignV: gui.AlignCenter})
-	tb.messageLabel.SetWidth(msgBoxWidth)
-	tb.messageLabel.SetBorders(2, 2, 2, 2)
-	tb.clearMessage()
+	tb.messageLabel = gtk.NewLabel("(No message)")
+	tb.messageLabel.SetWidthChars(40)
 
-	tb.Add(tb.messageLabel)
+	mli := gtk.NewToolItem()
+	mli.Add(tb.messageLabel)
+	mli.SetBorderWidth(1)
+	tb.Add(mli)
 
 	return tb
 }
 
-func (tb *toolbarT) clearMessage() {
-	tb.messageLabel.SetText("")
-	tb.messageLabel.SetBgColor(math32.NewColor("white"))
+func (tb *toolBarT) clearMessage() {
+	tb.messageLabel.SetLabel("")
 }
 
-func (tb *toolbarT) setMessage(msg string, severity severityType) {
-	tb.messageLabel.SetText(msg)
+func (tb *toolBarT) setMessage(msg string, severity severityType) {
+	tb.messageLabel.SetLabel(msg)
 	switch severity {
 	case infoSev:
-		tb.messageLabel.SetBgColor(math32.NewColor("white"))
-		tb.messageLabel.SetColor(math32.NewColor("black"))
+		tb.messageLabel.ModifyBG(gtk.STATE_NORMAL, gdk.NewColor("white"))
+		tb.messageLabel.ModifyFG(gtk.STATE_NORMAL, gdk.NewColor("black"))
 	case warningSev:
-		tb.messageLabel.SetBgColor(math32.NewColor("yellow"))
-		tb.messageLabel.SetColor(math32.NewColor("black"))
+		tb.messageLabel.ModifyBG(gtk.STATE_NORMAL, gdk.NewColor("yellow"))
+		tb.messageLabel.ModifyFG(gtk.STATE_NORMAL, gdk.NewColor("black"))
 	case errorSev, criticalSev:
-		tb.messageLabel.SetBgColor(math32.NewColor("red"))
-		tb.messageLabel.SetColor(math32.NewColor("white"))
+		tb.messageLabel.ModifyBG(gtk.STATE_NORMAL, gdk.NewColor("red"))
+		tb.messageLabel.ModifyFG(gtk.STATE_NORMAL, gdk.NewColor("white"))
 	}
-	tb.messageLabel.SetWidth(msgBoxWidth)
+	// tb.messageLabel.SetWidth(msgBoxWidth)
 }

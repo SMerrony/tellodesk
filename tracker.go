@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"image/png"
 	"io"
+	"log"
 	"math"
 	"os"
 	"strconv"
@@ -13,7 +14,7 @@ import (
 	"time"
 
 	"github.com/SMerrony/tello"
-	"github.com/g3n/engine/gui/assets/icon"
+	"github.com/mattn/go-gtk/gtk"
 )
 
 const timeStampFmt = "20060102150405.000"
@@ -99,126 +100,137 @@ func (tt *telloTrack) addPositionIfChanged(fd tello.FlightData) {
 	}
 }
 
-func (app *tdApp) exportTrackCB(s string, ev interface{}) {
+func exportTrackCB() {
 	var expPath string
-	fs, _ := NewFileSelect(app.mainPanel, app.settings.DataDir, "Choose File for Track Export", "*.csv")
-	fs.Subscribe("OnOK", func(n string, ev interface{}) {
-		expPath = fs.Selected()
+	fs := gtk.NewFileChooserDialog(
+		"File for Track Export",
+		win,
+		gtk.FILE_CHOOSER_ACTION_SAVE, "_Cancel", gtk.RESPONSE_CANCEL, "_Export", gtk.RESPONSE_ACCEPT)
+	fs.SetCurrentFolder(settings.DataDir)
+	ff := gtk.NewFileFilter()
+	ff.AddPattern("*.csv")
+	fs.SetFilter(ff)
+	res := fs.Run()
+	if res == gtk.RESPONSE_ACCEPT {
+		expPath = fs.GetFilename()
 		if expPath != "" {
 			exp, err := os.Create(expPath)
 			if err != nil {
-				alertDialog(app.mainPanel, warningSev, "Could not create CSV file")
+				alert := gtk.NewMessageDialog(win, gtk.DIALOG_MODAL, gtk.MESSAGE_INFO, gtk.BUTTONS_CLOSE,
+					"Could not create CSV file.")
+				alert.SetTitle(appName)
+				alert.Run()
+				alert.Destroy()
 			} else {
 				defer exp.Close()
 				w := csv.NewWriter(exp)
-				app.trackChart.track.trackMu.RLock()
-				for _, k := range app.trackChart.track.positions {
+				trackChart.track.trackMu.RLock()
+				for _, k := range trackChart.track.positions {
 					w.Write(k.toStrings())
 				}
-				app.trackChart.track.trackMu.RUnlock()
+				trackChart.track.trackMu.RUnlock()
 				w.Flush()
 			}
 		}
-		fs.Close()
-	})
-	fs.Subscribe("OnCancel", func(n string, ev interface{}) {
-		fs.Close()
-	})
+	}
+	fs.Destroy()
 }
 
-func (app *tdApp) exportTrackImageCB(s string, ev interface{}) {
+func exportTrackImageCB() {
 	var expPath string
-	fs, _ := NewFileSelect(app.mainPanel, app.settings.DataDir, "Choose File for Track Image", "*.png")
-	fs.Subscribe("OnOK", func(n string, ev interface{}) {
-		expPath = fs.Selected()
+	fs := gtk.NewFileChooserDialog(
+		"File for Track Image",
+		win,
+		gtk.FILE_CHOOSER_ACTION_SAVE, "_Cancel", gtk.RESPONSE_CANCEL, "_Export", gtk.RESPONSE_ACCEPT)
+	fs.SetCurrentFolder(settings.DataDir)
+	ff := gtk.NewFileFilter()
+	ff.AddPattern("*.png")
+	fs.SetFilter(ff)
+	res := fs.Run()
+	if res == gtk.RESPONSE_ACCEPT {
+		expPath = fs.GetFilename()
 		if expPath != "" {
 			exp, err := os.Create(expPath)
 			if err != nil {
-				alertDialog(app.mainPanel, warningSev, "Could not create image file")
+				alert := gtk.NewMessageDialog(win, gtk.DIALOG_MODAL, gtk.MESSAGE_INFO, gtk.BUTTONS_CLOSE,
+					"Could not create image file.")
+				alert.SetTitle(appName)
+				alert.Run()
+				alert.Destroy()
 			} else {
 				defer exp.Close()
-				if err := png.Encode(exp, app.trackChart.backingImage); err != nil {
-					alertDialog(app.mainPanel, errorSev, "Could not export track image")
+				if err := png.Encode(exp, trackChart.backingImage); err != nil {
+					alert := gtk.NewMessageDialog(win, gtk.DIALOG_MODAL, gtk.MESSAGE_INFO, gtk.BUTTONS_CLOSE,
+						"Could not write image file.")
+					alert.SetTitle(appName)
+					alert.Run()
+					alert.Destroy()
 				}
 			}
 		}
-		fs.Close()
-	})
-	fs.Subscribe("OnCancel", func(n string, ev interface{}) {
-		fs.Close()
-	})
+	}
+	fs.Destroy()
 }
 
-func (app *tdApp) importTrackCB(s string, ev interface{}) {
+func importTrackCB() {
 	var impPath string
-	fs, _ := NewFileSelect(app.mainPanel, app.settings.DataDir, "Choose CSV Path for Import", "*.csv")
-	fs.Subscribe("OnOK", func(n string, ev interface{}) {
-		impPath = fs.Selected()
+	fs := gtk.NewFileChooserDialog("Track to Import",
+		win,
+		gtk.FILE_CHOOSER_ACTION_OPEN,
+		"_Cancel", gtk.RESPONSE_CANCEL, "_Import", gtk.RESPONSE_ACCEPT)
+	fs.SetCurrentFolder(settings.DataDir)
+	ff := gtk.NewFileFilter()
+	ff.AddPattern("*.csv")
+	fs.SetFilter(ff)
+	res := fs.Run()
+	if res == gtk.RESPONSE_ACCEPT {
+		impPath = fs.GetFilename()
 		if impPath != "" {
 			imp, err := os.Open(impPath)
 			if err != nil {
-				alertDialog(app.mainPanel, warningSev, "Could not open CSV file")
+				alert := gtk.NewMessageDialog(win, gtk.DIALOG_MODAL, gtk.MESSAGE_INFO, gtk.BUTTONS_CLOSE,
+					"Could not open track CSV file.")
+				alert.SetTitle(appName)
+				alert.Run()
+				alert.Destroy()
 			} else {
 				defer imp.Close()
 				r := csv.NewReader(bufio.NewReader(imp))
-				tmpTrack := app.readTrack(r)
-				app.trackChart = buildTrackChart(videoWidth, videoHeight, tmpTrack.deriveScale(), app.trackShowDrone, app.trackShowPath)
-				app.trackChart.track = tmpTrack
-				app.trackChart.drawTrack()
-				app.trackTab.SetContent(app.trackChart)
+				tmpTrack := readTrack(r)
+				trackChart.track = tmpTrack
+				trackChart.drawTrack()
 			}
 		}
-		fs.Close()
-	})
-	fs.Subscribe("OnCancel", func(n string, ev interface{}) {
-		fs.Close()
-	})
-}
-
-func (app *tdApp) trackShowDroneCB(s string, ev interface{}) {
-	app.trackShowDrone = !app.trackShowDrone
-	if app.trackShowDrone {
-		app.tsmShowDrone.SetIcon(icon.CheckBox)
-	} else {
-		app.tsmShowDrone.SetIcon(icon.CheckBoxOutlineBlank)
 	}
-	app.trackChart.setShowDrone(app.trackShowDrone)
-	app.trackChart.drawTrack()
-	app.trackTab.SetContent(app.trackChart)
+	fs.Destroy()
 }
 
-func (app *tdApp) trackShowPathCB(s string, ev interface{}) {
-	app.trackShowPath = !app.trackShowPath
-	if app.trackShowPath {
-		app.tsmShowPath.SetIcon(icon.CheckBox)
-	} else {
-		app.tsmShowPath.SetIcon(icon.CheckBoxOutlineBlank)
-	}
-	app.trackChart.setShowPath(app.trackShowPath)
-	app.trackChart.drawTrack()
-	app.trackTab.SetContent(app.trackChart)
-}
+// // liveTracker is to be run at intervals (not as a goroutine)
+// func (app *tdApp) liveTrackerTCB(cb interface{}) {
+// 	trackChart.drawEmptyChart()
+// 	trackChart.drawTrack()l
+// 	//app.trackTab.SetContent(trackChart)
+// }
 
-// liveTracker is to be run at intervals (not as a goroutine)
-func (app *tdApp) liveTrackerTCB(cb interface{}) {
-	app.trackChart.drawEmptyChart()
-	app.trackChart.drawTrack()
-	app.trackTab.SetContent(app.trackChart)
-}
-
-func (app *tdApp) readTrack(r *csv.Reader) (trk *telloTrack) {
+func readTrack(r *csv.Reader) (trk *telloTrack) {
 	trk = newTrack()
 	for {
 		line, err := r.Read()
 		if err == io.EOF {
 			break
 		} else if err != nil {
-			alertDialog(app.mainPanel, errorSev, "Could not read CSV file")
+			alert := gtk.NewMessageDialog(win, gtk.DIALOG_MODAL, gtk.MESSAGE_INFO, gtk.BUTTONS_CLOSE,
+				"Could not read CSV track file.")
+			alert.SetTitle(appName)
+			alert.Run()
 			return
 		}
 		tmpTrackPos, err := toStruct(line)
 		if err != nil {
-			alertDialog(app.mainPanel, errorSev, "Could not parse CSV file")
+			alert := gtk.NewMessageDialog(win, gtk.DIALOG_MODAL, gtk.MESSAGE_INFO, gtk.BUTTONS_CLOSE,
+				"Could not parse track CSV track file.")
+			alert.SetTitle(appName)
+			alert.Run()
 			return
 		}
 		trk.positions = append(trk.positions, tmpTrackPos)
@@ -237,10 +249,10 @@ func (app *tdApp) readTrack(r *csv.Reader) (trk *telloTrack) {
 		}
 
 	}
-	app.Log().Info("Imported %d track positions", len(trk.positions))
-	app.Log().Info("Min X: %f, Max X:, %f", trk.minX, trk.maxX)
-	app.Log().Info("Min Y: %f, Max Y:, %f", trk.minY, trk.maxY)
-	app.Log().Info("Derived scale is %f", trk.deriveScale())
+	log.Printf("Imported %d track positions", len(trk.positions))
+	log.Printf("Min X: %f, Max X:, %f", trk.minX, trk.maxX)
+	log.Printf("Min Y: %f, Max Y:, %f", trk.minY, trk.maxY)
+	log.Printf("Derived scale is %f", trk.deriveScale())
 	return trk
 }
 

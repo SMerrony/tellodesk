@@ -1,14 +1,14 @@
 package main
 
-func (app *tdApp) takeoffCB(s string, i interface{}) {
+func takeoffCB() {
 	drone.TakeOff()
 }
-func (app *tdApp) throwTakeoffCB(s string, i interface{}) {
+func throwTakeoffCB() {
 	drone.ThrowTakeOff()
 }
-func (app *tdApp) landCB(s string, i interface{}) {
+func landCB() {
 	drone.Land()
 }
-func (app *tdApp) palmLandCB(s string, i interface{}) {
+func palmLandCB() {
 	drone.PalmLand()
 }

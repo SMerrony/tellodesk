@@ -1,22 +1,24 @@
 package main
 
+import "log"
+
 // fdListener should be run as a Goroutine to consume FD updates on the chan as they arrive.
 // It is started by connectCB() in droneCBs.go when the Tello is connected.
-func (app *tdApp) fdListener() {
+func fdListener() {
 	for {
 		select {
 		case tmpFd := <-fdChan:
-			app.flightDataMu.Lock()
-			app.flightData = tmpFd
-			app.flightDataMu.Unlock()
+			flightDataMu.Lock()
+			flightData = tmpFd
+			flightDataMu.Unlock()
 			if tmpFd.DownVisualState {
-				app.Log().Info("Down visual state")
+				log.Println("Down visual state")
 			}
 			if tmpFd.OnGround {
-				app.Log().Info("On Ground")
+				log.Println("On Ground")
 			}
 			if tmpFd.LightStrength == 0 {
-				app.trackChart.track.addPositionIfChanged(tmpFd)
+				trackChart.track.addPositionIfChanged(tmpFd)
 			}
 		case <-fdStopChan:
 			return
@@ -25,37 +27,37 @@ func (app *tdApp) fdListener() {
 }
 
 // updateMessage should be run periodically to check for condition we should alert the user about.
-func (app *tdApp) updateMessage(cb interface{}) {
+func updateMessageCB() {
 	var (
 		msg string
 		sev severityType
 	)
-	app.flightDataMu.RLock()
+	flightDataMu.RLock()
 	// is order of priority, descending...
 	switch {
-	case app.flightData.OverTemp:
+	case flightData.OverTemp:
 		msg = "Maximum Temperature Exceeded"
 		sev = criticalSev
-	case app.flightData.BatteryCritical:
+	case flightData.BatteryCritical:
 		msg = "Battery Critical"
 		sev = criticalSev
-	case app.flightData.WifiStrength < 30:
+	case flightData.WifiStrength < 30:
 		msg = "Wifi Strength Below 30%"
 		sev = criticalSev
-	case app.flightData.BatteryLow:
+	case flightData.BatteryLow:
 		msg = "Battery Low"
 		sev = warningSev
-	case app.flightData.WifiStrength < 50:
+	case flightData.WifiStrength < 50:
 		msg = "Wifi Strength Below 50%"
 		sev = infoSev
-	case app.flightData.LightStrength == 1:
+	case flightData.LightStrength == 1:
 		msg = "Low Light"
 		sev = infoSev
 	}
-	app.flightDataMu.RUnlock()
+	flightDataMu.RUnlock()
 	if msg == "" {
-		app.toolBar.clearMessage()
+		toolBar.clearMessage()
 	} else {
-		app.toolBar.setMessage(msg, sev)
+		toolBar.setMessage(msg, sev)
 	}
 }

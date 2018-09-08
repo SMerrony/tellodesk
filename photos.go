@@ -2,20 +2,27 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"path/filepath"
 	"time"
+
+	"github.com/mattn/go-gtk/gtk"
 )
 
-func (app *tdApp) takePhotoCB(s string, i interface{}) {
+func takePhotoCB() {
 	drone.TakePicture()
 }
 
-func (app *tdApp) saveAllPhotosCB(s string, i interface{}) {
+func saveAllPhotosCB() {
 	n, err := drone.SaveAllPics(fmt.Sprintf("%s%ctello_pic_%s",
-		app.settings.DataDir, filepath.Separator, time.Now().Format("2006Jan2150405")))
+		settings.DataDir, filepath.Separator, time.Now().Format("2006Jan2150405")))
 	if err != nil {
-		app.Log().Info("Error saving photos: %s", err.Error())
-		alertDialog(app.mainPanel, errorSev, err.Error())
+		log.Printf("Error saving photos: %s", err.Error())
+		alert := gtk.NewMessageDialog(win, gtk.DIALOG_MODAL, gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
+			err.Error())
+		alert.SetTitle(appName)
+		alert.Run()
+		alert.Destroy()
 	}
-	app.Log().Info("Saved %d photos", n)
+	log.Printf("Saved %d photos", n)
 }
