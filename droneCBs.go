@@ -26,8 +26,7 @@ to the Tello network.`)
 	go readJoystick(false, jsStopChan) // FIXME - if defined & opened ok!
 
 	trackChart.track = newTrack()
-	glib.TimeoutAdd(500, liveTrackerTCB)
-	// liveTrackerTimer = Gui().TimerManager.SetInterval(500*time.Millisecond, true, liveTrackerTCB)
+	glib.TimeoutAdd(500, liveTrackerTCB) // start the live tracker, cancelled via liveTrackStopChan
 
 	fdChan, _ = drone.StreamFlightData(false, fdPeriodMs)
 	go fdListener()

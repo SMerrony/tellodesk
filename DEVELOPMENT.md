@@ -22,4 +22,7 @@
 * StatusBar updater - statusbar.go:updateStatusBarTCB()
   * Timer started in main - 250ms
   * (No need to stop)
+* Live Tracker
+  * Timer started in connectCB() - 500ms
+  * Stopped in disconnectCB() via liveTrackStopChan
   
