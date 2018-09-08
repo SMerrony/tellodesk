@@ -91,20 +91,18 @@ func startVideo() {
 		}
 	}()
 
-	stopNewPicChan = make(chan bool)
-	newPicChan = make(chan bool)
+	stopFeedImageChan = make(chan bool)
+
 	go videoListener()
 
-	//go updateFeed()
-
-	glib.TimeoutAdd(30, func() bool {
-		updateFeed()
-		return true
-	})
+	glib.TimeoutAdd(30, updateFeed)
 }
 
 func customReader() ([]byte, int) {
-	pkt := <-videoChan
+	pkt, more := <-videoChan
+	if !more {
+		stopFeedImageChan <- true
+	}
 	videoRecMu.RLock()
 	if videoRecording {
 		videoWriter.Write(pkt)
@@ -237,7 +235,7 @@ func videoListener() {
 // updateFeed actually updates the video image in the feed tab.
 // It must be run on the main thread, so there is a little mutex dance to
 // check if a new image is ready for display.
-func updateFeed() {
+func updateFeed() bool {
 	newFeedImageMu.Lock()
 	if newFeedImage {
 		var pbd gdkpixbuf.PixbufData
@@ -256,4 +254,15 @@ func updateFeed() {
 		newFeedImage = false
 	}
 	newFeedImageMu.Unlock()
+
+	// check if feed should be shutdown
+	select {
+	case <-stopFeedImageChan:
+		log.Println("Debug: updateFeed stopping")
+		pb, _ := gdkpixbuf.NewPixbufFromFile(bluesky)
+		feedWgt.SetFromPixbuf(pb)
+		return false // stops the timer
+	default:
+	}
+	return true // continues the timer
 }

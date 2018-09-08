@@ -56,12 +56,12 @@ func disconnectCB() {
 	default:
 	}
 	select {
-	case stopNewPicChan <- true: // stop the video image updater goroutine
+	case stopFeedImageChan <- true: // stop the video image updater goroutine
 	default:
 	}
 
 	menuBar.disableFlightMenus()
 	statusBar.connectionLab.SetText(" Disconnected ")
-	feedWgt = buildFeedWgt()
+	//feedWgt = buildFeedWgt()
 	//feedTab.SetContent(feed)
 }

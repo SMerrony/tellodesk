@@ -51,7 +51,7 @@ var (
 	jsStopChan, fdStopChan, vrStopChan chan bool
 	fdChan                             <-chan tello.FlightData
 	videoChan                          <-chan []byte
-	newPicChan, stopNewPicChan         chan bool
+	stopFeedImageChan                  chan bool
 	feedWgt                            *gtk.Image
 	newFeedImageMu                     sync.Mutex
 	newFeedImage                       bool
