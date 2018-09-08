@@ -7,6 +7,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/SMerrony/tello"
+
 	"github.com/mattn/go-gtk/glib"
 
 	"github.com/3d0c/gmf"
@@ -77,6 +79,8 @@ func startVideo() {
 		alert.Destroy()
 	}
 
+	drone.SetVideoBitrate(tello.VbrAuto)
+
 	// start video feed restarter when drone connects
 	drone.StartVideo()
 	go func() { // no GTK stuff in here...
@@ -87,7 +91,7 @@ func startVideo() {
 				return
 			default:
 			}
-			time.Sleep(500 * time.Millisecond)
+			time.Sleep(1000 * time.Millisecond)
 		}
 	}()
 

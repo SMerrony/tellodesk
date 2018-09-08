@@ -21,7 +21,6 @@ import (
 //_ "net/http/pprof"
 
 const (
-	appAuthor               = "S.Merrony"
 	appCopyright            = "©2018 S.Merrony"
 	appDisclaimer           = "The author(s) is/are in no way\nconnected with Ryze®."
 	appHelpURL              = "http://stephenmerrony.co.uk/blog/" // FIXME Help URL
@@ -31,10 +30,12 @@ const (
 	appVersion              = "0.1.0"
 	bluesky                 = "sky960x720.png"
 	fdPeriodMs              = 100
-	prefWidth, prefHeight   = videoWidth, videoHeight + 127
+	prefWidth, prefHeight   = videoWidth + 2, videoHeight + 72
 	statusUpdatePeriodMs    = 250
 	videoWidth, videoHeight = 960, 720
 )
+
+var appAuthors = []string{"Stephen Merrony"}
 
 type severityType int
 
@@ -62,7 +63,6 @@ var (
 	videoWriter                                           *bufio.Writer
 	win                                                   *gtk.Window
 	menuBar                                               *menuBarT
-	toolBar                                               *toolBarT
 	statusBar                                             *statusBarT
 
 	flightDataMu sync.RWMutex
@@ -92,16 +92,10 @@ func main() {
 		exitNicely()
 	})
 
-	vbox := gtk.NewVBox(false, 1)
+	vbox := gtk.NewVBox(false, 0)
 
 	menuBar = buildMenu()
 	vbox.PackStart(menuBar, false, false, 0)
-	toolBar = buildToolBar()
-	vbox.PackStart(toolBar, false, false, 3)
-	glib.TimeoutAdd(statusUpdatePeriodMs, func() bool {
-		updateMessageCB()
-		return true
-	})
 
 	nb := gtk.NewNotebook()
 	vbox.PackStart(nb, false, false, 1)
@@ -171,7 +165,7 @@ func aboutCB() {
 	pb, _ := gdkpixbuf.NewPixbufFromFile(appIcon)
 	about.SetLogo(pb)
 	about.SetVersion(appVersion)
-	//about.SetAuthors(appAuthor)
+	about.SetAuthors(appAuthors)
 	about.SetCopyright(appCopyright)
 	about.SetComments(appDisclaimer)
 	about.Run()

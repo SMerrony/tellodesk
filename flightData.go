@@ -27,7 +27,7 @@ func fdListener() {
 }
 
 // updateMessage should be run periodically to check for condition we should alert the user about.
-func updateMessageCB() {
+func updateMessageCB() bool {
 	var (
 		msg string
 		sev severityType
@@ -56,8 +56,10 @@ func updateMessageCB() {
 	}
 	flightDataMu.RUnlock()
 	if msg == "" {
-		toolBar.clearMessage()
+		//toolBar.clearMessage()
 	} else {
-		toolBar.setMessage(msg, sev)
+		//toolBar.setMessage(msg, sev)
+		_ = sev
 	}
+	return true // continue the timer
 }

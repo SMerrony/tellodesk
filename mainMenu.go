@@ -6,11 +6,11 @@ import (
 
 type menuBarT struct {
 	*gtk.MenuBar
-	connectItem, disconnectItem   *gtk.MenuItem
-	flightItem                    *gtk.MenuItem
-	importTrackItem               *gtk.MenuItem
-	recVidItem, stopRecVidItem    *gtk.MenuItem
-	trackShowDrone, trackShowPath *gtk.CheckMenuItem
+	connectItem, disconnectItem             *gtk.MenuItem
+	navItem, goHomeItem, flightItem         *gtk.MenuItem
+	importTrackItem                         *gtk.MenuItem
+	imagingItem, recVidItem, stopRecVidItem *gtk.MenuItem
+	trackShowDrone, trackShowPath           *gtk.CheckMenuItem
 }
 
 func buildMenu() (mb *menuBarT) {
@@ -67,6 +67,22 @@ func buildMenu() (mb *menuBarT) {
 	sm.Connect("activate", nyi)
 	flightMenu.Append(sm)
 
+	mb.navItem = gtk.NewMenuItemWithLabel("Navigation")
+	mb.Append(mb.navItem)
+	navMenu := gtk.NewMenu()
+	mb.navItem.SetSubmenu(navMenu)
+
+	sh := gtk.NewMenuItemWithLabel("Set Home Position")
+	sh.Connect("activate", func() {
+		drone.SetHome()
+		mb.goHomeItem.SetSensitive(true)
+	})
+	navMenu.Append(sh)
+	mb.goHomeItem = gtk.NewMenuItemWithLabel("Return to Home")
+	mb.goHomeItem.SetSensitive(false)
+	mb.goHomeItem.Connect("activate", func() { drone.AutoFlyToXY(0, 0) })
+	navMenu.Append(mb.goHomeItem)
+
 	trackItem := gtk.NewMenuItemWithLabel("Track")
 	mb.Append(trackItem)
 	trackMenu := gtk.NewMenu()
@@ -102,30 +118,27 @@ func buildMenu() (mb *menuBarT) {
 		trackChart.drawTrack()
 	})
 
-	videoItem := gtk.NewMenuItemWithLabel("Video")
-	mb.Append(videoItem)
-	videoMenu := gtk.NewMenu()
-	videoItem.SetSubmenu(videoMenu)
+	mb.imagingItem = gtk.NewMenuItemWithLabel("Imaging")
+	mb.Append(mb.imagingItem)
+	imagingMenu := gtk.NewMenu()
+	mb.imagingItem.SetSubmenu(imagingMenu)
 
 	mb.recVidItem = gtk.NewMenuItemWithLabel("Record Video")
 	mb.recVidItem.Connect("activate", recordVideoCB)
-	videoMenu.Append(mb.recVidItem)
+	imagingMenu.Append(mb.recVidItem)
 	mb.stopRecVidItem = gtk.NewMenuItemWithLabel("Stop Recording Video")
 	mb.stopRecVidItem.Connect("activate", stopRecordingVideoCB)
 	mb.stopRecVidItem.SetSensitive(false)
-	videoMenu.Append(mb.stopRecVidItem)
+	imagingMenu.Append(mb.stopRecVidItem)
 
-	imagesItem := gtk.NewMenuItemWithLabel("Images")
-	mb.Append(imagesItem)
-	imagesMenu := gtk.NewMenu()
-	imagesItem.SetSubmenu(imagesMenu)
+	imagingMenu.Append(gtk.NewSeparatorMenuItem())
 
 	tp := gtk.NewMenuItemWithLabel("Take Photo")
 	tp.Connect("activate", takePhotoCB)
-	imagesMenu.Append(tp)
+	imagingMenu.Append(tp)
 	sp := gtk.NewMenuItemWithLabel("Save Photo(s)")
 	sp.Connect("activate", saveAllPhotosCB)
-	imagesMenu.Append(sp)
+	imagingMenu.Append(sp)
 
 	helpItem := gtk.NewMenuItemWithLabel("Help")
 	mb.Append(helpItem)
@@ -151,6 +164,8 @@ func (mb *menuBarT) enableFlightMenus() {
 	mb.disconnectItem.SetSensitive(true)
 	mb.connectItem.SetSensitive(false)
 	mb.flightItem.SetSensitive(true)
+	mb.navItem.SetSensitive(true)
+	mb.imagingItem.SetSensitive(true)
 	mb.importTrackItem.SetSensitive(false)
 }
 
@@ -158,5 +173,7 @@ func (mb *menuBarT) disableFlightMenus() {
 	mb.disconnectItem.SetSensitive(false)
 	mb.connectItem.SetSensitive(true)
 	mb.flightItem.SetSensitive(false)
+	mb.navItem.SetSensitive(false)
+	mb.imagingItem.SetSensitive(false)
 	mb.importTrackItem.SetSensitive(true)
 }

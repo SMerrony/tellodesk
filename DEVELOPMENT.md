@@ -15,7 +15,7 @@
 ## Regularly-Run Funcs
 * Video display updater
   * started in video.go:startVideo() - 30ms
-  * TODO - stopped in disconnectCB()
+  * stopped in disconnectCB()
 * ToolBar message updater
   * Timer started in main() - 250ms
   * (No need to stop)

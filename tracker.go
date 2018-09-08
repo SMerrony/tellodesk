@@ -49,13 +49,13 @@ func (tp *telloPosT) toStrings() (strings []string) {
 }
 
 func toStruct(strings []string) (tp telloPosT, err error) {
-	tp.timeStamp, err = time.Parse(timeStampFmt, strings[0])
+	tp.timeStamp, _ = time.Parse(timeStampFmt, strings[0])
 	var f64 float64
-	f64, err = strconv.ParseFloat(strings[1], 32)
+	f64, _ = strconv.ParseFloat(strings[1], 32)
 	tp.mvoX = float32(f64)
-	f64, err = strconv.ParseFloat(strings[2], 32)
+	f64, _ = strconv.ParseFloat(strings[2], 32)
 	tp.mvoY = float32(f64)
-	f64, err = strconv.ParseFloat(strings[3], 32)
+	f64, _ = strconv.ParseFloat(strings[3], 32)
 	tp.heightDm = int16(f64 * 10)
 	i64, err := strconv.ParseInt(strings[4], 10, 16)
 	tp.imuYaw = int16(i64)

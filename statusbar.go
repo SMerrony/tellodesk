@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"github.com/mattn/go-gtk/gdk"
 	"github.com/mattn/go-gtk/gtk"
 )
 
@@ -45,9 +46,19 @@ func buildStatusbar() (sb *statusBarT) {
 
 func (sb *statusBarT) updateStatusBarTCB() {
 	flightDataMu.RLock()
-	sb.heightLab.SetLabel(fmt.Sprintf(" Height: %.1fm ", float32(flightData.Height)/10))
-	sb.batteryPctLab.SetLabel(fmt.Sprintf(" Battery: %d%% ", flightData.BatteryPercentage))
-	sb.wifiStrLab.SetLabel(fmt.Sprintf(" Wifi Strength: %d%% ", flightData.WifiStrength))
+	sb.heightLab.SetLabel(fmt.Sprintf("Height: %.1fm", float32(flightData.Height)/10))
+	sb.batteryPctLab.SetLabel(fmt.Sprintf("Battery: %d%%", flightData.BatteryPercentage))
+	if flightData.BatteryPercentage < 30 {
+		sb.batteryPctLab.ModifyBG(gtk.STATE_NORMAL, gdk.NewColor("yellow"))
+	} else {
+		sb.batteryPctLab.ModifyBG(gtk.STATE_NORMAL, gdk.NewColor("white"))
+	}
+	sb.wifiStrLab.SetLabel(fmt.Sprintf("Wifi Strength: %d%%", flightData.WifiStrength))
+	if flightData.WifiStrength < 50 {
+		sb.wifiStrLab.ModifyBG(gtk.STATE_NORMAL, gdk.NewColor("yellow"))
+	} else {
+		sb.wifiStrLab.ModifyBG(gtk.STATE_NORMAL, gdk.NewColor("white"))
+	}
 	flightDataMu.RUnlock()
-	sb.photosLab.SetLabel(fmt.Sprintf(" Buffered Photos: %d", drone.NumPics()))
+	sb.photosLab.SetLabel(fmt.Sprintf("Buffered Photos: %d", drone.NumPics()))
 }
