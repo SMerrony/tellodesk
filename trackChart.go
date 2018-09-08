@@ -163,13 +163,13 @@ func (tc *trackChartT) drawPos(x, y float32, yaw int16) {
 		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)+4, tc.yToOrd(y)+4, tc.droneCol)
 		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x), tc.yToOrd(y)+8, tc.droneCol)
 	case yaw >= -135 && yaw < -45: // W
-		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)-4, tc.yToOrd(y)+4, tc.droneCol)
-		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)-4, tc.yToOrd(y)-4, tc.droneCol)
-		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)-8, tc.yToOrd(y), tc.droneCol)
-	case yaw > 45 && yaw < 135: // E
 		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)+4, tc.yToOrd(y)+4, tc.droneCol)
 		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)+4, tc.yToOrd(y)-4, tc.droneCol)
 		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)+8, tc.yToOrd(y), tc.droneCol)
+	case yaw > 45 && yaw < 135: // E
+		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)-4, tc.yToOrd(y)+4, tc.droneCol)
+		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)-4, tc.yToOrd(y)-4, tc.droneCol)
+		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)-8, tc.yToOrd(y), tc.droneCol)
 	default: // S
 		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)-4, tc.yToOrd(y)-4, tc.droneCol)
 		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)+4, tc.yToOrd(y)-4, tc.droneCol)

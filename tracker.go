@@ -205,12 +205,16 @@ func importTrackCB() {
 	fs.Destroy()
 }
 
-// // liveTracker is to be run at intervals (not as a goroutine)
-// func (app *tdApp) liveTrackerTCB(cb interface{}) {
-// 	trackChart.drawEmptyChart()
-// 	trackChart.drawTrack()l
-// 	//app.trackTab.SetContent(trackChart)
-// }
+// liveTracker is to be run at intervals (not as a goroutine)
+func liveTrackerTCB() bool {
+	trackChart.drawTrack()
+	select {
+	case <-liveTrackStopChan:
+		return false
+	default:
+	}
+	return true
+}
 
 func readTrack(r *csv.Reader) (trk *telloTrack) {
 	trk = newTrack()

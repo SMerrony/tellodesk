@@ -46,24 +46,24 @@ const (
 )
 
 var (
-	drone                              tello.Tello
-	stickChan                          chan<- tello.StickMessage
-	jsStopChan, fdStopChan, vrStopChan chan bool
-	fdChan                             <-chan tello.FlightData
-	videoChan                          <-chan []byte
-	stopFeedImageChan                  chan bool
-	feedWgt                            *gtk.Image
-	newFeedImageMu                     sync.Mutex
-	newFeedImage                       bool
-	feedImage                          *image.RGBA
-	videoRecMu                         sync.RWMutex
-	videoRecording                     bool
-	videoFile                          *os.File
-	videoWriter                        *bufio.Writer
-	win                                *gtk.Window
-	menuBar                            *menuBarT
-	toolBar                            *toolBarT
-	statusBar                          *statusBarT
+	drone                                                 tello.Tello
+	stickChan                                             chan<- tello.StickMessage
+	jsStopChan, fdStopChan, vrStopChan, liveTrackStopChan chan bool
+	fdChan                                                <-chan tello.FlightData
+	videoChan                                             <-chan []byte
+	stopFeedImageChan                                     chan bool
+	feedWgt                                               *gtk.Image
+	newFeedImageMu                                        sync.Mutex
+	newFeedImage                                          bool
+	feedImage                                             *image.RGBA
+	videoRecMu                                            sync.RWMutex
+	videoRecording                                        bool
+	videoFile                                             *os.File
+	videoWriter                                           *bufio.Writer
+	win                                                   *gtk.Window
+	menuBar                                               *menuBarT
+	toolBar                                               *toolBarT
+	statusBar                                             *statusBarT
 
 	flightDataMu sync.RWMutex
 	flightData   tello.FlightData
@@ -78,6 +78,7 @@ func main() {
 	jsStopChan = make(chan bool) // not buffered
 	fdStopChan = make(chan bool) // not buffered
 	vrStopChan = make(chan bool) // not buffered
+	liveTrackStopChan = make(chan bool)
 
 	gtk.Init(nil)
 	win = gtk.NewWindow(gtk.WINDOW_TOPLEVEL)

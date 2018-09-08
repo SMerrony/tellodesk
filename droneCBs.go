@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/mattn/go-gtk/glib"
 	"github.com/mattn/go-gtk/gtk"
 )
 
@@ -21,14 +22,11 @@ to the Tello network.`)
 
 	startVideo()
 
-	// jsStopChan = make(chan bool) // not buffered
-	// fdStopChan = make(chan bool) // not buffered
-	// vrStopChan = make(chan bool) // not buffered
-
 	stickChan, _ = drone.StartStickListener()
 	go readJoystick(false, jsStopChan) // FIXME - if defined & opened ok!
 
 	trackChart.track = newTrack()
+	glib.TimeoutAdd(500, liveTrackerTCB)
 	// liveTrackerTimer = Gui().TimerManager.SetInterval(500*time.Millisecond, true, liveTrackerTCB)
 
 	fdChan, _ = drone.StreamFlightData(false, fdPeriodMs)
@@ -41,7 +39,6 @@ to the Tello network.`)
 func disconnectCB() {
 	drone.VideoDisconnect()
 	drone.ControlDisconnect()
-	//Gui().TimerManager.ClearTimeout(liveTrackerTimer)
 
 	select {
 	case jsStopChan <- true: // stop the joystick listener goroutine
@@ -56,12 +53,14 @@ func disconnectCB() {
 	default:
 	}
 	select {
+	case liveTrackStopChan <- true: // stop the live tracker
+	default:
+	}
+	select {
 	case stopFeedImageChan <- true: // stop the video image updater goroutine
 	default:
 	}
 
 	menuBar.disableFlightMenus()
 	statusBar.connectionLab.SetText(" Disconnected ")
-	//feedWgt = buildFeedWgt()
-	//feedTab.SetContent(feed)
 }
