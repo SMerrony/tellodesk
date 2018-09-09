@@ -12,3 +12,7 @@ func landCB() {
 func palmLandCB() {
 	drone.PalmLand()
 }
+
+func toggleSportsModeCB() {
+	drone.SetSportsMode(menuBar.sportsModeItem.GetActive())
+}

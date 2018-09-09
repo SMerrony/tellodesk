@@ -4,7 +4,7 @@
 
 ### Menu
 
-* Drone | Sports Mode
+* ~~Drone | Sports Mode~~
 * ~~Track - Visual live tracking of path~~
 * ~~Images | Take Photo~~
 * ~~Images | Save Photo(s)~~

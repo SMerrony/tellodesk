@@ -8,6 +8,7 @@ type menuBarT struct {
 	*gtk.MenuBar
 	connectItem, disconnectItem             *gtk.MenuItem
 	navItem, goHomeItem, flightItem         *gtk.MenuItem
+	sportsModeItem                          *gtk.CheckMenuItem
 	importTrackItem                         *gtk.MenuItem
 	imagingItem, recVidItem, stopRecVidItem *gtk.MenuItem
 	trackShowDrone, trackShowPath           *gtk.CheckMenuItem
@@ -63,9 +64,9 @@ func buildMenu() (mb *menuBarT) {
 
 	flightMenu.Append(gtk.NewSeparatorMenuItem())
 
-	sm := gtk.NewMenuItemWithLabel("Sports (Fast) Mode")
-	sm.Connect("activate", nyi)
-	flightMenu.Append(sm)
+	mb.sportsModeItem = gtk.NewCheckMenuItemWithLabel("Sports (Fast) Mode")
+	mb.sportsModeItem.Connect("activate", toggleSportsModeCB)
+	flightMenu.Append(mb.sportsModeItem)
 
 	mb.navItem = gtk.NewMenuItemWithLabel("Navigation")
 	mb.Append(mb.navItem)
