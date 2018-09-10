@@ -19,8 +19,14 @@ to the Tello network.`)
 
 	startVideo()
 
-	stickChan, _ = drone.StartStickListener()
-	go readJoystick(false, jsStopChan) // FIXME - if defined & opened ok!
+	if len(settings.JoystickType) > 0 {
+		stickChan, err = drone.StartStickListener()
+		if err != nil {
+			messageDialog(win, gtk.MESSAGE_ERROR, err.Error())
+		} else {
+			go readJoystick(false)
+		}
+	}
 
 	trackChart.track = newTrack()
 	glib.TimeoutAdd(500, liveTrackerTCB) // start the live tracker, cancelled via liveTrackStopChan
@@ -36,10 +42,14 @@ func disconnectCB() {
 	drone.VideoDisconnect()
 	drone.ControlDisconnect()
 
-	select {
-	case jsStopChan <- true: // stop the joystick listener goroutine
-	default:
+	if len(settings.JoystickType) > 0 {
+		js.Close()
+		drone.StopStickListener()
 	}
+	// select {
+	// case jsStopChan <- true: // stop the joystick listener goroutine
+	// default:
+	// }
 	select {
 	case fdStopChan <- true: // stop the flight data listener goroutine
 	default:

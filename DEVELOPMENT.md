@@ -1,8 +1,8 @@
 # Development Notes & Reminders
 ## Goroutines
 * Joystick reader 
-  * started in droneCBs.go:connectCB(), 
-  * stopped in disconnectCB()
+  * started in main()
+  * ~~stopped in disconnectCB()~~
 * FlightData listener 
   * started in droneCBs.go:connectCB(), 
   * stopped in disconnectCB()

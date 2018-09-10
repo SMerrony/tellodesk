@@ -118,38 +118,31 @@ func assert(i interface{}, err error) interface{} {
 
 //func (app *tdApp) videoListener() {
 func videoListener() {
-
-	//Log().Info("Videolistener started")
-
 	iCtx := gmf.NewCtx()
 	defer iCtx.CloseInputAndRelease()
 
 	if err := iCtx.SetInputFormat("h264"); err != nil {
 		log.Fatalf("iCtx SetInputFormat %v", err)
 	}
-	//Log().Info("Input format set")
+
 	avioCtx, err := gmf.NewAVIOContext(iCtx, &gmf.AVIOHandlers{ReadPacket: customReader})
 	defer gmf.Release(avioCtx)
 	if err != nil {
 		log.Fatalf("NewAVIOContext %v", err)
 	}
 
-	//Log().Info("Setting Pb...")
 	iCtx.SetPb(avioCtx)
 
-	//Log().Info("Opening input...")
 	err = iCtx.OpenInput("")
 	if err != nil {
 		log.Fatalf("iCtx OpenInput %v", err)
 	}
 
-	//Log().Info("Getting best stream...")
 	srcVideoStream, err := iCtx.GetBestStream(gmf.AVMEDIA_TYPE_VIDEO)
 	if err != nil {
 		log.Fatalf("GetBestStream %v", err)
 	}
 
-	// codec, err := gmf.FindEncoder(gmf.AV_CODEC_ID_PNG)
 	codec, err := gmf.FindEncoder(gmf.AV_CODEC_ID_RAWVIDEO)
 	if err != nil {
 		log.Fatalf("FindDecoder %v", err)
@@ -161,12 +154,11 @@ func videoListener() {
 		cc.SetStrictCompliance(gmf.FF_COMPLIANCE_EXPERIMENTAL)
 	}
 
-	// cc.SetPixFmt(gmf.AV_PIX_FMT_RGB24).
 	cc.SetPixFmt(gmf.AV_PIX_FMT_BGR32).
 		SetWidth(videoWidth).
 		SetHeight(videoHeight).
 		SetTimeBase(gmf.AVR{Num: 1, Den: 1})
-	//Log().Info("Opening cc")
+
 	if err := cc.Open(nil); err != nil {
 		log.Fatalf("cc Open %v", err)
 	}
@@ -189,8 +181,6 @@ func videoListener() {
 
 	codecCtx := ist.CodecCtx()
 	defer gmf.Release(codecCtx)
-
-	//Log().Info("Entering get video packets loop...")
 
 	for pkt := range iCtx.GetNewPackets() {
 

@@ -166,8 +166,8 @@ func intAbs(x int16) int16 {
 	return x
 }
 
-// readJoystick is run as a Goroutine upon connection to the drone (see droneCBs.go)
-func readJoystick(test bool, stopChan chan bool) {
+// readJoystick is run as a Goroutine
+func readJoystick(test bool) {
 	var (
 		sm                 tello.StickMessage
 		jsState, prevState joystick.State
@@ -179,6 +179,7 @@ func readJoystick(test bool, stopChan chan bool) {
 
 		if err != nil {
 			log.Printf("Error reading joystick: %v\n", err)
+
 		}
 
 		if jsState.AxisData[jsConfig.Axes[axLeftX]] == 32768 {
@@ -270,14 +271,6 @@ func readJoystick(test bool, stopChan chan bool) {
 			}
 		}
 		prevState = jsState
-
-		select {
-		case <-stopChan:
-			js.Close()
-			log.Println("Debug: Joystick listener closed")
-			return
-		default:
-		}
 
 		time.Sleep(jsUpdatePeriod)
 	}
