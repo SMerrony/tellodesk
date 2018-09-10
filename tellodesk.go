@@ -24,11 +24,11 @@ const (
 	appCopyright            = "©2018 S.Merrony"
 	appDisclaimer           = "The author(s) is/are in no way\nconnected with Ryze®."
 	appHelpURL              = "http://stephenmerrony.co.uk/blog/" // FIXME Help URL
-	appIcon                 = "icon.png"
+	appIcon                 = "icon.png"                          // FIXME this should be a resource
 	appName                 = "Tello® Desktop"
 	appSettingsFile         = "tellodesktop.yaml"
 	appVersion              = "0.1.0"
-	bluesky                 = "sky960x720.png"
+	bluesky                 = "sky960x720.png" // FIXME this should be a resource
 	fdPeriodMs              = 100
 	prefWidth, prefHeight   = videoWidth + 2, videoHeight + 72
 	statusUpdatePeriodMs    = 250

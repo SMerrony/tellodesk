@@ -2,8 +2,6 @@ package main
 
 import "github.com/mattn/go-gtk/gtk"
 
-type severityT int
-
 func messageDialog(win *gtk.Window, sev gtk.MessageType, msg string) {
 	alert := gtk.NewMessageDialog(
 		win,
