@@ -19,6 +19,8 @@ func buildMenu() (mb *menuBarT) {
 	mb = new(menuBarT)
 	mb.MenuBar = gtk.NewMenuBar()
 
+	// File
+
 	fileItem := gtk.NewMenuItemWithLabel("File")
 	mb.Append(fileItem)
 	fileMenu := gtk.NewMenu()
@@ -31,6 +33,8 @@ func buildMenu() (mb *menuBarT) {
 	exitItem := gtk.NewMenuItemWithLabel("Exit")
 	exitItem.Connect("activate", exitNicely)
 	fileMenu.Append(exitItem)
+
+	// Drone
 
 	droneItem := gtk.NewMenuItemWithLabel("Drone")
 	mb.Append(droneItem)
@@ -68,6 +72,8 @@ func buildMenu() (mb *menuBarT) {
 	mb.sportsModeItem.Connect("activate", toggleSportsModeCB)
 	flightMenu.Append(mb.sportsModeItem)
 
+	// Navigation
+
 	mb.navItem = gtk.NewMenuItemWithLabel("Navigation")
 	mb.Append(mb.navItem)
 	navMenu := gtk.NewMenu()
@@ -83,6 +89,8 @@ func buildMenu() (mb *menuBarT) {
 	mb.goHomeItem.SetSensitive(false)
 	mb.goHomeItem.Connect("activate", func() { drone.AutoFlyToXY(0, 0) })
 	navMenu.Append(mb.goHomeItem)
+
+	// Track
 
 	trackItem := gtk.NewMenuItemWithLabel("Track")
 	mb.Append(trackItem)
@@ -119,6 +127,8 @@ func buildMenu() (mb *menuBarT) {
 		trackChart.drawTrack()
 	})
 
+	// Imaging
+
 	mb.imagingItem = gtk.NewMenuItemWithLabel("Imaging")
 	mb.Append(mb.imagingItem)
 	imagingMenu := gtk.NewMenu()
@@ -141,6 +151,8 @@ func buildMenu() (mb *menuBarT) {
 	sp.Connect("activate", saveAllPhotosCB)
 	imagingMenu.Append(sp)
 
+	// Help
+
 	helpItem := gtk.NewMenuItemWithLabel("Help")
 	mb.Append(helpItem)
 	helpMenu := gtk.NewMenu()
@@ -156,7 +168,7 @@ func buildMenu() (mb *menuBarT) {
 	ab.Connect("activate", aboutCB)
 	helpMenu.Append(ab)
 
-	mb.disableFlightMenus()
+	mb.disableFlightMenus() // At startup all flight functions are disabled
 
 	return mb
 }

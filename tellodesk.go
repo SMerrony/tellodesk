@@ -37,15 +37,6 @@ const (
 
 var appAuthors = []string{"Stephen Merrony"}
 
-type severityType int
-
-const (
-	infoSev severityType = iota
-	warningSev
-	errorSev
-	criticalSev
-)
-
 var (
 	drone                                                 tello.Tello
 	stickChan                                             chan<- tello.StickMessage
@@ -124,17 +115,11 @@ func getSettings() {
 	settings, err = loadSettings(appSettingsFile)
 	if err != nil {
 		if strings.Contains(err.Error(), "cannot find") || strings.Contains(err.Error(), "no such") {
-			alert := gtk.NewMessageDialog(win, gtk.DIALOG_MODAL, gtk.MESSAGE_INFO, gtk.BUTTONS_CLOSE,
+			messageDialog(win, gtk.MESSAGE_INFO,
 				"Could not open settings file\n\n"+appSettingsFile+"\n\n"+
 					"This is normal on a first run,\nor until you have saved your settings")
-			alert.SetTitle(appName)
-			alert.Run()
-			alert.Destroy()
 		} else {
-			alert := gtk.NewMessageDialog(win, gtk.DIALOG_MODAL, gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE, err.Error())
-			alert.SetTitle(appName)
-			alert.Run()
-			alert.Destroy()
+			messageDialog(win, gtk.MESSAGE_ERROR, err.Error())
 		}
 		settingsLoaded = false
 		log.Printf("Error loading saved settings: %v", err)
@@ -142,10 +127,7 @@ func getSettings() {
 		log.Printf("Debug: loaded settings: chosen JS type is %s\n", settings.JoystickType)
 		err = openJoystick(settings.JoystickID, settings.JoystickType)
 		if err != nil {
-			alert := gtk.NewMessageDialog(win, gtk.DIALOG_MODAL, gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE, "Could not open configured joystick")
-			alert.SetTitle(appName)
-			alert.Run()
-			alert.Destroy()
+			messageDialog(win, gtk.MESSAGE_ERROR, "Could not open configured joystick")
 		}
 		settingsLoaded = true
 	}
@@ -173,10 +155,7 @@ func aboutCB() {
 }
 
 func nyi() {
-	alert := gtk.NewMessageDialog(win, gtk.DIALOG_MODAL, gtk.MESSAGE_INFO, gtk.BUTTONS_CLOSE, "Not Yet Implemented")
-	alert.SetTitle(appName)
-	alert.Run()
-	alert.Destroy()
+	messageDialog(win, gtk.MESSAGE_INFO, "Not Yet Implemented")
 }
 
 // helper funcs

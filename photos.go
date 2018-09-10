@@ -18,11 +18,7 @@ func saveAllPhotosCB() {
 		settings.DataDir, filepath.Separator, time.Now().Format("2006Jan2150405")))
 	if err != nil {
 		log.Printf("Error saving photos: %s", err.Error())
-		alert := gtk.NewMessageDialog(win, gtk.DIALOG_MODAL, gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
-			err.Error())
-		alert.SetTitle(appName)
-		alert.Run()
-		alert.Destroy()
+		messageDialog(win, gtk.MESSAGE_ERROR, err.Error())
 	}
 	log.Printf("Saved %d photos", n)
 }

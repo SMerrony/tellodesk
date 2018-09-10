@@ -38,11 +38,7 @@ func recordVideoCB() {
 			var err error
 			videoFile, err = os.OpenFile(vidPath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
 			if err != nil {
-				alert := gtk.NewMessageDialog(win, gtk.DIALOG_MODAL, gtk.MESSAGE_INFO, gtk.BUTTONS_CLOSE,
-					"Could not create video file.")
-				alert.SetTitle(appName)
-				alert.Run()
-				alert.Destroy()
+				messageDialog(win, gtk.MESSAGE_INFO, "Could not create video file.")
 			} else {
 				videoWriter = bufio.NewWriter(videoFile)
 				videoRecMu.Lock()
@@ -73,10 +69,7 @@ func startVideo() {
 	videoChan, err = drone.VideoConnectDefault()
 	if err != nil {
 		log.Print(err.Error())
-		alert := gtk.NewMessageDialog(win, gtk.DIALOG_MODAL, gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE, err.Error())
-		alert.SetTitle(appName)
-		alert.Run()
-		alert.Destroy()
+		messageDialog(win, gtk.MESSAGE_ERROR, err.Error())
 	}
 
 	drone.SetVideoBitrate(tello.VbrAuto)

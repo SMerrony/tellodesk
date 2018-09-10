@@ -9,14 +9,11 @@ func connectCB() {
 
 	err := drone.ControlConnectDefault()
 	if err != nil {
-		alert := gtk.NewMessageDialog(win, gtk.DIALOG_MODAL, gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
+		messageDialog(win, gtk.MESSAGE_ERROR,
 			`Could not connect to Drone.
 
 Check that you have a Wifi connection 
 to the Tello network.`)
-		alert.SetTitle(appName)
-		alert.Run()
-		alert.Destroy()
 		return // Comment this for GUI testing
 	}
 

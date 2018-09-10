@@ -10,12 +10,6 @@
 * ~~Images | Save Photo(s)~~
 * Help | Online Help
 
-### Toolbar
-* ~~Pause/Panic~~
-* ~~Take Photo~~
-* ~~Set Home Position~~
-* ~~Return to Home~~
-
 ### General
 * Convert Video(s) to MP4 or similar
 * Sort out opening of joystick
@@ -26,7 +20,7 @@
 ## Improvements
 
 ### Track Tab
-* Better scaling - actually, just better centering
+* Maybe better centering?
 
 ### Settings
 * ~~Add data directory/path for saved pix/tracks/videos~~
@@ -34,3 +28,4 @@
 ## To Consider
 * Switch video mode?
 * Permit application resize?
+* Detailed status display like telloterm?

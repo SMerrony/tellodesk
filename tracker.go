@@ -116,11 +116,7 @@ func exportTrackCB() {
 		if expPath != "" {
 			exp, err := os.Create(expPath)
 			if err != nil {
-				alert := gtk.NewMessageDialog(win, gtk.DIALOG_MODAL, gtk.MESSAGE_INFO, gtk.BUTTONS_CLOSE,
-					"Could not create CSV file.")
-				alert.SetTitle(appName)
-				alert.Run()
-				alert.Destroy()
+				messageDialog(win, gtk.MESSAGE_INFO, "Could not create CSV file.")
 			} else {
 				defer exp.Close()
 				w := csv.NewWriter(exp)
@@ -152,19 +148,11 @@ func exportTrackImageCB() {
 		if expPath != "" {
 			exp, err := os.Create(expPath)
 			if err != nil {
-				alert := gtk.NewMessageDialog(win, gtk.DIALOG_MODAL, gtk.MESSAGE_INFO, gtk.BUTTONS_CLOSE,
-					"Could not create image file.")
-				alert.SetTitle(appName)
-				alert.Run()
-				alert.Destroy()
+				messageDialog(win, gtk.MESSAGE_INFO, "Could not create image file.")
 			} else {
 				defer exp.Close()
 				if err := png.Encode(exp, trackChart.backingImage); err != nil {
-					alert := gtk.NewMessageDialog(win, gtk.DIALOG_MODAL, gtk.MESSAGE_INFO, gtk.BUTTONS_CLOSE,
-						"Could not write image file.")
-					alert.SetTitle(appName)
-					alert.Run()
-					alert.Destroy()
+					messageDialog(win, gtk.MESSAGE_INFO, "Could not write image file.")
 				}
 			}
 		}
@@ -188,11 +176,7 @@ func importTrackCB() {
 		if impPath != "" {
 			imp, err := os.Open(impPath)
 			if err != nil {
-				alert := gtk.NewMessageDialog(win, gtk.DIALOG_MODAL, gtk.MESSAGE_INFO, gtk.BUTTONS_CLOSE,
-					"Could not open track CSV file.")
-				alert.SetTitle(appName)
-				alert.Run()
-				alert.Destroy()
+				messageDialog(win, gtk.MESSAGE_INFO, "Could not open track CSV file.")
 			} else {
 				defer imp.Close()
 				r := csv.NewReader(bufio.NewReader(imp))
@@ -223,18 +207,12 @@ func readTrack(r *csv.Reader) (trk *telloTrack) {
 		if err == io.EOF {
 			break
 		} else if err != nil {
-			alert := gtk.NewMessageDialog(win, gtk.DIALOG_MODAL, gtk.MESSAGE_INFO, gtk.BUTTONS_CLOSE,
-				"Could not read CSV track file.")
-			alert.SetTitle(appName)
-			alert.Run()
+			messageDialog(win, gtk.MESSAGE_INFO, "Could not read CSV track file.")
 			return
 		}
 		tmpTrackPos, err := toStruct(line)
 		if err != nil {
-			alert := gtk.NewMessageDialog(win, gtk.DIALOG_MODAL, gtk.MESSAGE_INFO, gtk.BUTTONS_CLOSE,
-				"Could not parse track CSV track file.")
-			alert.SetTitle(appName)
-			alert.Run()
+			messageDialog(win, gtk.MESSAGE_INFO, "Could not parse track CSV track file.")
 			return
 		}
 		trk.positions = append(trk.positions, tmpTrackPos)

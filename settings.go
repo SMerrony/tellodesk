@@ -102,11 +102,7 @@ func settingsCB() {
 		settings.JoystickID = foundCombo.GetActive()
 		settings.JoystickType = chosenTypeCombo.GetActiveText()
 		if err := saveSettings(settings, appSettingsFile); err != nil {
-			alert := gtk.NewMessageDialog(win, gtk.DIALOG_MODAL, gtk.MESSAGE_INFO, gtk.BUTTONS_CLOSE,
-				"Could not save settings.")
-			alert.SetTitle(appName)
-			alert.Run()
-			alert.Destroy()
+			messageDialog(win, gtk.MESSAGE_ERROR, "Could not save settings.")
 			log.Printf("Could not save settings: %v", err)
 		}
 	}
