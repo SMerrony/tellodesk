@@ -7,6 +7,8 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/mattn/go-gtk/gtk"
+
 	"github.com/SMerrony/tello"
 	"github.com/simulatedsimian/joystick"
 )
@@ -223,7 +225,6 @@ func readJoystick(test bool) {
 			log.Printf("JS: Lx: %d, Ly: %d, Rx: %d=>%d, Ry: %d\n", sm.Lx, sm.Ly, jsState.AxisData[jsConfig.Axes[axRightX]], sm.Rx, sm.Ry)
 		} else {
 			stickChan <- sm
-
 		}
 
 		if jsState.Buttons&(1<<jsConfig.Buttons[btnL1]) != 0 && prevState.Buttons&(1<<jsConfig.Buttons[btnL1]) == 0 {
@@ -232,7 +233,6 @@ func readJoystick(test bool) {
 			} else {
 				drone.Bounce()
 			}
-
 		}
 		if jsState.Buttons&(1<<jsConfig.Buttons[btnL2]) != 0 && prevState.Buttons&(1<<jsConfig.Buttons[btnL2]) == 0 {
 			if test {
@@ -240,7 +240,6 @@ func readJoystick(test bool) {
 			} else {
 				drone.PalmLand()
 			}
-
 		}
 		if jsState.Buttons&(1<<jsConfig.Buttons[btnSquare]) != 0 && prevState.Buttons&(1<<jsConfig.Buttons[btnSquare]) == 0 {
 			if test {
@@ -248,7 +247,6 @@ func readJoystick(test bool) {
 			} else {
 				drone.TakePicture()
 			}
-
 		}
 		if jsState.Buttons&(1<<jsConfig.Buttons[btnTriangle]) != 0 && prevState.Buttons&(1<<jsConfig.Buttons[btnTriangle]) == 0 {
 			if test {
@@ -256,7 +254,6 @@ func readJoystick(test bool) {
 			} else {
 				drone.TakeOff()
 			}
-
 		}
 		if jsState.Buttons&(1<<jsConfig.Buttons[btnCircle]) != 0 && prevState.Buttons&(1<<jsConfig.Buttons[btnCircle]) == 0 {
 			if test {
@@ -274,4 +271,20 @@ func readJoystick(test bool) {
 
 		time.Sleep(jsUpdatePeriod)
 	}
+}
+
+func joystickHelpCB() {
+	messageDialog(win, gtk.MESSAGE_INFO,
+		`Joystick Controls
+
+Right Stick   Forwards/backwards, left/right
+Left Stick    Turn left/right, go up/down
+
+▲ Triangle    Take off
+X  Cross        Land
+□ Square      Take Photo
+
+L1 Button     Bounce
+L2 Button     Palm Land
+`)
 }

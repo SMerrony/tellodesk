@@ -158,6 +158,10 @@ func buildMenu() (mb *menuBarT) {
 	helpMenu := gtk.NewMenu()
 	helpItem.SetSubmenu(helpMenu)
 
+	jh := gtk.NewMenuItemWithLabel("Joystick Functions")
+	jh.Connect("activate", func() { joystickHelpCB() })
+	helpMenu.Append(jh)
+
 	oh := gtk.NewMenuItemWithLabel("Online Help")
 	oh.Connect("activate", func() { openBrowser(appHelpURL) })
 	helpMenu.Append(oh)
