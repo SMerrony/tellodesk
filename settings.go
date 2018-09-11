@@ -104,6 +104,11 @@ func settingsCB() {
 		if err := saveSettings(settings, appSettingsFile); err != nil {
 			messageDialog(win, gtk.MESSAGE_ERROR, "Could not save settings.")
 			log.Printf("Could not save settings: %v", err)
+		} else {
+			messageDialog(win, gtk.MESSAGE_INFO, `Settings Saved
+		
+N.B. If you changed Joystick settings either
+reconnect to the drone or restart the program.`)
 		}
 	}
 	sd.Destroy()

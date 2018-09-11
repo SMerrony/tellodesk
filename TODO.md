@@ -12,7 +12,7 @@
 
 ### General
 * Convert Video(s) to MP4 or similar
-* Sort out opening of joystick
+* ~~Sort out opening of joystick~~
   
 ### Planner Tab
 * (Not started)
