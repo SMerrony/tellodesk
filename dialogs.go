@@ -1,6 +1,8 @@
 package main
 
-import "github.com/mattn/go-gtk/gtk"
+import (
+	"github.com/mattn/go-gtk/gtk"
+)
 
 func messageDialog(win *gtk.Window, sev gtk.MessageType, msg string) {
 	alert := gtk.NewMessageDialog(
@@ -10,7 +12,7 @@ func messageDialog(win *gtk.Window, sev gtk.MessageType, msg string) {
 		gtk.BUTTONS_CLOSE,
 		msg)
 	alert.SetTitle(appName)
-	alert.SetIconFromFile(appIcon) // FIXME
+	alert.SetIcon(iconPixbuf)
 	alert.SetPosition(gtk.WIN_POS_CENTER_ON_PARENT)
 	alert.Run()
 	alert.Destroy()

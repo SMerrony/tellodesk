@@ -17,7 +17,7 @@ import (
 )
 
 func buildFeedWgt() (wgt *gtk.Image) {
-	wgt = gtk.NewImageFromFile(bluesky)
+	wgt = gtk.NewImageFromPixbuf(blueSkyPixbuf)
 	return wgt
 }
 
@@ -246,8 +246,7 @@ func updateFeed() bool {
 	select {
 	case <-stopFeedImageChan:
 		log.Println("Debug: updateFeed stopping")
-		pb, _ := gdkpixbuf.NewPixbufFromFile(bluesky)
-		feedWgt.SetFromPixbuf(pb)
+		feedWgt.SetFromPixbuf(blueSkyPixbuf)
 		return false // stops the timer
 	default:
 	}

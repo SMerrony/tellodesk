@@ -20,3 +20,4 @@ tellodesktop.yaml
 debug
 
 .vscode/
+/resources.go

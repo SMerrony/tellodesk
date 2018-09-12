@@ -39,6 +39,7 @@ func loadSettings(filename string) (settingsT, error) {
 func settingsCB() {
 	sd := gtk.NewDialog()
 	sd.SetTitle(appName + " Settings")
+	sd.SetIcon(iconPixbuf)
 
 	table := gtk.NewTable(6, 3, false)
 	table.SetColSpacings(5)

@@ -24,11 +24,9 @@ const (
 	appCopyright            = "©2018 S.Merrony"
 	appDisclaimer           = "The author(s) is/are in no way\nconnected with Ryze®."
 	appHelpURL              = "http://stephenmerrony.co.uk/blog/" // FIXME Help URL
-	appIcon                 = "icon.png"                          // FIXME this should be a resource
 	appName                 = "Tello® Desktop"
 	appSettingsFile         = "tellodesktop.yaml"
 	appVersion              = "0.1.0"
-	bluesky                 = "sky960x720.png" // FIXME this should be a resource
 	fdPeriodMs              = 100
 	prefWidth, prefHeight   = videoWidth + 2, videoHeight + 72
 	statusUpdatePeriodMs    = 250
@@ -63,9 +61,14 @@ var (
 
 	settingsLoaded bool
 	settings       settingsT
+
+	blueSkyPixbuf, iconPixbuf *gdkpixbuf.Pixbuf
 )
 
 func main() {
+
+	blueSkyPixbuf = gdkpixbuf.NewPixbufFromData(blueSkyPNG)
+	iconPixbuf = gdkpixbuf.NewPixbufFromData(iconPNG)
 
 	//jsStopChan = make(chan bool) // not buffered
 	fdStopChan = make(chan bool) // not buffered
@@ -75,7 +78,7 @@ func main() {
 	gtk.Init(nil)
 	win = gtk.NewWindow(gtk.WINDOW_TOPLEVEL)
 	win.SetTitle(appName)
-	win.SetIconFromFile(appIcon)
+	win.SetIcon(iconPixbuf)
 	getSettings()
 	//win.SetDefaultSize(prefWidth, prefHeight)
 	win.SetSizeRequest(prefWidth, prefHeight)
@@ -145,8 +148,8 @@ func exitNicely() {
 func aboutCB() {
 	about := gtk.NewAboutDialog()
 	about.SetProgramName(appName)
-	pb, _ := gdkpixbuf.NewPixbufFromFile(appIcon)
-	about.SetLogo(pb)
+	about.SetIcon(iconPixbuf)
+	about.SetLogo(iconPixbuf)
 	about.SetVersion(appVersion)
 	about.SetAuthors(appAuthors)
 	about.SetCopyright(appCopyright)
