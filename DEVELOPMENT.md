@@ -25,4 +25,13 @@
 * Live Tracker
   * Timer started in connectCB() - 500ms
   * Stopped in disconnectCB() via liveTrackStopChan
+
+## Generated Files
+Images are embedded using the go-gtk tool make_inline_pixbuf.  Command looks like:
+
+`$GOBIN/make_inline_pixbuf.exe blueSkyPNG resources/sky960x720.png  > blueSky.gen.go`
+
+Generated files:
+* blueSky.gen.go
+* icon.gen.go
   

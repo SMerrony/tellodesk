@@ -40,6 +40,7 @@ func settingsCB() {
 	sd := gtk.NewDialog()
 	sd.SetTitle(appName + " Settings")
 	sd.SetIcon(iconPixbuf)
+	sd.SetPosition(gtk.WIN_POS_CENTER_ON_PARENT)
 
 	table := gtk.NewTable(6, 3, false)
 	table.SetColSpacings(5)

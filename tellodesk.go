@@ -67,10 +67,10 @@ var (
 
 func main() {
 
+	// load the images from generated data
 	blueSkyPixbuf = gdkpixbuf.NewPixbufFromData(blueSkyPNG)
 	iconPixbuf = gdkpixbuf.NewPixbufFromData(iconPNG)
 
-	//jsStopChan = make(chan bool) // not buffered
 	fdStopChan = make(chan bool) // not buffered
 	vrStopChan = make(chan bool) // not buffered
 	liveTrackStopChan = make(chan bool)
@@ -154,6 +154,7 @@ func aboutCB() {
 	about.SetAuthors(appAuthors)
 	about.SetCopyright(appCopyright)
 	about.SetComments(appDisclaimer)
+	about.SetPosition(gtk.WIN_POS_CENTER_ON_PARENT)
 	about.Run()
 	about.Destroy()
 }
