@@ -43,7 +43,7 @@ var (
 	fdChan                                    <-chan tello.FlightData
 	videoChan                                 <-chan []byte
 	stopFeedImageChan                         chan bool
-	feedWgt                                   *gtk.Image
+	feedWgt                                   *feedWgtT
 	newFeedImageMu                            sync.Mutex
 	newFeedImage                              bool
 	feedImage                                 *image.RGBA
@@ -108,6 +108,7 @@ func main() {
 		statusBar.updateStatusBarTCB()
 		return true
 	})
+	glib.TimeoutAdd(statusUpdatePeriodMs, updateMessageCB)
 
 	win.Add(vbox)
 	win.ShowAll()

@@ -26,40 +26,39 @@ func fdListener() {
 	}
 }
 
-// // updateMessage should be run periodically to check for condition we should alert the user about.
-// func updateMessageCB() bool {
-// 	var (
-// 		msg string
-// 		sev severityType
-// 	)
-// 	flightDataMu.RLock()
-// 	// is order of priority, descending...
-// 	switch {
-// 	case flightData.OverTemp:
-// 		msg = "Maximum Temperature Exceeded"
-// 		sev = criticalSev
-// 	case flightData.BatteryCritical:
-// 		msg = "Battery Critical"
-// 		sev = criticalSev
-// 	case flightData.WifiStrength < 30:
-// 		msg = "Wifi Strength Below 30%"
-// 		sev = criticalSev
-// 	case flightData.BatteryLow:
-// 		msg = "Battery Low"
-// 		sev = warningSev
-// 	case flightData.WifiStrength < 50:
-// 		msg = "Wifi Strength Below 50%"
-// 		sev = infoSev
-// 	case flightData.LightStrength == 1:
-// 		msg = "Low Light"
-// 		sev = infoSev
-// 	}
-// 	flightDataMu.RUnlock()
-// 	if msg == "" {
-// 		//toolBar.clearMessage()
-// 	} else {
-// 		//toolBar.setMessage(msg, sev)
-// 		_ = sev
-// 	}
-// 	return true // continue the timer
-// }
+// updateMessage should be run periodically to check for condition we should alert the user about.
+func updateMessageCB() bool {
+	var (
+		msg string
+		// sev severityType
+	)
+	flightDataMu.RLock()
+	// is order of priority, descending...
+	switch {
+	case flightData.OverTemp:
+		msg = "Maximum Temperature Exceeded"
+		// sev = criticalSev
+	case flightData.BatteryCritical:
+		msg = "Battery Critical"
+		// sev = criticalSev
+	case flightData.WifiStrength < 30:
+		msg = "Wifi Strength Below 30%"
+		// sev = criticalSev
+	case flightData.BatteryLow:
+		msg = "Battery Low"
+		// sev = warningSev
+	case flightData.WifiStrength < 50:
+		msg = "Wifi Strength Below 50%"
+		// sev = infoSev
+	case flightData.LightStrength == 1:
+		msg = "Low Light"
+		// sev = infoSev
+	}
+	flightDataMu.RUnlock()
+	if msg == "" {
+		feedWgt.clearMessage()
+	} else {
+		feedWgt.setMessage(msg)
+	}
+	return true // continue the timer
+}

@@ -7,6 +7,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/mattn/go-gtk/gdk"
+
 	"github.com/SMerrony/tello"
 
 	"github.com/mattn/go-gtk/glib"
@@ -16,9 +18,30 @@ import (
 	"github.com/mattn/go-gtk/gtk"
 )
 
-func buildFeedWgt() (wgt *gtk.Image) {
-	wgt = gtk.NewImageFromPixbuf(blueSkyPixbuf)
+type feedWgtT struct {
+	*gtk.Layout
+	image   *gtk.Image
+	message *gtk.Label
+}
+
+func buildFeedWgt() (wgt *feedWgtT) {
+	wgt = new(feedWgtT)
+	wgt.Layout = gtk.NewLayout(nil, nil)
+	wgt.image = gtk.NewImageFromPixbuf(blueSkyPixbuf)
+	wgt.Add(wgt.image)
+	wgt.message = gtk.NewLabel("")
+	wgt.message.ModifyFontEasy("Sans 20")
+	wgt.message.ModifyFG(gtk.STATE_NORMAL, gdk.NewColor("red"))
+	wgt.Put(wgt.message, 50, 50)
 	return wgt
+}
+
+func (wgt *feedWgtT) setMessage(msg string) {
+	wgt.message.SetText(msg)
+}
+
+func (wgt *feedWgtT) clearMessage() {
+	wgt.message.SetText("")
 }
 
 func recordVideoCB() {
@@ -236,7 +259,7 @@ func updateFeed() bool {
 		pbd.Data = feedImage.Pix
 
 		pb := gdkpixbuf.NewPixbufFromData(pbd)
-		feedWgt.SetFromPixbuf(pb)
+		feedWgt.image.SetFromPixbuf(pb)
 
 		newFeedImage = false
 	}
@@ -246,7 +269,7 @@ func updateFeed() bool {
 	select {
 	case <-stopFeedImageChan:
 		log.Println("Debug: updateFeed stopping")
-		feedWgt.SetFromPixbuf(blueSkyPixbuf)
+		feedWgt.image.SetFromPixbuf(blueSkyPixbuf)
 		return false // stops the timer
 	default:
 	}

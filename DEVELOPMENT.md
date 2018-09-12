@@ -16,8 +16,8 @@
 * Video display updater
   * started in video.go:startVideo() - 30ms
   * stopped in disconnectCB()
-* ToolBar message updater
-  * Timer started in main() - 250ms
+* Message Overlay updater
+  * Started in main() - 250ms
   * (No need to stop)
 * StatusBar updater - statusbar.go:updateStatusBarTCB()
   * Timer started in main - 250ms
