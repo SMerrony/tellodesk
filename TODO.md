@@ -29,3 +29,4 @@
 * Switch video mode?
 * Permit application resize?
 * Detailed status display like telloterm?
+* Keyboard Control
