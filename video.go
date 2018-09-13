@@ -97,11 +97,11 @@ func startVideo() {
 
 	drone.SetVideoBitrate(tello.VbrAuto)
 
-	// start video feed restarter when drone connects
-	drone.StartVideo()
+	// start video SPS/PPS requestor when drone connects
+	drone.GetVideoSpsPps()
 	go func() { // no GTK stuff in here...
 		for {
-			drone.StartVideo()
+			drone.GetVideoSpsPps()
 			select {
 			case <-vrStopChan:
 				return

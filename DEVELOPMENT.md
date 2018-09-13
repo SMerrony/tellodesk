@@ -6,7 +6,7 @@
 * FlightData listener 
   * started in droneCBs.go:connectCB(), 
   * stopped in disconnectCB()
-* Video Restarter 
+* Video SPS/PPS Requestor 
   * started in video.go:startVideo()
   * stopped in disconnectCB()
 * Video listener 
@@ -16,7 +16,7 @@
 * Video display updater
   * started in video.go:startVideo() - 30ms
   * stopped in disconnectCB()
-* Message Overlay updater
+* Message Overlay updater - flightData.go:updateMessageCB()
   * Started in main() - 250ms
   * (No need to stop)
 * StatusBar updater - statusbar.go:updateStatusBarTCB()

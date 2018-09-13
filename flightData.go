@@ -35,9 +35,9 @@ func updateMessageCB() bool {
 	flightDataMu.RLock()
 	// is order of priority, descending...
 	switch {
-	case flightData.OverTemp:
-		msg = "Maximum Temperature Exceeded"
-		// sev = criticalSev
+	// case flightData.ErrorState:
+	// 	msg = "Drone Error"
+	// 	// sev = criticalSev
 	case flightData.BatteryCritical:
 		msg = "Battery Critical"
 		// sev = criticalSev
