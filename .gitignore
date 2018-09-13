@@ -15,6 +15,7 @@
 *.mp4
 *.csv
 *.jpg
+*.pdf
 
 tellodesktop.yaml
 debug
