@@ -1,3 +1,10 @@
+/**
+ *Copyright (c) 2018 Stephen Merrony
+ *
+ *This software is released under the MIT License.
+ *https://opensource.org/licenses/MIT
+ */
+
 package main
 
 func takeoffCB() {
