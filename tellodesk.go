@@ -30,7 +30,7 @@ import (
 const (
 	appCopyright            = "©2018 S.Merrony"
 	appDisclaimer           = "The author(s) is/are in no way\nconnected with Ryze®."
-	appHelpURL              = "http://stephenmerrony.co.uk/blog/" // FIXME Help URL
+	appHelpURL              = "https://github.com/SMerrony/tellodesk/wiki"
 	appName                 = "Tello® Desktop"
 	appSettingsFile         = "tellodesktop.yaml"
 	appVersion              = "0.1.0"
