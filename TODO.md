@@ -30,3 +30,5 @@
 * Permit application resize?
 * Detailed status display like telloterm?
 * Keyboard Control
+* Object recognition with Tensorflow?
+* 
