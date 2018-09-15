@@ -2,7 +2,7 @@
 
 TelloDesk aims to provide a comfortable desktop environment for flying the Tello mini drone from a Windows or Linux desktop or laptop computer.  You will need a supported controller and a Wifi connection to the Tello.
 
-![TelloDesk flight tracker](https://github.com/SMerrony/tellodesk.wiki/TelloDeskTrackerV010.png)
+![TelloDesk flight tracker](https://raw.githubusercontent.com/wiki/SMerrony/tellodesk/TelloDeskTrackerV010.png)
 
 TelloDesk has been tested on Windows and Linux, and may run on MacOS.
 
