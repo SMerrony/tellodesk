@@ -31,10 +31,8 @@ const (
 	axLeftY
 	axRightX
 	axRightY
-	axL1
-	axL2
-	axR1
-	axR2
+	axLeftTrigger
+	axRightTrigger
 )
 
 const (
@@ -42,13 +40,18 @@ const (
 	btnCircle
 	btnTriangle
 	btnSquare
+	btnA
+	btnB
+	btnBack
 	btnL1
 	btnL2
 	btnL3
 	btnR1
 	btnR2
 	btnR3
-	btnUnknown
+	btnStart
+	btnX
+	btnY
 )
 
 const deadZone = 2000
@@ -69,13 +72,13 @@ var (
 	jsConfig              JoystickConfig
 	jsKnownWindowsConfigs = []JoystickConfig{
 		JoystickConfig{
-			Name:    "DualShock3", // TODO - Untested
+			Name:    "DualShock 3", // TODO - Untested
 			JsType:  typeGameController,
 			Axes:    []int{axLeftX: 0, axLeftY: 1, axRightX: 2, axRightY: 3},
 			Buttons: []uint{btnCross: 1, btnCircle: 2, btnTriangle: 3, btnSquare: 0, btnL1: 4, btnL2: 6, btnR1: 5, btnR2: 7},
 		},
 		JoystickConfig{
-			Name:    "DualShock4",
+			Name:    "DualShock 4",
 			JsType:  typeGameController,
 			Axes:    []int{axLeftX: 0, axLeftY: 1, axRightX: 2, axRightY: 3},
 			Buttons: []uint{btnCross: 1, btnCircle: 2, btnTriangle: 3, btnSquare: 0, btnL1: 4, btnL2: 6, btnR1: 5, btnR2: 7},
@@ -85,6 +88,12 @@ var (
 			JsType:  typeFlightController,
 			Axes:    []int{axLeftX: 4, axLeftY: 2, axRightX: 0, axRightY: 1},
 			Buttons: []uint{btnR1: 0, btnL1: 1, btnR3: 2, btnL3: 3, btnSquare: 4, btnCross: 5, btnCircle: 6, btnTriangle: 7, btnR2: 8, btnL2: 9},
+		},
+		JoystickConfig{
+			Name:    "XBox 360", // TODO - Untested
+			JsType:  typeGameController,
+			Axes:    []int{axLeftX: 0, axLeftY: 1, axRightX: 3, axRightY: 4},
+			Buttons: []uint{btnX: 2, btnY: 3, btnA: 0, btnB: 1, btnBack: 6, btnStart: 7},
 		},
 	}
 	jsKnownLinuxConfigs = []JoystickConfig{
@@ -99,6 +108,12 @@ var (
 			JsType:  typeFlightController,
 			Axes:    []int{axLeftX: 4, axLeftY: 2, axRightX: 0, axRightY: 1},
 			Buttons: []uint{btnR1: 0, btnL1: 1, btnR3: 2, btnL3: 3, btnSquare: 4, btnCross: 5, btnCircle: 6, btnTriangle: 7, btnR2: 8, btnL2: 9},
+		},
+		JoystickConfig{
+			Name:    "XBox 360", // TODO - Untested
+			JsType:  typeGameController,
+			Axes:    []int{axLeftX: 0, axLeftY: 1, axRightX: 3, axRightY: 4},
+			Buttons: []uint{btnX: 2, btnY: 3, btnA: 0, btnB: 1, btnBack: 6, btnStart: 7},
 		},
 	}
 )
@@ -255,9 +270,23 @@ func readJoystick(test bool) {
 				drone.TakePicture()
 			}
 		}
+		if jsState.Buttons&(1<<jsConfig.Buttons[btnA]) != 0 && prevState.Buttons&(1<<jsConfig.Buttons[btnA]) == 0 {
+			if test {
+				log.Println("A pressed")
+			} else {
+				drone.TakePicture()
+			}
+		}
 		if jsState.Buttons&(1<<jsConfig.Buttons[btnTriangle]) != 0 && prevState.Buttons&(1<<jsConfig.Buttons[btnTriangle]) == 0 {
 			if test {
 				log.Println("Triangle pressed")
+			} else {
+				drone.TakeOff()
+			}
+		}
+		if jsState.Buttons&(1<<jsConfig.Buttons[btnY]) != 0 && prevState.Buttons&(1<<jsConfig.Buttons[btnY]) == 0 {
+			if test {
+				log.Println("Y pressed")
 			} else {
 				drone.TakeOff()
 			}
@@ -268,6 +297,13 @@ func readJoystick(test bool) {
 			}
 		}
 		if jsState.Buttons&(1<<jsConfig.Buttons[btnCross]) != 0 && prevState.Buttons&(1<<jsConfig.Buttons[btnCross]) == 0 {
+			if test {
+				log.Println("Cross pressed")
+			} else {
+				drone.Land()
+			}
+		}
+		if jsState.Buttons&(1<<jsConfig.Buttons[btnX]) != 0 && prevState.Buttons&(1<<jsConfig.Buttons[btnX]) == 0 {
 			if test {
 				log.Println("X pressed")
 			} else {
@@ -287,9 +323,9 @@ func joystickHelpCB() {
 Right Stick   Forwards/backwards, left/right
 Left Stick    Turn left/right, go up/down
 
-▲ Triangle    Take off
-X  Cross        Land
-□ Square      Take Photo
+▲ Triangle, Y (Yellow)   Take off
+X  Cross, X (Blue)           Land
+□ Square, A (Green)      Take Photo
 
 L1 Button     Bounce
 L2 Button     Palm Land
