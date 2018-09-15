@@ -35,23 +35,29 @@ const (
 	axRightTrigger
 )
 
+// const (
+// 	btnCross = iota
+// 	btnCircle
+// 	btnTriangle
+// 	btnSquare
+// 	btnA
+// 	btnB
+// 	btnBack
+// 	btnL1
+// 	btnL2
+// 	btnL3
+// 	btnR1
+// 	btnR2
+// 	btnR3
+// 	btnStart
+// 	btnX
+// 	btnY
+// )
+
 const (
-	btnCross = iota
-	btnCircle
-	btnTriangle
-	btnSquare
-	btnA
-	btnB
-	btnBack
-	btnL1
-	btnL2
-	btnL3
-	btnR1
-	btnR2
-	btnR3
-	btnStart
-	btnX
-	btnY
+	btnTakeoff = iota
+	btnLand
+	btnTakePhoto
 )
 
 const deadZone = 2000
@@ -62,8 +68,8 @@ const jsUpdatePeriod = 40 * time.Millisecond // 40ms = 25Hz
 type JoystickConfig struct {
 	Name    string
 	JsType  int
-	Axes    []int
-	Buttons []uint
+	Axes    []int  // must have left and right X & Y entries
+	Buttons []uint // must have an entry for each define btn??? const
 }
 
 var (
@@ -72,28 +78,31 @@ var (
 	jsConfig              JoystickConfig
 	jsKnownWindowsConfigs = []JoystickConfig{
 		JoystickConfig{
-			Name:    "DualShock 3", // TODO - Untested
-			JsType:  typeGameController,
-			Axes:    []int{axLeftX: 0, axLeftY: 1, axRightX: 2, axRightY: 3},
-			Buttons: []uint{btnCross: 1, btnCircle: 2, btnTriangle: 3, btnSquare: 0, btnL1: 4, btnL2: 6, btnR1: 5, btnR2: 7},
+			Name:   "DualShock 3", // TODO - Untested
+			JsType: typeGameController,
+			Axes:   []int{axLeftX: 0, axLeftY: 1, axRightX: 2, axRightY: 3},
+			//Buttons: []uint{btnCross: 1, btnCircle: 2, btnTriangle: 3, btnSquare: 0, btnL1: 4, btnL2: 6, btnR1: 5, btnR2: 7},
+			Buttons: []uint{btnLand: 1, btnTakeoff: 3, btnTakePhoto: 0},
 		},
 		JoystickConfig{
-			Name:    "DualShock 4",
-			JsType:  typeGameController,
-			Axes:    []int{axLeftX: 0, axLeftY: 1, axRightX: 2, axRightY: 3},
-			Buttons: []uint{btnCross: 1, btnCircle: 2, btnTriangle: 3, btnSquare: 0, btnL1: 4, btnL2: 6, btnR1: 5, btnR2: 7},
+			Name:   "DualShock 4",
+			JsType: typeGameController,
+			Axes:   []int{axLeftX: 0, axLeftY: 1, axRightX: 2, axRightY: 3},
+			//Buttons: []uint{btnCross: 1, btnCircle: 2, btnTriangle: 3, btnSquare: 0, btnL1: 4, btnL2: 6, btnR1: 5, btnR2: 7},
+			Buttons: []uint{btnLand: 1, btnTakeoff: 3, btnTakePhoto: 0},
 		},
 		JoystickConfig{
-			Name:    "T-Flight Hotas X",
-			JsType:  typeFlightController,
-			Axes:    []int{axLeftX: 4, axLeftY: 2, axRightX: 0, axRightY: 1},
-			Buttons: []uint{btnR1: 0, btnL1: 1, btnR3: 2, btnL3: 3, btnSquare: 4, btnCross: 5, btnCircle: 6, btnTriangle: 7, btnR2: 8, btnL2: 9},
+			Name:   "T-Flight Hotas X",
+			JsType: typeFlightController,
+			Axes:   []int{axLeftX: 4, axLeftY: 2, axRightX: 0, axRightY: 1},
+			//Buttons: []uint{btnR1: 0, btnL1: 1, btnR3: 2, btnL3: 3, btnSquare: 4, btnCross: 5, btnCircle: 6, btnTriangle: 7, btnR2: 8, btnL2: 9},
+			Buttons: []uint{btnTakePhoto: 4, btnLand: 5, btnTakeoff: 7},
 		},
 		JoystickConfig{
 			Name:    "XBox 360", // TODO - Untested
 			JsType:  typeGameController,
 			Axes:    []int{axLeftX: 0, axLeftY: 1, axRightX: 3, axRightY: 4},
-			Buttons: []uint{btnX: 2, btnY: 3, btnA: 0, btnB: 1, btnBack: 6, btnStart: 7},
+			Buttons: []uint{btnLand: 2, btnTakeoff: 3, btnTakePhoto: 0},
 		},
 	}
 	jsKnownLinuxConfigs = []JoystickConfig{
@@ -101,19 +110,19 @@ var (
 			Name:    "DualShock 4",
 			JsType:  typeGameController,
 			Axes:    []int{axLeftX: 0, axLeftY: 1, axRightX: 3, axRightY: 4},
-			Buttons: []uint{btnCross: 0, btnCircle: 1, btnTriangle: 2, btnSquare: 3, btnL1: 4, btnL2: 6, btnR1: 5, btnR2: 7},
+			Buttons: []uint{btnLand: 0, btnTakeoff: 2, btnTakePhoto: 3},
 		},
 		JoystickConfig{
 			Name:    "T-Flight Hotas X", // Seeems to be the same on Linux and Windows
 			JsType:  typeFlightController,
 			Axes:    []int{axLeftX: 4, axLeftY: 2, axRightX: 0, axRightY: 1},
-			Buttons: []uint{btnR1: 0, btnL1: 1, btnR3: 2, btnL3: 3, btnSquare: 4, btnCross: 5, btnCircle: 6, btnTriangle: 7, btnR2: 8, btnL2: 9},
+			Buttons: []uint{btnTakePhoto: 4, btnLand: 5, btnTakeoff: 7},
 		},
 		JoystickConfig{
 			Name:    "XBox 360", // TODO - Untested
 			JsType:  typeGameController,
 			Axes:    []int{axLeftX: 0, axLeftY: 1, axRightX: 3, axRightY: 4},
-			Buttons: []uint{btnX: 2, btnY: 3, btnA: 0, btnB: 1, btnBack: 6, btnStart: 7},
+			Buttons: []uint{btnLand: 2, btnTakeoff: 3, btnTakePhoto: 0},
 		},
 	}
 )
@@ -249,67 +258,29 @@ func readJoystick(test bool) {
 			stickChan <- sm
 		}
 
-		if jsState.Buttons&(1<<jsConfig.Buttons[btnL1]) != 0 && prevState.Buttons&(1<<jsConfig.Buttons[btnL1]) == 0 {
+		if jsState.Buttons&(1<<jsConfig.Buttons[btnTakePhoto]) != 0 && prevState.Buttons&(1<<jsConfig.Buttons[btnTakePhoto]) == 0 {
 			if test {
-				log.Println("L1 pressed")
-			} else {
-				drone.Bounce()
-			}
-		}
-		if jsState.Buttons&(1<<jsConfig.Buttons[btnL2]) != 0 && prevState.Buttons&(1<<jsConfig.Buttons[btnL2]) == 0 {
-			if test {
-				log.Println("L2 pressed")
-			} else {
-				drone.PalmLand()
-			}
-		}
-		if jsState.Buttons&(1<<jsConfig.Buttons[btnSquare]) != 0 && prevState.Buttons&(1<<jsConfig.Buttons[btnSquare]) == 0 {
-			if test {
-				log.Println("Square pressed")
+				log.Println("Square/A pressed")
 			} else {
 				drone.TakePicture()
 			}
 		}
-		if jsState.Buttons&(1<<jsConfig.Buttons[btnA]) != 0 && prevState.Buttons&(1<<jsConfig.Buttons[btnA]) == 0 {
+
+		if jsState.Buttons&(1<<jsConfig.Buttons[btnTakeoff]) != 0 && prevState.Buttons&(1<<jsConfig.Buttons[btnTakeoff]) == 0 {
 			if test {
-				log.Println("A pressed")
-			} else {
-				drone.TakePicture()
-			}
-		}
-		if jsState.Buttons&(1<<jsConfig.Buttons[btnTriangle]) != 0 && prevState.Buttons&(1<<jsConfig.Buttons[btnTriangle]) == 0 {
-			if test {
-				log.Println("Triangle pressed")
+				log.Println("Triangle/Y pressed")
 			} else {
 				drone.TakeOff()
 			}
 		}
-		if jsState.Buttons&(1<<jsConfig.Buttons[btnY]) != 0 && prevState.Buttons&(1<<jsConfig.Buttons[btnY]) == 0 {
+		if jsState.Buttons&(1<<jsConfig.Buttons[btnLand]) != 0 && prevState.Buttons&(1<<jsConfig.Buttons[btnLand]) == 0 {
 			if test {
-				log.Println("Y pressed")
-			} else {
-				drone.TakeOff()
-			}
-		}
-		if jsState.Buttons&(1<<jsConfig.Buttons[btnCircle]) != 0 && prevState.Buttons&(1<<jsConfig.Buttons[btnCircle]) == 0 {
-			if test {
-				log.Println("Circle pressed")
-			}
-		}
-		if jsState.Buttons&(1<<jsConfig.Buttons[btnCross]) != 0 && prevState.Buttons&(1<<jsConfig.Buttons[btnCross]) == 0 {
-			if test {
-				log.Println("Cross pressed")
+				log.Println("Cross/X pressed")
 			} else {
 				drone.Land()
 			}
 		}
-		if jsState.Buttons&(1<<jsConfig.Buttons[btnX]) != 0 && prevState.Buttons&(1<<jsConfig.Buttons[btnX]) == 0 {
-			if test {
-				log.Println("X pressed")
-			} else {
-				drone.Land()
-			}
-		}
+
 		prevState = jsState
 
 		time.Sleep(jsUpdatePeriod)
@@ -326,8 +297,5 @@ Left Stick    Turn left/right, go up/down
 ▲ Triangle, Y (Yellow)   Take off
 X  Cross, X (Blue)           Land
 □ Square, A (Green)      Take Photo
-
-L1 Button     Bounce
-L2 Button     Palm Land
 `)
 }

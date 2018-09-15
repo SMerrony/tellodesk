@@ -8,10 +8,10 @@
 * ~~Track - Visual live tracking of path~~
 * ~~Images | Take Photo~~
 * ~~Images | Save Photo(s)~~
-* Help | Online Help
+* ~~Help | Online Help~~
 
 ### General
-* Convert Video(s) to MP4 or similar
+* Convert Video(s) to MP4 or similar?
 * ~~Sort out opening of joystick~~
   
 ### Planner Tab
@@ -29,6 +29,6 @@
 * Switch video mode?
 * Permit application resize?
 * Detailed status display like telloterm?
-* Keyboard Control
+* Keyboard Control?
 * Object recognition with Tensorflow?
 * 
