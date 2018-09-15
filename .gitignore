@@ -17,7 +17,7 @@
 *.jpg
 *.pdf
 
-tellodesktop.yaml
 debug
 
 .vscode/
+tellodesk.yaml

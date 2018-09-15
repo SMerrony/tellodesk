@@ -31,9 +31,9 @@ const (
 	appCopyright            = "©2018 S.Merrony"
 	appDisclaimer           = "The author(s) is/are in no way\nconnected with Ryze®."
 	appHelpURL              = "https://github.com/SMerrony/tellodesk/wiki"
-	appName                 = "Tello® Desktop"
-	appSettingsFile         = "tellodesktop.yaml"
-	appVersion              = "0.1.0"
+	appName                 = "Tello® Desk"
+	appSettingsFile         = "tellodesk.yaml"
+	appVersion              = "v0.1.0"
 	fdPeriodMs              = 100
 	prefWidth, prefHeight   = videoWidth + 2, videoHeight + 72
 	statusUpdatePeriodMs    = 250
@@ -159,6 +159,7 @@ func aboutCB() {
 	about.SetIcon(iconPixbuf)
 	about.SetLogo(iconPixbuf)
 	about.SetVersion(appVersion)
+	about.SetWebsite(appHelpURL)
 	about.SetAuthors(appAuthors)
 	about.SetCopyright(appCopyright)
 	about.SetComments(appDisclaimer)
