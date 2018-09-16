@@ -212,7 +212,7 @@ func readJoystick(test bool) {
 
 		if err != nil {
 			log.Printf("Error reading joystick: %v\n", err)
-
+			return
 		}
 
 		if jsState.AxisData[jsConfig.Axes[axLeftX]] == 32768 {

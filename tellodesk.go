@@ -137,10 +137,7 @@ func getSettings() {
 		log.Printf("Error loading saved settings: %v", err)
 	} else {
 		log.Printf("Debug: loaded settings: chosen JS type is %s\n", settings.JoystickType)
-		err = openJoystick(settings.JoystickID, settings.JoystickType)
-		if err != nil {
-			messageDialog(win, gtk.MESSAGE_ERROR, "Could not open configured joystick.")
-		}
+
 		settingsLoaded = true
 	}
 }

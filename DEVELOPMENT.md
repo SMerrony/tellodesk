@@ -1,8 +1,15 @@
 # Development Notes & Reminders
+
+## Dependencies
+* 3d0c/gmf for video handling. For Linux version to work gmf must be later than Sep 01 2018.
+* simulatedsimian/joystick
+* mattn/go-gtk
+* SMerrony/tello >= v0.9.0
+
 ## Goroutines
 * Joystick reader 
-  * started in main()
-  * ~~stopped in disconnectCB()~~
+  * started in droneCBs.go:connectCB(),
+  * JS is closed in disconnectCB() which causes Goroutine to end
 * FlightData listener 
   * started in droneCBs.go:connectCB(), 
   * stopped in disconnectCB()

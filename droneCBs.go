@@ -27,6 +27,10 @@ to the Tello network.`)
 	startVideo()
 
 	if len(settings.JoystickType) > 0 {
+		err = openJoystick(settings.JoystickID, settings.JoystickType)
+		if err != nil {
+			messageDialog(win, gtk.MESSAGE_ERROR, "Could not open configured joystick.")
+		}
 		stickChan, err = drone.StartStickListener()
 		if err != nil {
 			messageDialog(win, gtk.MESSAGE_ERROR, err.Error())
@@ -49,14 +53,11 @@ func disconnectCB() {
 	drone.VideoDisconnect()
 	drone.ControlDisconnect()
 
-	if len(settings.JoystickType) > 0 {
+	if len(settings.JoystickType) > 0 { 
 		js.Close()
 		drone.StopStickListener()
 	}
-	// select {
-	// case jsStopChan <- true: // stop the joystick listener goroutine
-	// default:
-	// }
+
 	select {
 	case fdStopChan <- true: // stop the flight data listener goroutine
 	default:
