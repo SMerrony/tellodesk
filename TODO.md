@@ -26,7 +26,7 @@
 * ~~Add data directory/path for saved pix/tracks/videos~~
 
 ## To Consider
-* Switch video mode?
+* ~~Switch video mode?~~
 * Permit application resize?
 * Detailed status display like telloterm?
 * Keyboard Control?

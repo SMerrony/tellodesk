@@ -28,28 +28,29 @@ import (
 //_ "net/http/pprof"
 
 const (
-	appCopyright            = "©2018 S.Merrony"
-	appDisclaimer           = "The author(s) is/are in no way\nconnected with Ryze®."
-	appHelpURL              = "https://github.com/SMerrony/tellodesk/wiki"
-	appName                 = "Tello® Desk"
-	appSettingsFile         = "tellodesk.yaml"
-	appVersion              = "v0.1.0"
-	fdPeriodMs              = 100
-	statusUpdatePeriodMs    = 250
-	videoWidth, videoHeight = 960, 720
+	appCopyright                        = "©2018 S.Merrony"
+	appDisclaimer                       = "The author(s) is/are in no way\nconnected with Ryze®."
+	appHelpURL                          = "https://github.com/SMerrony/tellodesk/wiki"
+	appName                             = "Tello® Desk"
+	appSettingsFile                     = "tellodesk.yaml"
+	appVersion                          = "v0.1.0"
+	fdPeriodMs                          = 100
+	statusUpdatePeriodMs                = 250
+	normalVideoWidth, normalVideoHeight = 960, 720
+	wideVideoWidth, wideVideoHeight     = 1280, 720
 )
 
 var appAuthors = []string{"Stephen Merrony"}
 
 var (
-	drone     tello.Tello
-	stickChan chan<- tello.StickMessage
-	//jsStopChan,
+	drone                                     tello.Tello
+	stickChan                                 chan<- tello.StickMessage
 	fdStopChan, vrStopChan, liveTrackStopChan chan bool
 	fdChan                                    <-chan tello.FlightData
 	videoChan                                 <-chan []byte
 	stopFeedImageChan                         chan bool
 	feedWgt                                   *feedWgtT
+	videoWidth, videoHeight                   = normalVideoWidth, normalVideoHeight
 	newFeedImageMu                            sync.Mutex
 	newFeedImage                              bool
 	feedImage                                 *image.RGBA
@@ -87,6 +88,9 @@ func main() {
 	win.SetTitle(appName)
 	win.SetIcon(iconPixbuf)
 	getSettings()
+	if settings.WideVideo {
+		videoWidth, videoHeight = wideVideoWidth, wideVideoHeight
+	}
 	win.SetResizable(false) // Gtk does the right thing and sets the size after laying out
 	win.Connect("destroy", func() {
 		exitNicely()

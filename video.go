@@ -35,6 +35,7 @@ func buildFeedWgt() (wgt *feedWgtT) {
 	wgt = new(feedWgtT)
 	wgt.Layout = gtk.NewLayout(nil, nil)
 	wgt.image = gtk.NewImageFromPixbuf(blueSkyPixbuf)
+	wgt.image.SetSizeRequest(videoWidth, videoHeight)
 	wgt.Add(wgt.image)
 	wgt.message = gtk.NewLabel("")
 	wgt.message.ModifyFontEasy("Sans 20")
@@ -103,6 +104,10 @@ func startVideo() {
 	}
 
 	drone.SetVideoBitrate(tello.VbrAuto)
+
+	if settings.WideVideo {
+		drone.SetVideoWide()
+	}
 
 	// start video SPS/PPS requestor when drone connects
 	drone.GetVideoSpsPps()

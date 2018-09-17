@@ -20,6 +20,7 @@ type settingsT struct {
 	JoystickID   int
 	JoystickType string
 	DataDir      string
+	WideVideo    bool
 }
 
 func saveSettings(s settingsT, filename string) error {
@@ -100,6 +101,13 @@ func settingsCB() {
 		dc.Destroy()
 	})
 
+	table.AttachDefaults(gtk.NewLabel("Video Mode :"), 0, 1, 3, 4)
+	vm := gtk.NewCheckButtonWithLabel("Wide")
+	if settings.WideVideo {
+		vm.SetActive(true)
+	}
+	table.AttachDefaults(vm, 1, 2, 3, 4)
+
 	sd.GetVBox().PackStart(table, true, true, 5)
 	sd.AddButton("Cancel", gtk.RESPONSE_CANCEL)
 	sd.AddButton("OK", gtk.RESPONSE_OK)
@@ -110,6 +118,7 @@ func settingsCB() {
 	if response == gtk.RESPONSE_OK {
 		settings.JoystickID = foundCombo.GetActive()
 		settings.JoystickType = chosenTypeCombo.GetActiveText()
+		settings.WideVideo = vm.GetActive()
 		if err := saveSettings(settings, appSettingsFile); err != nil {
 			messageDialog(win, gtk.MESSAGE_ERROR, "Could not save settings.")
 			log.Printf("Could not save settings: %v", err)
@@ -117,7 +126,9 @@ func settingsCB() {
 			messageDialog(win, gtk.MESSAGE_INFO, `Settings Saved
 		
 N.B. If you changed Joystick settings either
-reconnect to the drone or restart the program.`)
+reconnect to the drone or restart the program.
+
+If you changed video mode please restart the program.`)
 		}
 	}
 	sd.Destroy()
