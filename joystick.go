@@ -31,8 +31,6 @@ const (
 	axLeftY
 	axRightX
 	axRightY
-	axLeftTrigger
-	axRightTrigger
 )
 
 // const (

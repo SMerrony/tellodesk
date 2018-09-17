@@ -201,3 +201,7 @@ func (mb *menuBarT) disableFlightMenus() {
 	mb.imagingItem.SetSensitive(false)
 	mb.importTrackItem.SetSensitive(true)
 }
+
+// func nyi() {
+// 	messageDialog(win, gtk.MESSAGE_INFO, "Not Yet Implemented")
+// }

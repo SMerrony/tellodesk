@@ -59,6 +59,7 @@ var (
 	videoWriter                               *bufio.Writer
 	win                                       *gtk.Window
 	menuBar                                   *menuBarT
+	notebook                                  *gtk.Notebook
 	statusBar                                 *statusBarT
 
 	flightDataMu sync.RWMutex
@@ -96,15 +97,15 @@ func main() {
 	menuBar = buildMenu()
 	vbox.PackStart(menuBar, false, false, 0)
 
-	nb := gtk.NewNotebook()
-	vbox.PackStart(nb, false, false, 1)
+	notebook = gtk.NewNotebook()
+	vbox.PackStart(notebook, false, false, 1)
 
 	feedWgt = buildFeedWgt()
-	nb.AppendPage(feedWgt, gtk.NewLabel("Live Feed"))
+	notebook.AppendPage(feedWgt, gtk.NewLabel("Live Feed"))
 
 	trackChart = buildTrackChart(videoWidth, videoHeight, defaultTrackScale,
 		menuBar.trackShowDrone.GetActive(), menuBar.trackShowPath.GetActive())
-	nb.AppendPage(trackChart, gtk.NewLabel("Tracker"))
+	notebook.AppendPage(trackChart, gtk.NewLabel("Tracker"))
 
 	statusBar = buildStatusbar()
 	vbox.PackEnd(statusBar, false, false, 0)
@@ -160,10 +161,6 @@ func aboutCB() {
 	about.SetPosition(gtk.WIN_POS_CENTER_ON_PARENT)
 	about.Run()
 	about.Destroy()
-}
-
-func nyi() {
-	messageDialog(win, gtk.MESSAGE_INFO, "Not Yet Implemented")
 }
 
 // helper funcs

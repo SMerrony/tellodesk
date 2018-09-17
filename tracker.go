@@ -190,6 +190,7 @@ func importTrackCB() {
 				tmpTrack := readTrack(r)
 				trackChart.track = tmpTrack
 				trackChart.drawTrack()
+				notebook.SetCurrentPage(1) // Yuck
 			}
 		}
 	}
