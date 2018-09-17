@@ -35,7 +35,6 @@ const (
 	appSettingsFile         = "tellodesk.yaml"
 	appVersion              = "v0.1.0"
 	fdPeriodMs              = 100
-	prefWidth, prefHeight   = videoWidth + 2, videoHeight + 72
 	statusUpdatePeriodMs    = 250
 	videoWidth, videoHeight = 960, 720
 )
@@ -87,9 +86,7 @@ func main() {
 	win.SetTitle(appName)
 	win.SetIcon(iconPixbuf)
 	getSettings()
-	//win.SetDefaultSize(prefWidth, prefHeight)
-	win.SetSizeRequest(prefWidth, prefHeight)
-	win.SetResizable(false)
+	win.SetResizable(false) // Gtk does the right thing and sets the size after laying out
 	win.Connect("destroy", func() {
 		exitNicely()
 	})
