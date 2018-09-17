@@ -58,6 +58,8 @@ const (
 	btnTakeoff = iota
 	btnLand
 	btnTakePhoto
+	btnSetHome
+	btnReturnHome
 )
 
 const deadZone = 2000
@@ -82,27 +84,27 @@ var (
 			JsType: typeGameController,
 			Axes:   []int{axLeftX: 0, axLeftY: 1, axRightX: 2, axRightY: 3},
 			//Buttons: []uint{btnCross: 1, btnCircle: 2, btnTriangle: 3, btnSquare: 0, btnL1: 4, btnL2: 6, btnR1: 5, btnR2: 7},
-			Buttons: []uint{btnLand: 1, btnTakeoff: 3, btnTakePhoto: 0},
+			Buttons: []uint{btnLand: 1, btnTakeoff: 3, btnTakePhoto: 0, btnSetHome: 4, btnReturnHome: 5},
 		},
 		JoystickConfig{
 			Name:   "DualShock 4",
 			JsType: typeGameController,
 			Axes:   []int{axLeftX: 0, axLeftY: 1, axRightX: 2, axRightY: 3},
 			//Buttons: []uint{btnCross: 1, btnCircle: 2, btnTriangle: 3, btnSquare: 0, btnL1: 4, btnL2: 6, btnR1: 5, btnR2: 7},
-			Buttons: []uint{btnLand: 1, btnTakeoff: 3, btnTakePhoto: 0},
+			Buttons: []uint{btnLand: 1, btnTakeoff: 3, btnTakePhoto: 0, btnSetHome: 4, btnReturnHome: 5},
 		},
 		JoystickConfig{
 			Name:   "T-Flight Hotas X",
 			JsType: typeFlightController,
 			Axes:   []int{axLeftX: 4, axLeftY: 2, axRightX: 0, axRightY: 1},
 			//Buttons: []uint{btnR1: 0, btnL1: 1, btnR3: 2, btnL3: 3, btnSquare: 4, btnCross: 5, btnCircle: 6, btnTriangle: 7, btnR2: 8, btnL2: 9},
-			Buttons: []uint{btnTakePhoto: 4, btnLand: 5, btnTakeoff: 7},
+			Buttons: []uint{btnTakePhoto: 4, btnLand: 5, btnTakeoff: 7, btnSetHome: 1, btnReturnHome: 0},
 		},
 		JoystickConfig{
 			Name:    "XBox 360", // TODO - Untested
 			JsType:  typeGameController,
 			Axes:    []int{axLeftX: 0, axLeftY: 1, axRightX: 3, axRightY: 4},
-			Buttons: []uint{btnLand: 2, btnTakeoff: 3, btnTakePhoto: 0},
+			Buttons: []uint{btnLand: 2, btnTakeoff: 3, btnTakePhoto: 0, btnSetHome: 4, btnReturnHome: 5},
 		},
 	}
 	jsKnownLinuxConfigs = []JoystickConfig{
@@ -110,19 +112,19 @@ var (
 			Name:    "DualShock 4",
 			JsType:  typeGameController,
 			Axes:    []int{axLeftX: 0, axLeftY: 1, axRightX: 3, axRightY: 4},
-			Buttons: []uint{btnLand: 0, btnTakeoff: 2, btnTakePhoto: 3},
+			Buttons: []uint{btnLand: 0, btnTakeoff: 2, btnTakePhoto: 3, btnSetHome: 4, btnReturnHome: 5},
 		},
 		JoystickConfig{
 			Name:    "T-Flight Hotas X", // Seeems to be the same on Linux and Windows
 			JsType:  typeFlightController,
 			Axes:    []int{axLeftX: 4, axLeftY: 2, axRightX: 0, axRightY: 1},
-			Buttons: []uint{btnTakePhoto: 4, btnLand: 5, btnTakeoff: 7},
+			Buttons: []uint{btnTakePhoto: 4, btnLand: 5, btnTakeoff: 7, btnSetHome: 1, btnReturnHome: 0},
 		},
 		JoystickConfig{
 			Name:    "XBox 360", // TODO - Untested
 			JsType:  typeGameController,
 			Axes:    []int{axLeftX: 0, axLeftY: 1, axRightX: 3, axRightY: 4},
-			Buttons: []uint{btnLand: 2, btnTakeoff: 3, btnTakePhoto: 0},
+			Buttons: []uint{btnLand: 2, btnTakeoff: 3, btnTakePhoto: 0, btnSetHome: 4, btnReturnHome: 5},
 		},
 	}
 )
@@ -265,7 +267,6 @@ func readJoystick(test bool) {
 				drone.TakePicture()
 			}
 		}
-
 		if jsState.Buttons&(1<<jsConfig.Buttons[btnTakeoff]) != 0 && prevState.Buttons&(1<<jsConfig.Buttons[btnTakeoff]) == 0 {
 			if test {
 				log.Println("Triangle/Y pressed")
@@ -278,6 +279,21 @@ func readJoystick(test bool) {
 				log.Println("Cross/X pressed")
 			} else {
 				drone.Land()
+			}
+		}
+		if jsState.Buttons&(1<<jsConfig.Buttons[btnSetHome]) != 0 && prevState.Buttons&(1<<jsConfig.Buttons[btnSetHome]) == 0 {
+			if test {
+				log.Println("L1/Left Shoulder pressed")
+			} else {
+				drone.SetHome()
+				menuBar.goHomeItem.SetSensitive(true)
+			}
+		}
+		if jsState.Buttons&(1<<jsConfig.Buttons[btnReturnHome]) != 0 && prevState.Buttons&(1<<jsConfig.Buttons[btnReturnHome]) == 0 {
+			if test {
+				log.Println("R1/Right Shoulder pressed")
+			} else {
+				drone.AutoFlyToXY(0, 0)
 			}
 		}
 
@@ -297,5 +313,7 @@ Left Stick    Turn left/right, go up/down
 ▲ Triangle, Y (Yellow)   Take off
 X  Cross, X (Blue)           Land
 □ Square, A (Green)      Take Photo
+L1, Left Shoulder           Set Home
+R1, Right Shoulder        Return To Home
 `)
 }
