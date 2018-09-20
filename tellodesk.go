@@ -8,11 +8,8 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"image"
 	"log"
-	"os"
 	"os/exec"
 	"runtime"
 	"strings"
@@ -28,16 +25,14 @@ import (
 //_ "net/http/pprof"
 
 const (
-	appCopyright                        = "©2018 S.Merrony"
-	appDisclaimer                       = "The author(s) is/are in no way\nconnected with Ryze®."
-	appHelpURL                          = "https://github.com/SMerrony/tellodesk/wiki"
-	appName                             = "Tello® Desk"
-	appSettingsFile                     = "tellodesk.yaml"
-	appVersion                          = "v0.1.0"
-	fdPeriodMs                          = 100
-	statusUpdatePeriodMs                = 250
-	normalVideoWidth, normalVideoHeight = 960, 720
-	wideVideoWidth, wideVideoHeight     = 1280, 720
+	appCopyright         = "©2018 S.Merrony"
+	appDisclaimer        = "The author(s) is/are in no way\nconnected with Ryze®."
+	appHelpURL           = "https://github.com/SMerrony/tellodesk/wiki"
+	appName              = "Tello® Desk"
+	appSettingsFile      = "tellodesk.yaml"
+	appVersion           = "v0.1.0"
+	fdPeriodMs           = 100
+	statusUpdatePeriodMs = 250
 )
 
 var appAuthors = []string{"Stephen Merrony"}
@@ -49,15 +44,8 @@ var (
 	fdChan                                    <-chan tello.FlightData
 	videoChan                                 <-chan []byte
 	stopFeedImageChan                         chan bool
-	feedWgt                                   *feedWgtT
+	feedWgt                                   *videoWgtT
 	videoWidth, videoHeight                   = normalVideoWidth, normalVideoHeight
-	newFeedImageMu                            sync.Mutex
-	newFeedImage                              bool
-	feedImage                                 *image.RGBA
-	videoRecMu                                sync.RWMutex
-	videoRecording                            bool
-	videoFile                                 *os.File
-	videoWriter                               *bufio.Writer
 	win                                       *gtk.Window
 	menuBar                                   *menuBarT
 	notebook                                  *gtk.Notebook
@@ -104,7 +92,7 @@ func main() {
 	notebook = gtk.NewNotebook()
 	vbox.PackStart(notebook, false, false, 1)
 
-	feedWgt = buildFeedWgt()
+	feedWgt = buildVideodWgt()
 	notebook.AppendPage(feedWgt, gtk.NewLabel("Live Feed"))
 
 	trackChart = buildTrackChart(videoWidth, videoHeight, defaultTrackScale,

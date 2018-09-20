@@ -12,6 +12,7 @@ import (
 	"image"
 	"log"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/mattn/go-gtk/gdk"
@@ -25,14 +26,29 @@ import (
 	"github.com/mattn/go-gtk/gtk"
 )
 
-type feedWgtT struct {
+const (
+	normalVideoWidth, normalVideoHeight = 960, 720
+	wideVideoWidth, wideVideoHeight     = 1280, 720
+)
+
+var (
+	newFeedImageMu sync.Mutex
+	newFeedImage   bool
+	feedImage      *image.RGBA
+	videoRecMu     sync.RWMutex
+	videoRecording bool
+	videoFile      *os.File
+	videoWriter    *bufio.Writer
+)
+
+type videoWgtT struct {
 	*gtk.Layout
 	image   *gtk.Image
 	message *gtk.Label
 }
 
-func buildFeedWgt() (wgt *feedWgtT) {
-	wgt = new(feedWgtT)
+func buildVideodWgt() (wgt *videoWgtT) {
+	wgt = new(videoWgtT)
 	wgt.Layout = gtk.NewLayout(nil, nil)
 	wgt.image = gtk.NewImageFromPixbuf(blueSkyPixbuf)
 	wgt.image.SetSizeRequest(videoWidth, videoHeight)
@@ -44,11 +60,11 @@ func buildFeedWgt() (wgt *feedWgtT) {
 	return wgt
 }
 
-func (wgt *feedWgtT) setMessage(msg string) {
+func (wgt *videoWgtT) setMessage(msg string) {
 	wgt.message.SetText(msg)
 }
 
-func (wgt *feedWgtT) clearMessage() {
+func (wgt *videoWgtT) clearMessage() {
 	wgt.message.SetText("")
 }
 
