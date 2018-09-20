@@ -63,9 +63,9 @@ func updateMessageCB() bool {
 	}
 	flightDataMu.RUnlock()
 	if msg == "" {
-		feedWgt.clearMessage()
+		videoWgt.clearMessage()
 	} else {
-		feedWgt.setMessage(msg)
+		videoWgt.setMessage(msg)
 	}
 	return true // continue the timer
 }

@@ -24,7 +24,7 @@ to the Tello network.`)
 		return // Comment this for GUI testing
 	}
 
-	startVideo()
+	videoWgt.startVideo()
 
 	if len(settings.JoystickType) > 0 {
 		err = openJoystick(settings.JoystickID, settings.JoystickType)
@@ -53,7 +53,7 @@ func disconnectCB() {
 	drone.VideoDisconnect()
 	drone.ControlDisconnect()
 
-	if len(settings.JoystickType) > 0 { 
+	if len(settings.JoystickType) > 0 {
 		js.Close()
 		drone.StopStickListener()
 	}

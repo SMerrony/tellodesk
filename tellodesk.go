@@ -44,7 +44,7 @@ var (
 	fdChan                                    <-chan tello.FlightData
 	videoChan                                 <-chan []byte
 	stopFeedImageChan                         chan bool
-	feedWgt                                   *videoWgtT
+	videoWgt                                   *videoWgtT
 	videoWidth, videoHeight                   = normalVideoWidth, normalVideoHeight
 	win                                       *gtk.Window
 	menuBar                                   *menuBarT
@@ -92,8 +92,8 @@ func main() {
 	notebook = gtk.NewNotebook()
 	vbox.PackStart(notebook, false, false, 1)
 
-	feedWgt = buildVideodWgt()
-	notebook.AppendPage(feedWgt, gtk.NewLabel("Live Feed"))
+	videoWgt = buildVideodWgt()
+	notebook.AppendPage(videoWgt, gtk.NewLabel("Live Feed"))
 
 	trackChart = buildTrackChart(videoWidth, videoHeight, defaultTrackScale,
 		menuBar.trackShowDrone.GetActive(), menuBar.trackShowPath.GetActive())

@@ -15,14 +15,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mattn/go-gtk/gdk"
-
-	"github.com/SMerrony/tello"
-
-	"github.com/mattn/go-gtk/glib"
-
 	"github.com/3d0c/gmf"
+	"github.com/SMerrony/tello"
+	"github.com/mattn/go-gtk/gdk"
 	"github.com/mattn/go-gtk/gdkpixbuf"
+	"github.com/mattn/go-gtk/glib"
 	"github.com/mattn/go-gtk/gtk"
 )
 
@@ -32,9 +29,6 @@ const (
 )
 
 var (
-	newFeedImageMu sync.Mutex
-	newFeedImage   bool
-	feedImage      *image.RGBA
 	videoRecMu     sync.RWMutex
 	videoRecording bool
 	videoFile      *os.File
@@ -42,9 +36,12 @@ var (
 )
 
 type videoWgtT struct {
-	*gtk.Layout
-	image   *gtk.Image
-	message *gtk.Label
+	*gtk.Layout    // use a layout so we can overlay a message etc.
+	image          *gtk.Image
+	feedImage      *image.RGBA
+	newFeedImageMu sync.Mutex
+	newFeedImage   bool
+	message        *gtk.Label
 }
 
 func buildVideodWgt() (wgt *videoWgtT) {
@@ -109,7 +106,7 @@ func stopRecordingVideoCB() {
 	menuBar.stopRecVidItem.SetSensitive(false)
 }
 
-func startVideo() {
+func (wgt *videoWgtT) startVideo() {
 
 	var err error
 
@@ -141,9 +138,9 @@ func startVideo() {
 
 	stopFeedImageChan = make(chan bool)
 
-	go videoListener()
+	go wgt.videoListener()
 
-	glib.TimeoutAdd(30, updateFeed)
+	glib.TimeoutAdd(30, wgt.updateFeed)
 }
 
 func customReader() ([]byte, int) {
@@ -168,7 +165,7 @@ func assert(i interface{}, err error) interface{} {
 }
 
 //func (app *tdApp) videoListener() {
-func videoListener() {
+func (wgt *videoWgtT) videoListener() {
 	iCtx := gmf.NewCtx()
 	defer iCtx.CloseInputAndRelease()
 
@@ -258,10 +255,10 @@ func videoListener() {
 		rgba.Rect = image.Rect(0, 0, videoWidth, videoHeight)
 		rgba.Pix = p.Data()
 
-		newFeedImageMu.Lock()
-		feedImage = rgba
-		newFeedImage = true
-		newFeedImageMu.Unlock()
+		wgt.newFeedImageMu.Lock()
+		wgt.feedImage = rgba
+		wgt.newFeedImage = true
+		wgt.newFeedImageMu.Unlock()
 
 		gmf.Release(p)
 		gmf.Release(frame)
@@ -273,9 +270,9 @@ func videoListener() {
 // updateFeed actually updates the video image in the feed tab.
 // It must be run on the main thread, so there is a little mutex dance to
 // check if a new image is ready for display.
-func updateFeed() bool {
-	newFeedImageMu.Lock()
-	if newFeedImage {
+func (wgt *videoWgtT) updateFeed() bool {
+	wgt.newFeedImageMu.Lock()
+	if wgt.newFeedImage {
 		var pbd gdkpixbuf.PixbufData
 		pbd.Colorspace = gdkpixbuf.GDK_COLORSPACE_RGB
 		pbd.HasAlpha = true
@@ -284,20 +281,20 @@ func updateFeed() bool {
 		pbd.Height = videoHeight
 		pbd.RowStride = videoWidth * 4 // RGBA
 
-		pbd.Data = feedImage.Pix
+		pbd.Data = wgt.feedImage.Pix
 
 		pb := gdkpixbuf.NewPixbufFromData(pbd)
-		feedWgt.image.SetFromPixbuf(pb)
+		videoWgt.image.SetFromPixbuf(pb)
 
-		newFeedImage = false
+		wgt.newFeedImage = false
 	}
-	newFeedImageMu.Unlock()
+	wgt.newFeedImageMu.Unlock()
 
 	// check if feed should be shutdown
 	select {
 	case <-stopFeedImageChan:
 		log.Println("Debug: updateFeed stopping")
-		feedWgt.image.SetFromPixbuf(blueSkyPixbuf)
+		wgt.image.SetFromPixbuf(blueSkyPixbuf)
 		return false // stops the timer
 	default:
 	}
