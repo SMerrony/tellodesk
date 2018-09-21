@@ -16,9 +16,6 @@ import (
 
 	"github.com/mattn/go-gtk/gdkpixbuf"
 	"github.com/mattn/go-gtk/gtk"
-	"golang.org/x/image/font"
-	"golang.org/x/image/font/basicfont"
-	"golang.org/x/image/math/fixed"
 )
 
 type trackChartT struct {
@@ -39,13 +36,12 @@ const defaultTrackScale float32 = 10.0
 func buildTrackChart(w, h int, scale float32, showDrone, showPath bool) (tc *trackChartT) {
 	tc = new(trackChartT)
 	tc.Image = gtk.NewImage()
-	tc.width = w
-	tc.height = h
+	tc.width, tc.height = w, h
 	tc.showDrone, tc.showPath = showDrone, showPath
 	tc.xOrigin = w / 2
 	tc.yOrigin = h / 2
 	tc.bgCol = color.White
-	tc.axesCol = color.RGBA{128, 128, 128, 255} // color.Black
+	tc.axesCol = color.RGBA{128, 128, 128, 255}
 	tc.labelCol = color.RGBA{128, 128, 128, 255}
 	tc.droneCol = color.RGBA{255, 0, 0, 255}
 	tc.maxOffset = scale
@@ -65,7 +61,6 @@ func buildTrackChart(w, h int, scale float32, showDrone, showPath bool) (tc *tra
 	tc.pixBuf = gdkpixbuf.NewPixbufFromData(tc.pbd)
 	tc.track = newTrack()
 	tc.drawEmptyChart()
-	//tc.Image = gtk.NewImageFromPixbuf(tc.pixBuf)
 	tc.SetFromPixbuf(tc.pixBuf)
 	return tc
 }
@@ -84,16 +79,7 @@ func (tc *trackChartT) clearChart() {
 	tc.pbd.Data = tc.backingImage.Pix
 	tc.pixBuf = gdkpixbuf.NewPixbufFromData(tc.pbd)
 	tc.SetFromPixbuf(tc.pixBuf)
-	//tc.Image = gtk.NewImageFromPixbuf(tc.pixBuf)
 }
-
-// func (tc *trackChartT) setShowDrone(show bool) {
-// 	tc.showDrone = show
-// }
-
-// func (tc *trackChartT) setShowPath(show bool) {
-// 	tc.showPath = show
-// }
 
 func (tc *trackChartT) drawEmptyChart() {
 	tc.clearChart()
@@ -128,20 +114,10 @@ func (tc *trackChartT) drawEmptyChart() {
 	tc.pbd.Data = tc.backingImage.Pix
 	tc.pixBuf = gdkpixbuf.NewPixbufFromData(tc.pbd)
 	tc.SetFromPixbuf(tc.pixBuf)
-	//tc.Image = gtk.NewImageFromPixbuf(tc.pixBuf)
 }
 
 func (tc *trackChartT) drawLabel(x, y float32, lab string) {
-	point := fixed.Point26_6{
-		X: fixed.Int26_6(tc.xToOrd(x) * 64),
-		Y: fixed.Int26_6(tc.yToOrd(y) * 64)}
-	d := &font.Drawer{
-		Dst:  tc.backingImage,
-		Src:  image.NewUniform(tc.labelCol),
-		Face: basicfont.Face7x13,
-		Dot:  point,
-	}
-	d.DrawString(lab)
+	drawPhysLabel(tc.backingImage, tc.xToOrd(x), tc.yToOrd(y), lab, tc.labelCol)
 }
 
 func (tc *trackChartT) drawTitles() {
@@ -166,21 +142,21 @@ func (tc *trackChartT) yToOrd(y float32) (yOrd int) {
 func (tc *trackChartT) drawPos(x, y float32, yaw int16) {
 	switch {
 	case yaw >= -45 && yaw <= 45: // N
-		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)-4, tc.yToOrd(y)+4, tc.droneCol)
-		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)+4, tc.yToOrd(y)+4, tc.droneCol)
-		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x), tc.yToOrd(y)+8, tc.droneCol)
+		drawPhysLine(tc.backingImage, tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)-4, tc.yToOrd(y)+4, tc.droneCol)
+		drawPhysLine(tc.backingImage, tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)+4, tc.yToOrd(y)+4, tc.droneCol)
+		drawPhysLine(tc.backingImage, tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x), tc.yToOrd(y)+8, tc.droneCol)
 	case yaw >= -135 && yaw < -45: // W
-		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)+4, tc.yToOrd(y)+4, tc.droneCol)
-		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)+4, tc.yToOrd(y)-4, tc.droneCol)
-		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)+8, tc.yToOrd(y), tc.droneCol)
+		drawPhysLine(tc.backingImage, tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)+4, tc.yToOrd(y)+4, tc.droneCol)
+		drawPhysLine(tc.backingImage, tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)+4, tc.yToOrd(y)-4, tc.droneCol)
+		drawPhysLine(tc.backingImage, tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)+8, tc.yToOrd(y), tc.droneCol)
 	case yaw > 45 && yaw < 135: // E
-		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)-4, tc.yToOrd(y)+4, tc.droneCol)
-		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)-4, tc.yToOrd(y)-4, tc.droneCol)
-		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)-8, tc.yToOrd(y), tc.droneCol)
+		drawPhysLine(tc.backingImage, tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)-4, tc.yToOrd(y)+4, tc.droneCol)
+		drawPhysLine(tc.backingImage, tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)-4, tc.yToOrd(y)-4, tc.droneCol)
+		drawPhysLine(tc.backingImage, tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)-8, tc.yToOrd(y), tc.droneCol)
 	default: // S
-		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)-4, tc.yToOrd(y)-4, tc.droneCol)
-		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)+4, tc.yToOrd(y)-4, tc.droneCol)
-		tc.physLine(tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x), tc.yToOrd(y)-8, tc.droneCol)
+		drawPhysLine(tc.backingImage, tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)-4, tc.yToOrd(y)-4, tc.droneCol)
+		drawPhysLine(tc.backingImage, tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x)+4, tc.yToOrd(y)-4, tc.droneCol)
+		drawPhysLine(tc.backingImage, tc.xToOrd(x), tc.yToOrd(y), tc.xToOrd(x), tc.yToOrd(y)-8, tc.droneCol)
 	}
 }
 
@@ -208,43 +184,5 @@ func (tc *trackChartT) drawTrack() {
 // helper funcs...
 
 func (tc *trackChartT) line(x0, y0, x1, y1 float32, col color.Color) {
-	tc.physLine(tc.xToOrd(x0), tc.yToOrd(y0), tc.xToOrd(x1), tc.yToOrd(y1), col)
-}
-
-func (tc *trackChartT) physLine(x0, y0, x1, y1 int, col color.Color) {
-	dx := x1 - x0
-	if dx < 0 {
-		dx = -dx
-	}
-	dy := y1 - y0
-	if dy < 0 {
-		dy = -dy
-	}
-	var sx, sy int
-	if x0 < x1 {
-		sx = 1
-	} else {
-		sx = -1
-	}
-	if y0 < y1 {
-		sy = 1
-	} else {
-		sy = -1
-	}
-	err := dx - dy
-	for {
-		tc.backingImage.Set(x0, y0, col)
-		if x0 == x1 && y0 == y1 {
-			break
-		}
-		e2 := 2 * err
-		if e2 > -dy {
-			err -= dy
-			x0 += sx
-		}
-		if e2 < dx {
-			err += dx
-			y0 += sy
-		}
-	}
+	drawPhysLine(tc.backingImage, tc.xToOrd(x0), tc.yToOrd(y0), tc.xToOrd(x1), tc.yToOrd(y1), col)
 }
