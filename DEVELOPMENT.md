@@ -1,10 +1,14 @@
 # Development Notes & Reminders
-
 ## Dependencies
 * 3d0c/gmf for video handling. For Linux version to work gmf must be later than Sep 01 2018.
 * simulatedsimian/joystick
 * mattn/go-gtk
 * SMerrony/tello >= v0.9.0
+  
+## Func Naming Conventions
+* Func names ending in ...CB are callbacks usually invoked from a menu or other GUI control
+* Func names ending in ...TCB are timer callbacks to be regualarly run  via glib.TimeoutAdd() - they should return true for the timeout to be renewed.
+* Important types are named ...T for clarity
 
 ## Goroutines
 * Joystick reader 

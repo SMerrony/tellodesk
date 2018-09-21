@@ -23,7 +23,7 @@ import (
 
 type trackChartT struct {
 	*gtk.Image
-	track                              *telloTrack
+	track                              *telloTrackT
 	backingImage                       *image.RGBA
 	pbd                                gdkpixbuf.PixbufData
 	pixBuf                             *gdkpixbuf.Pixbuf
@@ -203,7 +203,6 @@ func (tc *trackChartT) drawTrack() {
 	tc.drawTitles()
 	tc.pbd.Data = tc.backingImage.Pix
 	tc.SetFromPixbuf(tc.pixBuf)
-
 }
 
 // helper funcs...

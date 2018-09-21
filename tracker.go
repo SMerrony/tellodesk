@@ -26,6 +26,7 @@ import (
 
 const timeStampFmt = "20060102150405.000"
 
+// telloPosT defines an instantaneous position of the drone.
 type telloPosT struct {
 	timeStamp  time.Time
 	heightDm   int16
@@ -33,19 +34,21 @@ type telloPosT struct {
 	imuYaw     int16
 }
 
-type telloTrack struct {
+// telloTrackT contains a complete (or in-flight) track.
+type telloTrackT struct {
 	trackMu                sync.RWMutex
 	maxX, maxY, minX, minY float32
 	positions              []telloPosT
 }
 
-func newTrack() (tt *telloTrack) {
-	tt = new(telloTrack)
+func newTrack() (tt *telloTrackT) {
+	tt = new(telloTrackT)
 	tt.positions = make([]telloPosT, 0, 1000)
-
 	return tt
 }
 
+// toStrings converts a single position into an array of human-readable strings
+// suitable for CSV export etc.
 func (tp *telloPosT) toStrings() (strings []string) {
 	strings = append(strings, tp.timeStamp.Format(timeStampFmt))
 	strings = append(strings, fmt.Sprintf("%.3f", tp.mvoX))
@@ -55,6 +58,8 @@ func (tp *telloPosT) toStrings() (strings []string) {
 	return strings
 }
 
+// toStruct does the inverse of toStrings, converting an array of strings into
+// a single position struct.
 func toStruct(strings []string) (tp telloPosT, err error) {
 	tp.timeStamp, _ = time.Parse(timeStampFmt, strings[0])
 	var f64 float64
@@ -69,7 +74,10 @@ func toStruct(strings []string) (tp telloPosT, err error) {
 	return tp, err
 }
 
-func (tt *telloTrack) addPositionIfChanged(fd tello.FlightData) {
+// addPositionIfChanged appends a new position report to the track if any of
+// the mvoX, mvoY or Yaw have changed.  If only the timestamp has changed the
+// position is not added.
+func (tt *telloTrackT) addPositionIfChanged(fd tello.FlightData) {
 	var newPos telloPosT
 
 	newPos.heightDm = fd.Height
@@ -107,6 +115,65 @@ func (tt *telloTrack) addPositionIfChanged(fd tello.FlightData) {
 	}
 }
 
+// deriveScale returns the largest X or Y value rounded up to a whole number.
+func (tt *telloTrackT) deriveScale() (scale float32) {
+	scale = 1.0 // minimum scale value
+	if tt.maxX > scale {
+		scale = tt.maxX
+	}
+	if -tt.minX > scale {
+		scale = -tt.minX
+	}
+	if tt.maxY > scale {
+		scale = tt.maxY
+	}
+	if -tt.minY > scale {
+		scale = -tt.minY
+	}
+	scale = float32(math.Ceil(float64(scale)))
+	return scale
+}
+
+// simplify attempts to reduce the number of points in a track by eliminating consecutive postions that
+// are within minDist metres of the previous position.
+func (tt *telloTrackT) simplify(minDist float32) {
+	if minDist < 0.1 || minDist > 2.0 {
+		log.Printf("Track simplification ignored as minDist is out of range (0.1m ~ 2.0m): %f\n", minDist)
+		return
+	}
+	if len(tt.positions) < 3 {
+		log.Printf("Track too short to simplify (only %d points found).\n", len(tt.positions))
+		return
+	}
+	min64 := float64(minDist)
+	lastPos := tt.positions[0]
+	thisIx := 1
+	for thisIx < len(tt.positions) {
+		thisPos := tt.positions[thisIx]
+		xdiff := math.Abs(float64(lastPos.mvoX - thisPos.mvoX))
+		ydiff := math.Abs(float64(lastPos.mvoY - thisPos.mvoY))
+		zdiff := math.Abs(float64(lastPos.heightDm)-float64(thisPos.heightDm)) / 10.0
+		if xdiff < min64 && ydiff < min64 && zdiff < min64 {
+			tt.positions = append(tt.positions[:thisIx], tt.positions[thisIx+1:]...)
+			//log.Printf("xdiff: %f, ydiff: %f, zdiff: %f ... skipping\n", xdiff, ydiff, zdiff)
+		} else {
+			lastPos = tt.positions[thisIx]
+			thisIx++
+			//log.Printf("xdiff: %f, ydiff: %f, zdiff: %f ... keeping\n", xdiff, ydiff, zdiff)
+		}
+	}
+}
+
+func simplifyCB() {
+	posBefore := len(trackChart.track.positions)
+	trackChart.track.simplify(0.3) // eliminates points within 30cm of each other
+	posAfter := len(trackChart.track.positions)
+	msg := fmt.Sprintf("Positions before : %d\n\nPositions after  : %d", posBefore, posAfter)
+	messageDialog(win, gtk.MESSAGE_INFO, msg)
+	trackChart.drawTrack()
+}
+
+// exportTrackCB exports the (global) current track as a CSV file.  The user is prompted for a filename.
 func exportTrackCB() {
 	var expPath string
 	fs := gtk.NewFileChooserDialog(
@@ -139,6 +206,7 @@ func exportTrackCB() {
 	fs.Destroy()
 }
 
+// exportTrackImageCB saves the currently-displayed track as a PNG image.  The user is prompted for a filename.
 func exportTrackImageCB() {
 	var expPath string
 	fs := gtk.NewFileChooserDialog(
@@ -167,6 +235,7 @@ func exportTrackImageCB() {
 	fs.Destroy()
 }
 
+// importTrackCB asks the user for the name of a CSV track and tries to import it via readTrack() as the current track.
 func importTrackCB() {
 	var impPath string
 	fs := gtk.NewFileChooserDialog("Track to Import",
@@ -190,7 +259,7 @@ func importTrackCB() {
 				tmpTrack := readTrack(r)
 				trackChart.track = tmpTrack
 				trackChart.drawTrack()
-				notebook.SetCurrentPage(1) // Yuck
+				notebook.SetCurrentPage(trackPage)
 			}
 		}
 	}
@@ -208,7 +277,8 @@ func liveTrackerTCB() bool {
 	return true
 }
 
-func readTrack(r *csv.Reader) (trk *telloTrack) {
+// readTrack reads an open CSV file into a telloTrackT struct.
+func readTrack(r *csv.Reader) (trk *telloTrackT) {
 	trk = newTrack()
 	for {
 		line, err := r.Read()
@@ -244,22 +314,4 @@ func readTrack(r *csv.Reader) (trk *telloTrack) {
 	log.Printf("Min Y: %f, Max Y:, %f", trk.minY, trk.maxY)
 	log.Printf("Derived scale is %f", trk.deriveScale())
 	return trk
-}
-
-func (tt *telloTrack) deriveScale() (scale float32) {
-	scale = 1.0 // minimum scale value
-	if tt.maxX > scale {
-		scale = tt.maxX
-	}
-	if -tt.minX > scale {
-		scale = -tt.minX
-	}
-	if tt.maxY > scale {
-		scale = tt.maxY
-	}
-	if -tt.minY > scale {
-		scale = -tt.minY
-	}
-	scale = float32(math.Ceil(float64(scale)))
-	return scale
 }

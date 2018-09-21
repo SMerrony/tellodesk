@@ -44,11 +44,12 @@ var (
 	fdChan                                    <-chan tello.FlightData
 	videoChan                                 <-chan []byte
 	stopFeedImageChan                         chan bool
-	videoWgt                                   *videoWgtT
+	videoWgt                                  *videoWgtT
 	videoWidth, videoHeight                   = normalVideoWidth, normalVideoHeight
 	win                                       *gtk.Window
 	menuBar                                   *menuBarT
 	notebook                                  *gtk.Notebook
+	videoPage, trackPage                      int // IDs of the notebook pages for each tab
 	statusBar                                 *statusBarT
 
 	flightDataMu sync.RWMutex
@@ -93,11 +94,11 @@ func main() {
 	vbox.PackStart(notebook, false, false, 1)
 
 	videoWgt = buildVideodWgt()
-	notebook.AppendPage(videoWgt, gtk.NewLabel("Live Feed"))
+	videoPage = notebook.AppendPage(videoWgt, gtk.NewLabel("Live Feed"))
 
 	trackChart = buildTrackChart(videoWidth, videoHeight, defaultTrackScale,
 		menuBar.trackShowDrone.GetActive(), menuBar.trackShowPath.GetActive())
-	notebook.AppendPage(trackChart, gtk.NewLabel("Tracker"))
+	trackPage = notebook.AppendPage(trackChart, gtk.NewLabel("Tracker"))
 
 	statusBar = buildStatusbar()
 	vbox.PackEnd(statusBar, false, false, 0)
