@@ -259,6 +259,8 @@ func importTrackCB() {
 				tmpTrack := readTrack(r)
 				trackChart.track = tmpTrack
 				trackChart.drawTrack()
+				profileChart.track = tmpTrack
+				profileChart.drawProfile()
 				notebook.SetCurrentPage(trackPage)
 			}
 		}

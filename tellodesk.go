@@ -49,12 +49,13 @@ var (
 	win                                       *gtk.Window
 	menuBar                                   *menuBarT
 	notebook                                  *gtk.Notebook
-	videoPage, trackPage                      int // IDs of the notebook pages for each tab
+	videoPage, trackPage, profilePage         int // IDs of the notebook pages for each tab
 	statusBar                                 *statusBarT
 
 	flightDataMu sync.RWMutex
 	flightData   tello.FlightData
 	trackChart   *trackChartT
+	profileChart *profileChartT
 
 	settingsLoaded bool
 	settings       settingsT
@@ -99,6 +100,9 @@ func main() {
 	trackChart = buildTrackChart(videoWidth, videoHeight, defaultTrackScale,
 		menuBar.trackShowDrone.GetActive(), menuBar.trackShowPath.GetActive())
 	trackPage = notebook.AppendPage(trackChart, gtk.NewLabel("Tracker"))
+
+	profileChart = buildProfileChart(videoWidth, videoHeight, defaultTrackScale)
+	profilePage = notebook.AppendPage(profileChart, gtk.NewLabel("Profile"))
 
 	statusBar = buildStatusbar()
 	vbox.PackEnd(statusBar, false, false, 0)

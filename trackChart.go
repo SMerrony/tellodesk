@@ -65,7 +65,7 @@ func buildTrackChart(w, h int, scale float32, showDrone, showPath bool) (tc *tra
 	return tc
 }
 
-func (tc *trackChartT) resetScale() {
+func (tc *trackChartT) calcScale() {
 	tc.maxOffset = tc.track.deriveScale()
 	if tc.width >= tc.height { // scale to the shortest axis
 		tc.scalePPM = float32(tc.yOrigin) / tc.maxOffset
@@ -81,6 +81,7 @@ func (tc *trackChartT) clearChart() {
 	tc.SetFromPixbuf(tc.pixBuf)
 }
 
+// drawEmptyChart draws the custom 'graph paper' for blank and populated charts.
 func (tc *trackChartT) drawEmptyChart() {
 	tc.clearChart()
 	// blank vertical axis
@@ -129,11 +130,13 @@ func (tc *trackChartT) drawTitles() {
 	}
 }
 
+// xToOrd converts a horizontal value to its physical equivalent on an image
 func (tc *trackChartT) xToOrd(x float32) (xOrd int) {
 	xOrd = int(float32(tc.xOrigin) + x*tc.scalePPM)
 	return xOrd
 }
 
+// yToOrd converts a vertical value to its physical equivalent on an image
 func (tc *trackChartT) yToOrd(y float32) (yOrd int) {
 	yOrd = int(float32(tc.yOrigin) - y*tc.scalePPM)
 	return yOrd
@@ -162,7 +165,7 @@ func (tc *trackChartT) drawPos(x, y float32, yaw int16) {
 
 func (tc *trackChartT) drawTrack() {
 	if tc.track != nil {
-		tc.resetScale()
+		tc.calcScale()
 	}
 	tc.drawEmptyChart()
 	var lastX, lastY float32
