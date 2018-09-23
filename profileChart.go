@@ -40,10 +40,10 @@ func buildProfileChart(w, h int, scale float32) (pc *profileChartT) {
 	pc.xOrigin = 20
 	pc.yOrigin = h / 2
 	pc.bgCol = color.White
-	pc.axesCol = color.RGBA{255, 255, 255, 255}
-	pc.labelCol = color.RGBA{128, 128, 128, 128}
-	pc.lineCol = color.RGBA{255, 0, 0, 255}
-	pc.faintCol = color.RGBA{64, 64, 64, 64}
+	pc.axesCol = color.RGBA{0, 0, 0, 255}        // black
+	pc.labelCol = color.RGBA{128, 128, 128, 255} // dark grey
+	pc.lineCol = color.RGBA{255, 0, 0, 255}      // red
+	pc.faintCol = color.RGBA{192, 192, 192, 64}  // light grey
 
 	pc.maxOffset = scale
 	pc.yScalePPM = float32(pc.yOrigin) / scale
@@ -78,10 +78,9 @@ func (pc *profileChartT) calcScales() {
 	pc.maxOffset = pc.track.deriveScale()
 	pc.yScalePPM = float32(pc.yOrigin) / pc.maxOffset
 	// horizontal (time)
-	trackDur := pc.track.positions[len(pc.track.positions)-1].timeStamp.Sub(pc.track.positions[1].timeStamp) // FIXME
-	//trackDur = trackDur.Round(time.Minute)
-	pc.xScalePPS = float32(float64(pc.width-20) / trackDur.Seconds())
-	log.Printf("Debug: profileChart xScalePPS is: %f, from %f seconds\n", pc.xScalePPS, trackDur.Seconds())
+	pc.trackDuration = pc.track.positions[len(pc.track.positions)-1].timeStamp.Sub(pc.track.positions[1].timeStamp) // FIXME
+	pc.xScalePPS = float32(float64(pc.width-20) / pc.trackDuration.Seconds())
+	log.Printf("Debug: profileChart xScalePPS is: %f, from %f seconds\n", pc.xScalePPS, pc.trackDuration.Seconds())
 }
 
 // xToOrd converts a horizontal (time in secs) value to its physical equivalent on an image
@@ -102,6 +101,10 @@ func (pc *profileChartT) drawEmptyChart() {
 	// blank vertical axis
 	for y := 0; y < pc.height; y++ {
 		pc.backingImage.Set(pc.xOrigin, y, pc.axesCol)
+	}
+
+	for s := 60; s <= int(pc.trackDuration.Seconds()); s += 60 {
+		drawPhysLine(pc.backingImage, pc.xToOrd(float32(s)), 0, pc.xToOrd(float32(s)), pc.height, pc.faintCol)
 	}
 
 	// y-axis labels
