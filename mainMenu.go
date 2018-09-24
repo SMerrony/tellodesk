@@ -97,6 +97,10 @@ func buildMenu() (mb *menuBarT) {
 	mb.goHomeItem.Connect("activate", func() { drone.AutoFlyToXY(0, 0) })
 	navMenu.Append(mb.goHomeItem)
 
+	ca := gtk.NewMenuItemWithLabel("Cancel Auto-Flight (RTH)")
+	ca.Connect("activate", func() { drone.CancelAutoFlyToXY() })
+	navMenu.Append(ca)
+
 	// Track
 
 	trackItem := gtk.NewMenuItemWithLabel("Track")
