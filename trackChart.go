@@ -20,15 +20,15 @@ import (
 
 type trackChartT struct {
 	*gtk.Image
-	track                              *telloTrackT
-	backingImage                       *image.RGBA
-	pbd                                gdkpixbuf.PixbufData
-	pixBuf                             *gdkpixbuf.Pixbuf
-	width, height, xOrigin, yOrigin    int
-	bgCol, axesCol, labelCol, droneCol color.Color
-	maxOffset                          float32
-	scalePPM                           float32 // scale factor expressed as Pixels Per Metre
-	showDrone, showPath                bool
+	track                                        *telloTrackT
+	backingImage                                 *image.RGBA
+	pbd                                          gdkpixbuf.PixbufData
+	pixBuf                                       *gdkpixbuf.Pixbuf
+	width, height, xOrigin, yOrigin              int
+	bgCol, axesCol, labelCol, faintCol, droneCol color.Color
+	maxOffset                                    float32
+	scalePPM                                     float32 // scale factor expressed as Pixels Per Metre
+	showDrone, showPath                          bool
 }
 
 const defaultTrackScale float32 = 10.0
@@ -41,9 +41,10 @@ func buildTrackChart(w, h int, scale float32, showDrone, showPath bool) (tc *tra
 	tc.xOrigin = w / 2
 	tc.yOrigin = h / 2
 	tc.bgCol = color.White
-	tc.axesCol = color.RGBA{128, 128, 128, 255}
-	tc.labelCol = color.RGBA{128, 128, 128, 255}
-	tc.droneCol = color.RGBA{255, 0, 0, 255}
+	tc.axesCol = color.RGBA{0, 0, 0, 255}        // black
+	tc.labelCol = color.RGBA{128, 128, 128, 255} //dark grey
+	tc.faintCol = color.RGBA{192, 192, 192, 64}  // light grey
+	tc.droneCol = color.RGBA{255, 0, 0, 255}     // red
 	tc.maxOffset = scale
 	if w >= h { // scale to the shortest axis
 		tc.scalePPM = float32(tc.yOrigin) / scale
@@ -85,13 +86,11 @@ func (tc *trackChartT) clearChart() {
 func (tc *trackChartT) drawEmptyChart() {
 	tc.clearChart()
 	// blank vertical axis
-	for y := 0; y < tc.height; y++ {
-		tc.backingImage.Set(tc.xOrigin, y, tc.axesCol)
-	}
+	drawPhysLine(tc.backingImage, tc.xOrigin, 0, tc.xOrigin, tc.height, tc.axesCol)
+
 	// blank horizontal axis
-	for x := 0; x < tc.width; x++ {
-		tc.backingImage.Set(x, tc.yOrigin, tc.axesCol)
-	}
+	drawPhysLine(tc.backingImage, 0, tc.yOrigin, tc.width, tc.yOrigin, tc.axesCol)
+
 	// x-axis labels
 	var tickInterval float32 = 100.0
 	switch {
@@ -101,16 +100,21 @@ func (tc *trackChartT) drawEmptyChart() {
 		tickInterval = 10.0
 	}
 	for x := -tc.maxOffset; x <= tc.maxOffset; x += tickInterval {
+		if x != 0 {
+			drawPhysLine(tc.backingImage, tc.xToOrd(x), 0, tc.xToOrd(x), tc.height, tc.faintCol)
+		}
 		tc.backingImage.Set(tc.xOrigin+int(x*tc.scalePPM), tc.yOrigin-1, tc.axesCol)
 		tc.backingImage.Set(tc.xOrigin+int(x*tc.scalePPM), tc.yOrigin+1, tc.axesCol)
 		tc.drawLabel(x, 0, strconv.Itoa(int(x)))
 	}
 	// y-axis labels
 	for y := -tc.maxOffset; y <= tc.maxOffset; y += tickInterval {
+		if y != 0 {
+			drawPhysLine(tc.backingImage, 0, tc.yToOrd(y), tc.width, tc.yToOrd(y), tc.faintCol)
+		}
 		tc.backingImage.Set(tc.xOrigin-1, tc.yOrigin+int(y*tc.scalePPM), tc.axesCol)
 		tc.backingImage.Set(tc.xOrigin+1, tc.yOrigin+int(y*tc.scalePPM), tc.axesCol)
 		tc.drawLabel(0, y, strconv.Itoa(int(y)))
-		//fmt.Printf("Y label drawn at: %f\n", y)
 	}
 	tc.pbd.Data = tc.backingImage.Pix
 	tc.pixBuf = gdkpixbuf.NewPixbufFromData(tc.pbd)

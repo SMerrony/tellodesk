@@ -122,9 +122,8 @@ func (pc *profileChartT) drawEmptyChart() {
 		drawPhysLine(pc.backingImage, pc.xOrigin, pc.yOrigin+int(y*pc.yScalePPM), pc.width, pc.yOrigin+int(y*pc.yScalePPM), pc.faintCol)
 	}
 	// blank horizontal axis
-	for x := pc.xOrigin; x < pc.width; x++ {
-		pc.backingImage.Set(x, pc.yOrigin, pc.axesCol)
-	}
+	drawPhysLine(pc.backingImage, pc.xOrigin, pc.yOrigin, pc.width, pc.yOrigin, pc.axesCol)
+
 	pc.pbd.Data = pc.backingImage.Pix
 	pc.pixBuf = gdkpixbuf.NewPixbufFromData(pc.pbd)
 	pc.SetFromPixbuf(pc.pixBuf)

@@ -167,10 +167,12 @@ func (tt *telloTrackT) simplify(minDist float32) {
 func simplifyCB() {
 	posBefore := len(trackChart.track.positions)
 	trackChart.track.simplify(0.3) // eliminates points within 30cm of each other
+	profileChart.track = trackChart.track
 	posAfter := len(trackChart.track.positions)
 	msg := fmt.Sprintf("Positions before : %d\n\nPositions after  : %d", posBefore, posAfter)
 	messageDialog(win, gtk.MESSAGE_INFO, msg)
 	trackChart.drawTrack()
+	profileChart.drawProfile()
 }
 
 // exportTrackCB exports the (global) current track as a CSV file.  The user is prompted for a filename.
@@ -271,6 +273,7 @@ func importTrackCB() {
 // liveTracker is to be run at intervals (not as a goroutine)
 func liveTrackerTCB() bool {
 	trackChart.drawTrack()
+	profileChart.drawProfile()
 	select {
 	case <-liveTrackStopChan:
 		return false
