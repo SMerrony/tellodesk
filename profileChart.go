@@ -99,12 +99,12 @@ func (pc *profileChartT) yToOrd(y float32) (yOrd int) {
 func (pc *profileChartT) drawEmptyChart() {
 	pc.clearChart()
 	// blank vertical axis
-	for y := 0; y < pc.height; y++ {
-		pc.backingImage.Set(pc.xOrigin, y, pc.axesCol)
-	}
+	drawPhysLine(pc.backingImage, pc.xOrigin, 0, pc.xOrigin, pc.height, pc.axesCol)
 
+	// faint vertical grid lines - 1 per minute
 	for s := 60; s <= int(pc.trackDuration.Seconds()); s += 60 {
 		drawPhysLine(pc.backingImage, pc.xToOrd(float32(s)), 0, pc.xToOrd(float32(s)), pc.height, pc.faintCol)
+		drawPhysLabel(pc.backingImage, pc.xToOrd(float32(s)), pc.yToOrd(0)-10, fmt.Sprintf("%d'", s/60), pc.labelCol)
 	}
 
 	// y-axis labels
