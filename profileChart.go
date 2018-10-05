@@ -75,11 +75,11 @@ func (pc *profileChartT) clearChart() {
 
 func (pc *profileChartT) calcScales() {
 	// vertical (height)
-	pc.maxOffset = pc.track.deriveScale()
+	pc.maxOffset = pc.track.deriveVerticalScale()
 	pc.yScalePPM = float32(pc.yOrigin) / pc.maxOffset
 	// horizontal (time)
 	if len(pc.track.positions) > 3 {
-		pc.trackDuration = pc.track.positions[len(pc.track.positions)-1].timeStamp.Sub(pc.track.positions[1].timeStamp) // FIXME
+		pc.trackDuration = pc.track.positions[len(pc.track.positions)-1].timeStamp.Sub(pc.track.positions[1].timeStamp)
 	} else {
 		pc.trackDuration = time.Minute
 	}

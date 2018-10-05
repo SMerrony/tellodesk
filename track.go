@@ -136,6 +136,18 @@ func (tt *telloTrackT) deriveScale() (scale float32) {
 	return scale
 }
 
+func (tt *telloTrackT) deriveVerticalScale() (scale float32) {
+	scale = 1.0 // min
+	if tt.maxY > scale {
+		scale = tt.maxY
+	}
+	if -tt.minY > scale {
+		scale = -tt.minY
+	}
+	scale = float32(math.Ceil(float64(scale)))
+	return scale
+}
+
 // simplify attempts to reduce the number of points in a track by eliminating consecutive postions that
 // are within minDist metres of the previous position.
 func (tt *telloTrackT) simplify(minDist float32) {
@@ -185,6 +197,7 @@ func exportTrackCB() {
 		win,
 		gtk.FILE_CHOOSER_ACTION_SAVE, "_Cancel", gtk.RESPONSE_CANCEL, "_Export", gtk.RESPONSE_ACCEPT)
 	fs.SetCurrentFolder(settings.DataDir)
+	fs.SetLocalOnly(true)
 	ff := gtk.NewFileFilter()
 	ff.AddPattern("*.csv")
 	fs.SetFilter(ff)
@@ -247,6 +260,7 @@ func importTrackCB() {
 		gtk.FILE_CHOOSER_ACTION_OPEN,
 		"_Cancel", gtk.RESPONSE_CANCEL, "_Import", gtk.RESPONSE_ACCEPT)
 	fs.SetCurrentFolder(settings.DataDir)
+	fs.SetLocalOnly(true)
 	ff := gtk.NewFileFilter()
 	ff.AddPattern("*.csv")
 	fs.SetFilter(ff)
