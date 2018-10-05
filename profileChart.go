@@ -78,7 +78,11 @@ func (pc *profileChartT) calcScales() {
 	pc.maxOffset = pc.track.deriveScale()
 	pc.yScalePPM = float32(pc.yOrigin) / pc.maxOffset
 	// horizontal (time)
-	pc.trackDuration = pc.track.positions[len(pc.track.positions)-1].timeStamp.Sub(pc.track.positions[1].timeStamp) // FIXME
+	if len(pc.track.positions) > 3 {
+		pc.trackDuration = pc.track.positions[len(pc.track.positions)-1].timeStamp.Sub(pc.track.positions[1].timeStamp) // FIXME
+	} else {
+		pc.trackDuration = time.Minute
+	}
 	pc.xScalePPS = float32(float64(pc.width-20) / pc.trackDuration.Seconds())
 	log.Printf("Debug: profileChart xScalePPS is: %f, from %f seconds\n", pc.xScalePPS, pc.trackDuration.Seconds())
 }
@@ -140,7 +144,7 @@ func (pc *profileChartT) drawTitles() {
 }
 
 func (pc *profileChartT) drawProfile() {
-	if pc.track == nil {
+	if pc.track == nil || len(pc.track.positions) < 3 {
 		return
 	}
 	pc.calcScales()

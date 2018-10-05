@@ -86,9 +86,11 @@ func (tt *telloTrackT) addPositionIfChanged(fd tello.FlightData) {
 	newPos.imuYaw = fd.IMU.Yaw
 
 	if len(tt.positions) == 0 {
-		tt.trackMu.Lock()
-		tt.positions = append(tt.positions, newPos)
-		tt.trackMu.Unlock()
+		if newPos.heightDm != 0 && newPos.mvoX != 0 && newPos.mvoY != 0 {
+			tt.trackMu.Lock()
+			tt.positions = append(tt.positions, newPos)
+			tt.trackMu.Unlock()
+		}
 	} else {
 		lastPos := tt.positions[len(tt.positions)-1]
 		if lastPos.heightDm == newPos.heightDm && lastPos.mvoX == newPos.mvoX && lastPos.mvoY == newPos.mvoY && lastPos.imuYaw == newPos.imuYaw {
