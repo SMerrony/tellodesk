@@ -183,6 +183,15 @@ func (tc *trackChartT) drawTrack() {
 			lastY = pos.mvoY
 		}
 	}
+	drawPhysLabel(tc.backingImage,
+		tc.xToOrd(tc.track.positions[0].mvoX),
+		tc.yToOrd(tc.track.positions[0].mvoY),
+		"Start", tc.labelCol)
+	last := len(tc.track.positions) - 1
+	drawPhysLabel(tc.backingImage,
+		tc.xToOrd(tc.track.positions[last].mvoX),
+		tc.yToOrd(tc.track.positions[last].mvoY),
+		"Finish", tc.labelCol)
 	tc.drawTitles()
 	tc.pbd.Data = tc.backingImage.Pix
 	tc.SetFromPixbuf(tc.pixBuf)
