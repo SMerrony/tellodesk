@@ -288,8 +288,10 @@ func importTrackCB() {
 
 // liveTracker is to be run at intervals (not as a goroutine)
 func liveTrackerTCB() bool {
-	trackChart.drawTrack()
-	profileChart.drawProfile()
+	if len(trackChart.track.positions) > 2 {
+		trackChart.drawTrack()
+		profileChart.drawProfile()
+	}
 	select {
 	case <-liveTrackStopChan:
 		return false
