@@ -101,7 +101,7 @@ var (
 		JoystickConfig{
 			Name:    "XBox 360", // TODO - Untested
 			JsType:  typeGameController,
-			Axes:    []int{axLeftX: 0, axLeftY: 1, axRightX: 3, axRightY: 4},
+			Axes:    []int{axLeftX: 0, axLeftY: 1, axRightX: 4, axRightY: 5},
 			Buttons: []uint{btnLand: 2, btnTakeoff: 3, btnTakePhoto: 0, btnSetHome: 4, btnReturnHome: 5},
 		},
 	}
@@ -121,7 +121,7 @@ var (
 		JoystickConfig{
 			Name:    "XBox 360", // TODO - Untested
 			JsType:  typeGameController,
-			Axes:    []int{axLeftX: 0, axLeftY: 1, axRightX: 3, axRightY: 4},
+			Axes:    []int{axLeftX: 0, axLeftY: 1, axRightX: 4, axRightY: 5},
 			Buttons: []uint{btnLand: 2, btnTakeoff: 3, btnTakePhoto: 0, btnSetHome: 4, btnReturnHome: 5},
 		},
 	}
