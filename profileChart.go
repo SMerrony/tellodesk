@@ -12,7 +12,6 @@ import (
 	"image"
 	"image/color"
 	"image/draw"
-	"log"
 	"strconv"
 	"time"
 
@@ -75,7 +74,7 @@ func (pc *profileChartT) clearChart() {
 
 func (pc *profileChartT) calcScales() {
 	// vertical (height)
-	pc.maxOffset = pc.track.deriveVerticalScale()
+	pc.maxOffset = pc.track.deriveHeightScale()
 	pc.yScalePPM = float32(pc.yOrigin) / pc.maxOffset
 	// horizontal (time)
 	if len(pc.track.positions) > 3 {
@@ -84,7 +83,7 @@ func (pc *profileChartT) calcScales() {
 		pc.trackDuration = time.Minute
 	}
 	pc.xScalePPS = float32(float64(pc.width-20) / pc.trackDuration.Seconds())
-	log.Printf("Debug: profileChart xScalePPS is: %f, from %f seconds\n", pc.xScalePPS, pc.trackDuration.Seconds())
+	// log.Printf("Debug: profileChart xScalePPS is: %f, from %f seconds\n", pc.xScalePPS, pc.trackDuration.Seconds())
 }
 
 // xToOrd converts a horizontal (time in secs) value to its physical equivalent on an image

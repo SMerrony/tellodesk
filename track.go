@@ -36,9 +36,10 @@ type telloPosT struct {
 
 // telloTrackT contains a complete (or in-flight) track.
 type telloTrackT struct {
-	trackMu                sync.RWMutex
-	maxX, maxY, minX, minY float32
-	positions              []telloPosT
+	trackMu                  sync.RWMutex
+	maxX, maxY, minX, minY   float32
+	maxHeightDm, minHeightDm int16
+	positions                []telloPosT
 }
 
 func newTrack() (tt *telloTrackT) {
@@ -109,11 +110,19 @@ func (tt *telloTrackT) addPositionIfChanged(fd tello.FlightData) {
 	if newPos.mvoX > tt.maxX {
 		tt.maxX = newPos.mvoX
 	}
+
 	if newPos.mvoY < tt.minY {
 		tt.minY = newPos.mvoY
 	}
 	if newPos.mvoY > tt.maxY {
 		tt.maxY = newPos.mvoY
+	}
+
+	if newPos.heightDm < tt.minHeightDm {
+		tt.minHeightDm = newPos.heightDm
+	}
+	if newPos.heightDm > tt.maxHeightDm {
+		tt.maxHeightDm = newPos.heightDm
 	}
 }
 
@@ -136,15 +145,15 @@ func (tt *telloTrackT) deriveScale() (scale float32) {
 	return scale
 }
 
-func (tt *telloTrackT) deriveVerticalScale() (scale float32) {
-	scale = 1.0 // min
-	if tt.maxY > scale {
-		scale = tt.maxY
+func (tt *telloTrackT) deriveHeightScale() (scale float32) {
+	var tmpScale int16 = 1 // min
+	if tt.maxHeightDm > tmpScale {
+		tmpScale = tt.maxHeightDm
 	}
-	if -tt.minY > scale {
-		scale = -tt.minY
+	if -tt.minHeightDm > tmpScale {
+		tmpScale = -tt.minHeightDm
 	}
-	scale = float32(math.Ceil(float64(scale)))
+	scale = float32(math.Ceil(float64(tmpScale)) + 1.0)
 	return scale
 }
 
