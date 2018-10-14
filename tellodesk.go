@@ -101,7 +101,7 @@ func main() {
 		menuBar.trackShowDrone.GetActive(), menuBar.trackShowPath.GetActive())
 	trackPage = notebook.AppendPage(trackChart, gtk.NewLabel("Tracker"))
 
-	profileChart = buildProfileChart(videoWidth, videoHeight, defaultTrackScale)
+	profileChart = buildProfileChart(videoWidth, videoHeight)
 	profilePage = notebook.AppendPage(profileChart, gtk.NewLabel("Profile"))
 
 	statusBar = buildStatusbar()

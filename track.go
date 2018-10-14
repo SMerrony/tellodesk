@@ -146,14 +146,14 @@ func (tt *telloTrackT) deriveScale() (scale float32) {
 }
 
 func (tt *telloTrackT) deriveHeightScale() (scale float32) {
-	var tmpScale int16 = 1 // min
+	var tmpScale int16 = 10 // min
 	if tt.maxHeightDm > tmpScale {
 		tmpScale = tt.maxHeightDm
 	}
 	if -tt.minHeightDm > tmpScale {
 		tmpScale = -tt.minHeightDm
 	}
-	scale = float32(math.Ceil(float64(tmpScale)) + 1.0)
+	scale = float32(tmpScale/10) + 1.0
 	return scale
 }
 
@@ -333,6 +333,7 @@ func readTrack(r *csv.Reader) (trk *telloTrackT) {
 		if tmpTrackPos.mvoX > trk.maxX {
 			trk.maxX = tmpTrackPos.mvoX
 		}
+
 		if tmpTrackPos.mvoY < trk.minY {
 			trk.minY = tmpTrackPos.mvoY
 		}
@@ -340,10 +341,16 @@ func readTrack(r *csv.Reader) (trk *telloTrackT) {
 			trk.maxY = tmpTrackPos.mvoY
 		}
 
+		if tmpTrackPos.heightDm < trk.minHeightDm {
+			trk.minHeightDm = tmpTrackPos.heightDm
+		}
+		if tmpTrackPos.heightDm > trk.maxHeightDm {
+			trk.maxHeightDm = tmpTrackPos.heightDm
+		}
 	}
-	log.Printf("Imported %d track positions", len(trk.positions))
-	log.Printf("Min X: %f, Max X:, %f", trk.minX, trk.maxX)
-	log.Printf("Min Y: %f, Max Y:, %f", trk.minY, trk.maxY)
-	log.Printf("Derived scale is %f", trk.deriveScale())
+	// log.Printf("Imported %d track positions", len(trk.positions))
+	// log.Printf("Min X: %f, Max X:, %f", trk.minX, trk.maxX)
+	// log.Printf("Min Y: %f, Max Y:, %f", trk.minY, trk.maxY)
+	// log.Printf("Derived scale is %f", trk.deriveScale())
 	return trk
 }

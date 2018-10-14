@@ -32,7 +32,7 @@ type profileChartT struct {
 	trackDuration                               time.Duration
 }
 
-func buildProfileChart(w, h int, scale float32) (pc *profileChartT) {
+func buildProfileChart(w, h int) (pc *profileChartT) {
 	pc = new(profileChartT)
 	pc.Image = gtk.NewImage()
 	pc.width, pc.height = w, h
@@ -44,8 +44,8 @@ func buildProfileChart(w, h int, scale float32) (pc *profileChartT) {
 	pc.lineCol = color.RGBA{255, 0, 0, 255}      // red
 	pc.faintCol = color.RGBA{192, 192, 192, 64}  // light grey
 
-	pc.maxOffset = scale
-	pc.yScalePPM = float32(pc.yOrigin) / scale
+	pc.maxOffset = 10
+	pc.yScalePPM = float32(pc.yOrigin) / 10
 
 	pc.trackDuration, _ = time.ParseDuration("1m")
 
@@ -113,11 +113,12 @@ func (pc *profileChartT) drawEmptyChart() {
 	// y-axis labels
 	var yTickInterval float32 = 100.0
 	switch {
-	case pc.maxOffset < 10.1:
+	case pc.maxOffset < 11.1:
 		yTickInterval = 1.0
-	case pc.maxOffset < 101.0:
+	case pc.maxOffset < 101.1:
 		yTickInterval = 10.0
 	}
+	//log.Printf("Debug: drawEmptyChart() - maxOffset: %f, yTickInterval: %f\n", pc.maxOffset, yTickInterval)
 	for y := -pc.maxOffset; y <= pc.maxOffset; y += yTickInterval {
 		pc.backingImage.Set(pc.xOrigin-1, pc.yOrigin+int(y*pc.yScalePPM), pc.axesCol)
 		pc.backingImage.Set(pc.xOrigin+1, pc.yOrigin+int(y*pc.yScalePPM), pc.axesCol)
