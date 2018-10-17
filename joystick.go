@@ -61,7 +61,11 @@ const (
 	btnCancelAuto
 )
 
-const deadZone = 2000
+const (
+	deadZone = 2000
+	maxZone  = 16000
+	maxVal   = 32767
+)
 
 const jsUpdatePeriod = 40 * time.Millisecond // 40ms = 25Hz
 
@@ -217,29 +221,30 @@ func readJoystick(test bool) {
 		}
 
 		if jsState.AxisData[jsConfig.Axes[axLeftX]] == 32768 {
-			sm.Lx = 32767
+			sm.Lx = maxVal
 		} else {
 			sm.Lx = int16(jsState.AxisData[jsConfig.Axes[axLeftX]])
 		}
 
 		if jsState.AxisData[jsConfig.Axes[axLeftY]] == 32768 {
-			sm.Ly = -32767
+			sm.Ly = -maxVal
 		} else {
 			sm.Ly = -int16(jsState.AxisData[jsConfig.Axes[axLeftY]])
 		}
 
 		if jsState.AxisData[jsConfig.Axes[axRightX]] == 32768 {
-			sm.Rx = 32767
+			sm.Rx = maxVal
 		} else {
 			sm.Rx = int16(jsState.AxisData[jsConfig.Axes[axRightX]])
 		}
 
 		if jsState.AxisData[jsConfig.Axes[axRightY]] == 32768 {
-			sm.Ry = -32767
+			sm.Ry = -maxVal
 		} else {
 			sm.Ry = -int16(jsState.AxisData[jsConfig.Axes[axRightY]])
 		}
 
+		// zero out values in dead zone
 		if intAbs(sm.Lx) < deadZone {
 			sm.Lx = 0
 		}
@@ -251,6 +256,34 @@ func readJoystick(test bool) {
 		}
 		if intAbs(sm.Ry) < deadZone {
 			sm.Ry = 0
+		}
+
+		if sm.Lx > maxZone {
+			sm.Lx = maxVal
+		}
+		if sm.Lx < -maxZone {
+			sm.Lx = -maxVal
+		}
+
+		if sm.Ly > maxZone {
+			sm.Ly = maxVal
+		}
+		if sm.Ly < -maxZone {
+			sm.Ly = -maxVal
+		}
+
+		if sm.Rx > maxZone {
+			sm.Rx = maxVal
+		}
+		if sm.Rx < -maxZone {
+			sm.Rx = -maxVal
+		}
+
+		if sm.Ry > maxZone {
+			sm.Ry = maxVal
+		}
+		if sm.Ry < -maxZone {
+			sm.Ry = -maxVal
 		}
 
 		if test {
