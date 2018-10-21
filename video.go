@@ -48,7 +48,7 @@ func buildVideodWgt() (wgt *videoWgtT) {
 	wgt = new(videoWgtT)
 	wgt.Layout = gtk.NewLayout(nil, nil)
 	wgt.image = gtk.NewImageFromPixbuf(blueSkyPixbuf)
-	wgt.image.SetSizeRequest(videoWidth, videoHeight)
+	//wgt.image.SetSizeRequest(videoWidth, videoHeight)
 	wgt.Add(wgt.image)
 	wgt.message = gtk.NewLabel("")
 	wgt.message.ModifyFontEasy("Sans 20")

@@ -80,6 +80,7 @@ func main() {
 	getSettings()
 	if settings.WideVideo {
 		videoWidth, videoHeight = wideVideoWidth, wideVideoHeight
+		blueSkyPixbuf = blueSkyPixbuf.ScaleSimple(videoWidth, videoHeight, gdkpixbuf.INTERP_BILINEAR)
 	}
 	win.SetResizable(false) // Gtk does the right thing and sets the size after laying out
 	win.Connect("destroy", func() {
