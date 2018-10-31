@@ -54,6 +54,7 @@ var (
 
 	flightDataMu sync.RWMutex
 	flightData   tello.FlightData
+	liveTrack    *telloTrackT
 	trackChart   *trackChartT
 	profileChart *profileChartT
 
@@ -98,7 +99,9 @@ func main() {
 	videoWgt = buildVideodWgt()
 	videoPage = notebook.AppendPage(videoWgt, gtk.NewLabel("Live Feed"))
 
-	trackChart = buildTrackChart(videoWidth, videoHeight, defaultTrackScale,
+	liveTrack = newTrack()
+
+	trackChart = buildTrackChart(liveTrack, videoWidth, videoHeight, defaultTrackScale,
 		menuBar.trackShowDrone.GetActive(), menuBar.trackShowPath.GetActive())
 	trackPage = notebook.AppendPage(trackChart, gtk.NewLabel("Tracker"))
 

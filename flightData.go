@@ -25,7 +25,7 @@ func fdListener() {
 				log.Println("On Ground")
 			}
 			if tmpFd.LightStrength == 0 {
-				trackChart.track.addPositionIfChanged(tmpFd)
+				liveTrack.addPositionIfChanged(tmpFd)
 			}
 		case <-fdStopChan:
 			return

@@ -220,11 +220,11 @@ func exportTrackCB() {
 			} else {
 				defer exp.Close()
 				w := csv.NewWriter(exp)
-				trackChart.track.trackMu.RLock()
-				for _, k := range trackChart.track.positions {
+				liveTrack.trackMu.RLock()
+				for _, k := range liveTrack.positions {
 					w.Write(k.toStrings())
 				}
-				trackChart.track.trackMu.RUnlock()
+				liveTrack.trackMu.RUnlock()
 				w.Flush()
 			}
 		}
@@ -282,13 +282,18 @@ func importTrackCB() {
 				messageDialog(win, gtk.MESSAGE_INFO, "Could not open track CSV file.")
 			} else {
 				defer imp.Close()
-				r := csv.NewReader(bufio.NewReader(imp))
-				tmpTrack := readTrack(r)
-				trackChart.track = tmpTrack
-				trackChart.drawTrack()
-				profileChart.track = tmpTrack
-				profileChart.drawProfile()
-				notebook.SetCurrentPage(trackPage)
+				stat, err := imp.Stat()
+				if err != nil || stat.Size() == 0 {
+					messageDialog(win, gtk.MESSAGE_ERROR, "Invalid track CSV file")
+				} else {
+					r := csv.NewReader(bufio.NewReader(imp))
+					liveTrack = readTrack(r)
+					trackChart.track = liveTrack
+					trackChart.drawTrack()
+					profileChart.track = liveTrack
+					profileChart.drawProfile()
+					notebook.SetCurrentPage(trackPage)
+				}
 			}
 		}
 	}

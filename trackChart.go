@@ -33,7 +33,7 @@ type trackChartT struct {
 
 const defaultTrackScale float32 = 10.0
 
-func buildTrackChart(w, h int, scale float32, showDrone, showPath bool) (tc *trackChartT) {
+func buildTrackChart(trk *telloTrackT, w, h int, scale float32, showDrone, showPath bool) (tc *trackChartT) {
 	tc = new(trackChartT)
 	tc.Image = gtk.NewImage()
 	tc.width, tc.height = w, h
@@ -60,7 +60,7 @@ func buildTrackChart(w, h int, scale float32, showDrone, showPath bool) (tc *tra
 	tc.pbd.RowStride = tc.backingImage.Stride
 	tc.pbd.Data = tc.backingImage.Pix
 	tc.pixBuf = gdkpixbuf.NewPixbufFromData(tc.pbd)
-	tc.track = newTrack()
+	tc.track = trk
 	tc.drawEmptyChart()
 	tc.SetFromPixbuf(tc.pixBuf)
 	return tc

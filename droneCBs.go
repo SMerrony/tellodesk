@@ -39,7 +39,7 @@ to the Tello network.`)
 		}
 	}
 
-	trackChart.track = newTrack()
+	// trackChart.track = newTrack()
 	glib.TimeoutAdd(500, liveTrackerTCB) // start the live tracker, cancelled via liveTrackStopChan
 
 	fdChan, _ = drone.StreamFlightData(false, fdPeriodMs)
