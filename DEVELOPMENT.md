@@ -4,6 +4,13 @@
 * simulatedsimian/joystick
 * mattn/go-gtk
 * SMerrony/tello >= v0.9.0
+
+## Building on Ubuntu 18.04 (Bionic Beaver)
+* Install all the -dev packages for libav* using any package manager
+* `go get github.com/3d0c/gmf` - don't worry about the error
+* cd into the github.com/3d0c/gmf directory
+* `git checkout ec1401b491850f6cce7615f222072d0d473f1c80`
+* redo the `go get` command above, there will be one warning you can safely ignore
   
 ## Func Naming Conventions
 * Func names ending in ...CB are callbacks usually invoked from a menu or other GUI control
