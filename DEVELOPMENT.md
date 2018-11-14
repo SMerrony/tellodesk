@@ -42,6 +42,8 @@ Images are embedded using the go-gtk tool make_inline_pixbuf.  Command looks lik
 
 `$GOBIN/make_inline_pixbuf.exe blueSkyPNG resources/sky960x720.png  > blueSky.gen.go`
 
+ `make_inline_pixbuf.exe iconPNG resources/TD.png > icon.gen.go`
+
 Generated files:
 * blueSky.gen.go
 * icon.gen.go
