@@ -188,14 +188,53 @@ func (tt *telloTrackT) simplify(minDist float32) {
 }
 
 func simplifyCB() {
-	posBefore := len(trackChart.track.positions)
-	trackChart.track.simplify(0.3) // eliminates points within 30cm of each other
-	profileChart.track = trackChart.track
-	posAfter := len(trackChart.track.positions)
-	msg := fmt.Sprintf("Positions before : %d\n\nPositions after  : %d", posBefore, posAfter)
-	messageDialog(win, gtk.MESSAGE_INFO, msg)
-	trackChart.drawTrack()
-	profileChart.drawProfile()
+
+	sd := gtk.NewDialog()
+	sd.SetTitle(appName + " Simplify Track")
+	sd.SetIcon(iconPixbuf)
+	sd.SetPosition(gtk.WIN_POS_CENTER_ON_PARENT)
+	hbox := gtk.NewHBox(false, 10)
+	hbox.Add(gtk.NewLabel("Minimum Horizontal Distance:"))
+	hdd := gtk.NewComboBoxText()
+	hdd.AppendText("0.1m")
+	hdd.AppendText("0.2m")
+	hdd.AppendText("0.3m")
+	hdd.AppendText("0.5m")
+	hdd.AppendText("1.0m")
+	hdd.SetActive(1) // default to 0.2m
+	hbox.Add(hdd)
+	sd.GetVBox().PackStart(hbox, true, true, 5)
+	sd.AddButton("Cancel", gtk.RESPONSE_CANCEL)
+	sd.AddButton("OK", gtk.RESPONSE_OK)
+	sd.SetDefaultResponse(gtk.RESPONSE_OK)
+	sd.ShowAll()
+
+	response := sd.Run()
+
+	if response == gtk.RESPONSE_OK {
+		posBefore := len(trackChart.track.positions)
+		var scale float32
+		switch hdd.GetActive() {
+		case 0:
+			scale = 0.1
+		case 1:
+			scale = 0.2
+		case 2:
+			scale = 0.3
+		case 3:
+			scale = 0.5
+		case 4:
+			scale = 1.0
+		}
+		trackChart.track.simplify(scale) // eliminates points within `scale` of each other
+		profileChart.track = trackChart.track
+		posAfter := len(trackChart.track.positions)
+		msg := fmt.Sprintf("Positions before : %d\n\nPositions after  : %d", posBefore, posAfter)
+		messageDialog(win, gtk.MESSAGE_INFO, msg)
+		trackChart.drawTrack()
+		profileChart.drawProfile()
+	}
+	sd.Destroy()
 }
 
 // exportTrackCB exports the (global) current track as a CSV file.  The user is prompted for a filename.
