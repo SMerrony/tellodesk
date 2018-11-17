@@ -56,7 +56,9 @@ func settingsCB() {
 
 	table.AttachDefaults(gtk.NewLabel("Detected"), 1, 2, 0, 1)
 	table.AttachDefaults(gtk.NewLabel("Type"), 2, 3, 0, 1)
-	table.AttachDefaults(gtk.NewLabel("Joystick :"), 0, 1, 1, 2)
+	jsLab := gtk.NewLabel("Joystick :")
+	jsLab.SetAlignment(1, 0.5)
+	table.AttachDefaults(jsLab, 0, 1, 1, 2)
 
 	// display all joysticks detected on the system
 	foundCombo := gtk.NewComboBoxText()
@@ -80,11 +82,14 @@ func settingsCB() {
 	}
 	table.AttachDefaults(chosenTypeCombo, 2, 3, 1, 2)
 
-	table.AttachDefaults(gtk.NewLabel("Data Directory :"), 0, 1, 2, 3)
+	ddLab := gtk.NewLabel("Data Directory :")
+	ddLab.SetAlignment(1, 0.5)
+	table.AttachDefaults(ddLab, 0, 1, 2, 3)
 	if settings.DataDir == "" {
 		settings.DataDir = "."
 	}
 	ddLabel := gtk.NewLabel(settings.DataDir)
+	ddLabel.SetAlignment(-1, 0.5)
 	table.AttachDefaults(ddLabel, 1, 2, 2, 3)
 	cdirBtn := gtk.NewButtonWithLabel("Change Dir.")
 	table.AttachDefaults(cdirBtn, 2, 3, 2, 3)
@@ -101,7 +106,9 @@ func settingsCB() {
 		dc.Destroy()
 	})
 
-	table.AttachDefaults(gtk.NewLabel("Video Mode :"), 0, 1, 3, 4)
+	vmLab := gtk.NewLabel("Video Mode :")
+	vmLab.SetAlignment(1, 0.5)
+	table.AttachDefaults(vmLab, 0, 1, 3, 4)
 	vm := gtk.NewCheckButtonWithLabel("Wide")
 	if settings.WideVideo {
 		vm.SetActive(true)
