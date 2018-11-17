@@ -25,9 +25,9 @@ import (
 //_ "net/http/pprof"
 
 const (
-	appCopyright         = "©2018 S.Merrony"
-	appDisclaimer        = "The author(s) is/are in no way\nconnected with Ryze®;\n" +
-	"nor are they responsible for any\ndamage caused to, or by, any device\ncontrolled by this software."
+	appCopyright  = "©2018 S.Merrony"
+	appDisclaimer = "The author(s) is/are in no way\nconnected with Ryze®;\n" +
+		"nor are they responsible for any\ndamage caused to, or by, any device\ncontrolled by this software."
 	appHelpURL           = "https://github.com/SMerrony/tellodesk/wiki"
 	appName              = "Tello® Desk"
 	appSettingsFile      = "tellodesk.yaml"
@@ -159,7 +159,7 @@ func aboutCB() {
 	about.SetWebsite(appHelpURL)
 	about.SetAuthors(appAuthors)
 	about.SetCopyright(appCopyright)
-	about.SetComments(appDisclaimer)
+	about.SetComments("Using Tello Package: " + tello.TelloPackageVersion + "\n\n" + appDisclaimer)
 	about.SetPosition(gtk.WIN_POS_CENTER_ON_PARENT)
 	about.Run()
 	about.Destroy()
