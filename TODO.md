@@ -28,7 +28,7 @@
 ## To Consider
 * ~~Switch video mode?~~
 * Permit application resize?
-* Detailed status display like telloterm?
+* ~~Detailed status display like telloterm?~~
 * Keyboard Control?
 * Object recognition with Tensorflow?
 * 

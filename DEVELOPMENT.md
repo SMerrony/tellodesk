@@ -34,7 +34,7 @@
 * Video display updater
   * started in video.go:startVideo() - 30ms
   * stopped in disconnectCB()
-* Message Overlay updater - flightData.go:updateMessageCB()
+* Flight Status updater - flightData.go:updateFlightDataTCB()
   * Started in main() - 250ms
   * (No need to stop)
 * StatusBar updater - statusbar.go:updateStatusBarTCB()

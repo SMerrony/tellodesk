@@ -45,6 +45,12 @@ to the Tello network.`)
 	fdChan, _ = drone.StreamFlightData(false, fdPeriodMs)
 	go fdListener()
 
+	// ask for drone data not normally sent
+	drone.GetLowBatteryThreshold()
+	drone.GetMaxHeight()
+	drone.GetSSID()
+	drone.GetVersion()
+
 	menuBar.enableFlightMenus()
 	statusBar.connectionLab.SetText("Connected")
 }

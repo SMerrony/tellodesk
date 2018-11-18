@@ -39,22 +39,23 @@ const (
 var appAuthors = []string{"Stephen Merrony"}
 
 var (
-	drone                                     tello.Tello
-	stickChan                                 chan<- tello.StickMessage
-	fdStopChan, vrStopChan, liveTrackStopChan chan bool
-	fdChan                                    <-chan tello.FlightData
-	videoChan                                 <-chan []byte
-	stopFeedImageChan                         chan bool
-	videoWgt                                  *videoWgtT
-	videoWidth, videoHeight                   = normalVideoWidth, normalVideoHeight
-	win                                       *gtk.Window
-	menuBar                                   *menuBarT
-	notebook                                  *gtk.Notebook
-	videoPage, trackPage, profilePage         int // IDs of the notebook pages for each tab
-	statusBar                                 *statusBarT
+	drone                                         tello.Tello
+	stickChan                                     chan<- tello.StickMessage
+	fdStopChan, vrStopChan, liveTrackStopChan     chan bool
+	fdChan                                        <-chan tello.FlightData
+	videoChan                                     <-chan []byte
+	stopFeedImageChan                             chan bool
+	videoWgt                                      *videoWgtT
+	videoWidth, videoHeight                       = normalVideoWidth, normalVideoHeight
+	win                                           *gtk.Window
+	menuBar                                       *menuBarT
+	notebook                                      *gtk.Notebook
+	videoPage, statusPage, trackPage, profilePage int // IDs of the notebook pages for each tab
+	statusBar                                     *statusBarT
 
 	flightDataMu sync.RWMutex
 	flightData   tello.FlightData
+	statusTab    *liveStatusTabT
 	liveTrack    *telloTrackT
 	trackChart   *trackChartT
 	profileChart *profileChartT
@@ -100,6 +101,9 @@ func main() {
 	videoWgt = buildVideodWgt()
 	videoPage = notebook.AppendPage(videoWgt, gtk.NewLabel("Live Feed"))
 
+	statusTab = buildLiveStatusTab(videoWidth, videoHeight)
+	statusPage = notebook.AppendPage(statusTab, gtk.NewLabel("Status"))
+
 	liveTrack = newTrack()
 
 	trackChart = buildTrackChart(liveTrack, videoWidth, videoHeight, defaultTrackScale,
@@ -115,7 +119,7 @@ func main() {
 		statusBar.updateStatusBarTCB()
 		return true
 	})
-	glib.TimeoutAdd(statusUpdatePeriodMs, updateMessageCB)
+	glib.TimeoutAdd(statusUpdatePeriodMs, updateFlightDataTCB)
 
 	win.Add(vbox)
 	win.ShowAll()

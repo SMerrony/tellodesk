@@ -21,7 +21,7 @@ type statusBarT struct {
 
 func buildStatusbar() (sb *statusBarT) {
 	sb = new(statusBarT)
-	sb.HBox = gtk.NewHBox(true, 2)
+	sb.HBox = gtk.NewHBox(false, 2)
 
 	clf := gtk.NewFrame("")
 	sb.connectionLab = gtk.NewLabel("Disconnected") //NewFixedLabel(" Disconnected ", color.RGBA{255, 255, 255, 255})
@@ -55,14 +55,19 @@ func buildStatusbar() (sb *statusBarT) {
 
 func (sb *statusBarT) updateStatusBarTCB() {
 	flightDataMu.RLock()
-	sb.heightLab.SetLabel(fmt.Sprintf("Height: %.1fm", float32(flightData.Height)/10))
-	sb.batteryPctLab.SetLabel(fmt.Sprintf("Battery: %d%%", flightData.BatteryPercentage))
+	if len(flightData.SSID) > 0 {
+		sb.connectionLab.SetLabel(fmt.Sprintf("%s - Firmware: %s", flightData.SSID, flightData.Version))
+	} else {
+		sb.connectionLab.SetLabel("Disconnected")
+	}
+	sb.heightLab.SetLabel(fmt.Sprintf("Height: %.1fm (Max: %dm)", float32(flightData.Height)/10, flightData.MaxHeight))
+	sb.batteryPctLab.SetLabel(fmt.Sprintf("Battery: %d%% (%dmV)", flightData.BatteryPercentage, flightData.BatteryMilliVolts))
 	if flightData.BatteryPercentage < 30 {
 		sb.batteryPctLab.ModifyFG(gtk.STATE_NORMAL, gdk.NewColor("red"))
 	} else {
 		sb.batteryPctLab.ModifyFG(gtk.STATE_NORMAL, gdk.NewColor("black"))
 	}
-	sb.wifiStrLab.SetLabel(fmt.Sprintf("Wifi Strength: %d%%", flightData.WifiStrength))
+	sb.wifiStrLab.SetLabel(fmt.Sprintf("Wifi: %d%% - Interference: %d%%", flightData.WifiStrength, flightData.WifiInterference))
 	if flightData.WifiStrength < 50 {
 		sb.wifiStrLab.ModifyFG(gtk.STATE_NORMAL, gdk.NewColor("red"))
 	} else {
