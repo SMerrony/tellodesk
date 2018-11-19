@@ -44,9 +44,12 @@ func updateFlightDataTCB() bool {
 		msg string
 	)
 	flightDataMu.RLock()
+
 	// first, the message overlaid on the video display
 	// in order of priority, descending...
 	switch {
+	case len(flightData.SSID) == 0:
+		break
 	case flightData.BatteryCritical:
 		msg = "Battery Critical"
 	case flightData.WifiStrength < 30:
@@ -58,6 +61,7 @@ func updateFlightDataTCB() bool {
 	case flightData.LightStrength == 1:
 		msg = "Low Light"
 	}
+
 	// now the flight status display
 	statFields[fYaw].value.SetText(fmt.Sprintf("%d°", flightData.IMU.Yaw))
 	statFields[fLoBattThres].value.SetText(fmt.Sprintf("%d%%", flightData.LowBatteryThreshold))
