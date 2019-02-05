@@ -1,5 +1,5 @@
 /**
- *Copyright (c) 2018 Stephen Merrony
+ *Copyright (c) 2019 Stephen Merrony
  *
  *This software is released under the MIT License.
  *https://opensource.org/licenses/MIT
@@ -21,8 +21,8 @@ import (
 )
 
 const (
-	typeJoystick = iota
-	typeGameController
+	//typeJoystick = iota
+	typeGameController = iota
 	typeFlightController
 )
 
@@ -32,25 +32,6 @@ const (
 	axRightX
 	axRightY
 )
-
-// const (
-// 	btnCross = iota
-// 	btnCircle
-// 	btnTriangle
-// 	btnSquare
-// 	btnA
-// 	btnB
-// 	btnBack
-// 	btnL1
-// 	btnL2
-// 	btnL3
-// 	btnR1
-// 	btnR2
-// 	btnR3
-// 	btnStart
-// 	btnX
-// 	btnY
-// )
 
 const (
 	btnTakeoff = iota

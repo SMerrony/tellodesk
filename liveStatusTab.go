@@ -1,5 +1,5 @@
 /**
- *Copyright (c) 2018 Stephen Merrony
+ *Copyright (c) 2019 Stephen Merrony
  *
  *This software is released under the MIT License.
  *https://opensource.org/licenses/MIT
@@ -71,7 +71,7 @@ func initFields() {
 	statFields[fFlying] = sFieldT{row: 10, col: 2, label: "Flying:"}
 	statFields[fWindy] = sFieldT{row: 10, col: 4, label: "Windy:"}
 
-	for f, _ := range statFields {
+	for f := range statFields {
 		statFields[f].value = gtk.NewLabel("")
 		statFields[f].value.ModifyFontEasy("Sans 16")
 		statFields[f].value.SetAlignment(-1, 0.5)

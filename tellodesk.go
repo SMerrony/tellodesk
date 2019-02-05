@@ -1,5 +1,5 @@
 /**
- *Copyright (c) 2018 Stephen Merrony
+ *Copyright (c) 2019 Stephen Merrony
  *
  *This software is released under the MIT License.
  *https://opensource.org/licenses/MIT
@@ -31,7 +31,7 @@ const (
 	appHelpURL           = "https://github.com/SMerrony/tellodesk/wiki"
 	appName              = "Tello® Desk"
 	appSettingsFile      = "tellodesk.yaml"
-	appVersion           = "v0.1.0"
+	appVersion           = "v0.1.0" // TODO Update with every release!
 	fdPeriodMs           = 100
 	statusUpdatePeriodMs = 250
 )
