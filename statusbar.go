@@ -93,6 +93,8 @@ func (sb *statusBarT) updateStatusBarTCB() {
 	} else {
 		// disconnected
 		sb.connectionLab.SetLabel("Disconnected")
+		menuBar.disconnectItem.SetSensitive(false)
+		menuBar.connectItem.SetSensitive(true)
 		sb.heightLab.SetLabel("Height: Unknown")
 		sb.batteryPctLab.SetLabel("Battery: Unknown")
 		sb.wifiStrLab.SetLabel("Wifi Strength: Unknown")
