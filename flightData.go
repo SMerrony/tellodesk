@@ -46,20 +46,19 @@ func updateFlightDataTCB() bool {
 	flightDataMu.RLock()
 
 	// first, the message overlaid on the video display
-	// in order of priority, descending...
 	switch {
 	case len(flightData.SSID) == 0:
 		break
 	case flightData.BatteryCritical:
-		msg = "Battery Critical"
+		msg = "Battery Critical  "
 	case flightData.WifiStrength < 30:
-		msg = "Wifi Strength Below 30%"
+		msg += "Wifi < 30%  "
 	case flightData.BatteryLow:
-		msg = "Battery Low"
+		msg += "Battery Low  "
 	case flightData.WifiStrength < 50:
-		msg = "Wifi Strength Below 50%"
+		msg += "Wifi < 50%  "
 	case flightData.LightStrength == 1:
-		msg = "Low Light"
+		msg += "Low Light  "
 	}
 
 	// now the flight status display

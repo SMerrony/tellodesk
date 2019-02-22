@@ -16,7 +16,7 @@ import (
 
 type statusBarT struct {
 	*gtk.HBox
-	connectionLab, heightLab, batteryPctLab, wifiStrLab, photosLab *gtk.Label
+	connectionLab, heightLab, homeLab, batteryPctLab, wifiStrLab, photosLab *gtk.Label
 }
 
 func buildStatusbar() (sb *statusBarT) {
@@ -28,10 +28,15 @@ func buildStatusbar() (sb *statusBarT) {
 	clf.Add(sb.connectionLab)
 	sb.Add(clf)
 
-	hlf := gtk.NewFrame("")
+	htlf := gtk.NewFrame("")
 	sb.heightLab = gtk.NewLabel("Height: 00.0m")
-	hlf.Add(sb.heightLab)
-	sb.Add(hlf)
+	htlf.Add(sb.heightLab)
+	sb.Add(htlf)
+
+	holf := gtk.NewFrame("")
+	sb.homeLab = gtk.NewLabel("Home: Unset")
+	holf.Add(sb.homeLab)
+	sb.Add(holf)
 
 	blf := gtk.NewFrame("")
 	sb.batteryPctLab = gtk.NewLabel("Battery: 000%")
@@ -54,25 +59,43 @@ func buildStatusbar() (sb *statusBarT) {
 }
 
 func (sb *statusBarT) updateStatusBarTCB() {
-	flightDataMu.RLock()
-	if len(flightData.SSID) > 0 {
-		sb.connectionLab.SetLabel(fmt.Sprintf("%s - Firmware: %s", flightData.SSID, flightData.Version))
+	if drone.ControlConnected() {
+		flightDataMu.RLock()
+		if len(flightData.SSID) > 0 {
+			sb.connectionLab.SetLabel(fmt.Sprintf("%s - Firmware: %s", flightData.SSID, flightData.Version))
+		} else {
+			sb.connectionLab.SetLabel("Disconnected")
+		}
+		sb.heightLab.SetLabel(fmt.Sprintf("Height: %.1fm (Max: %dm)", float32(flightData.Height)/10, flightData.MaxHeight))
+		sb.batteryPctLab.SetLabel(fmt.Sprintf("Battery: %d%% (%dmV)", flightData.BatteryPercentage, flightData.BatteryMilliVolts))
+		if flightData.BatteryPercentage < 30 {
+			sb.batteryPctLab.ModifyFG(gtk.STATE_NORMAL, gdk.NewColor("red"))
+		} else {
+			sb.batteryPctLab.ModifyFG(gtk.STATE_NORMAL, gdk.NewColor("black"))
+		}
+		sb.wifiStrLab.SetLabel(fmt.Sprintf("Wifi: %d%% - Interference: %d%%", flightData.WifiStrength, flightData.WifiInterference))
+		if flightData.WifiStrength < 50 {
+			sb.wifiStrLab.ModifyFG(gtk.STATE_NORMAL, gdk.NewColor("red"))
+		} else {
+			sb.wifiStrLab.ModifyFG(gtk.STATE_NORMAL, gdk.NewColor("black"))
+		}
+		flightDataMu.RUnlock()
+		// outside the lock...
+		if drone.IsHomeSet() {
+			if drone.IsAutoXY() {
+				sb.homeLab.SetLabel("AUTOFLIGHT")
+			} else {
+				sb.homeLab.SetLabel("Home: Set")
+			}
+		} else {
+			sb.homeLab.SetLabel("Home: Unset")
+		}
 	} else {
+		// disconnected
 		sb.connectionLab.SetLabel("Disconnected")
+		sb.heightLab.SetLabel("Height: Unknown")
+		sb.batteryPctLab.SetLabel("Battery: Unknown")
+		sb.wifiStrLab.SetLabel("Wifi Strength: Unknown")
 	}
-	sb.heightLab.SetLabel(fmt.Sprintf("Height: %.1fm (Max: %dm)", float32(flightData.Height)/10, flightData.MaxHeight))
-	sb.batteryPctLab.SetLabel(fmt.Sprintf("Battery: %d%% (%dmV)", flightData.BatteryPercentage, flightData.BatteryMilliVolts))
-	if flightData.BatteryPercentage < 30 {
-		sb.batteryPctLab.ModifyFG(gtk.STATE_NORMAL, gdk.NewColor("red"))
-	} else {
-		sb.batteryPctLab.ModifyFG(gtk.STATE_NORMAL, gdk.NewColor("black"))
-	}
-	sb.wifiStrLab.SetLabel(fmt.Sprintf("Wifi: %d%% - Interference: %d%%", flightData.WifiStrength, flightData.WifiInterference))
-	if flightData.WifiStrength < 50 {
-		sb.wifiStrLab.ModifyFG(gtk.STATE_NORMAL, gdk.NewColor("red"))
-	} else {
-		sb.wifiStrLab.ModifyFG(gtk.STATE_NORMAL, gdk.NewColor("black"))
-	}
-	flightDataMu.RUnlock()
 	sb.photosLab.SetLabel(fmt.Sprintf("Buffered Photos: %d", drone.NumPics()))
 }
