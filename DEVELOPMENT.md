@@ -3,7 +3,7 @@
 * 3d0c/gmf for video handling. For Linux version to work gmf must be later than Sep 01 2018.
 * simulatedsimian/joystick
 * mattn/go-gtk
-* SMerrony/tello >= v0.9.0
+* SMerrony/tello >= v0.9.3
 
 ## Building on Ubuntu 18.04 (Bionic Beaver)
 * Install all the -dev packages for libav* using any package manager

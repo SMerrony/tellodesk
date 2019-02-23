@@ -40,9 +40,7 @@ func fdListener() {
 // updateFlightDataTCB should be run periodically to check for condition we should alert the user about
 // and update the flight status display.
 func updateFlightDataTCB() bool {
-	var (
-		msg string
-	)
+	msg := ""
 	flightDataMu.RLock()
 
 	// first, the message overlaid on the video display
