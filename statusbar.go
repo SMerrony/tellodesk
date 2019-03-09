@@ -58,7 +58,7 @@ func buildStatusbar() (sb *statusBarT) {
 	return sb
 }
 
-func (sb *statusBarT) updateStatusBarTCB() {
+func (sb *statusBarT) updateStatusBarTCB() bool {
 	if drone.ControlConnected() {
 		flightDataMu.RLock()
 		if len(flightData.SSID) > 0 {
@@ -100,4 +100,6 @@ func (sb *statusBarT) updateStatusBarTCB() {
 		sb.wifiStrLab.SetLabel("Wifi Strength: Unknown")
 	}
 	sb.photosLab.SetLabel(fmt.Sprintf("Buffered Photos: %d", drone.NumPics()))
+
+	return true // continue the timer
 }

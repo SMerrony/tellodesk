@@ -28,21 +28,22 @@ const (
 	appCopyright  = "©2018 S.Merrony"
 	appDisclaimer = "The author(s) is/are in no way\nconnected with Ryze®;\n" +
 		"nor are they responsible for any\ndamage caused to, or by, any device\ncontrolled by this software."
-	appHelpURL           = "https://github.com/SMerrony/tellodesk/wiki"
-	appName              = "Tello® Desk"
-	appSettingsFile      = "tellodesk.yaml"
-	appVersion           = "v0.1.0" // TODO Update with every release!
-	fdPeriodMs           = 100
-	statusUpdatePeriodMs = 250
+	appHelpURL              = "https://github.com/SMerrony/tellodesk/wiki"
+	appName                 = "Tello® Desk"
+	appSettingsFile         = "tellodesk.yaml"
+	appVersion              = "v0.1.0" // TODO Update with every release!
+	fdPeriodMs              = 100
+	statusUpdatePeriodMs    = 250
+	connectionCheckPeriodMs = 1000
 )
 
 var appAuthors = []string{"Stephen Merrony"}
 
 var (
-	drone                                         tello.Tello
-	stickChan                                     chan<- tello.StickMessage
-	fdStopChan, vrStopChan, liveTrackStopChan     chan bool
-	fdChan                                        <-chan tello.FlightData
+	drone                                     tello.Tello
+	stickChan                                 chan<- tello.StickMessage
+	fdStopChan, vrStopChan, liveTrackStopChan chan bool
+	//fdChan                                        <-chan tello.FlightData
 	videoChan                                     <-chan []byte
 	stopFeedImageChan                             chan bool
 	videoWgt                                      *videoWgtT
@@ -115,10 +116,8 @@ func main() {
 
 	statusBar = buildStatusbar()
 	vbox.PackEnd(statusBar, false, false, 0)
-	glib.TimeoutAdd(statusUpdatePeriodMs, func() bool {
-		statusBar.updateStatusBarTCB()
-		return true
-	})
+
+	glib.TimeoutAdd(statusUpdatePeriodMs, statusBar.updateStatusBarTCB)
 	glib.TimeoutAdd(statusUpdatePeriodMs, updateFlightDataTCB)
 
 	win.Add(vbox)
