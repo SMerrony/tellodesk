@@ -10,6 +10,7 @@ package main
 import (
 	"bufio"
 	"image"
+	"io"
 	"log"
 	"os"
 	"sync"
@@ -167,7 +168,7 @@ func assert(i interface{}, err error) interface{} {
 //func (app *tdApp) videoListener() {
 func (wgt *videoWgtT) videoListener() {
 	iCtx := gmf.NewCtx()
-	defer iCtx.CloseInputAndRelease()
+	defer iCtx.CloseInput() //  CloseInputAndRelease()
 
 	if err := iCtx.SetInputFormat("h264"); err != nil {
 		log.Fatalf("iCtx SetInputFormat %v", err)
@@ -230,7 +231,15 @@ func (wgt *videoWgtT) videoListener() {
 	codecCtx := ist.CodecCtx()
 	defer gmf.Release(codecCtx)
 
-	for pkt := range iCtx.GetNewPackets() {
+	// for pkt := range iCtx.GetNewPackets() {
+	for {
+		pkt, err := iCtx.GetNextPacket()
+		if err != nil && err != io.EOF {
+			if pkt != nil {
+				pkt.Free()
+				break
+			}
+		}
 
 		if pkt.StreamIndex() != srcVideoStream.Index() {
 			log.Println("Skipping wrong stream packet")
