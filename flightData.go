@@ -11,11 +11,13 @@ import (
 	"fmt"
 	"log"
 	"math"
+
+	"github.com/SMerrony/tello"
 )
 
 // fdListener should be run as a Goroutine to consume FD updates on the chan as they arrive.
 // It is started by connectCB() in droneCBs.go when the Tello is connected.
-func fdListener() {
+func fdListener(fdChan <-chan tello.FlightData) {
 	for {
 		select {
 		case tmpFd := <-fdChan:

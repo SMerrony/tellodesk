@@ -42,8 +42,8 @@ to the Tello network.`)
 	// trackChart.track = newTrack()
 	glib.TimeoutAdd(500, liveTrackerTCB) // start the live tracker, cancelled via liveTrackStopChan
 
-	fdChan, _ = drone.StreamFlightData(false, fdPeriodMs)
-	go fdListener()
+	fdChan, _ := drone.StreamFlightData(false, fdPeriodMs)
+	go fdListener(fdChan)
 
 	// ask for drone data not normally sent
 	drone.GetLowBatteryThreshold()
@@ -53,16 +53,27 @@ to the Tello network.`)
 
 	menuBar.enableFlightMenus()
 	statusBar.connectionLab.SetText("Connected")
+
+	glib.TimeoutAdd(connectionCheckPeriodMs, checkConnectedTCB)
+}
+
+func checkConnectedTCB() bool {
+	if drone.ControlConnected() {
+		return true // continue the timer
+	} else {
+		disconnectCB() // run all the disconnect actions
+		return false   // stop the timer
+	}
 }
 
 func disconnectCB() {
 	drone.VideoDisconnect()
 	drone.ControlDisconnect()
 
-	if len(settings.JoystickType) > 0 {
-		js.Close()
-		drone.StopStickListener()
-	}
+	//if len(settings.JoystickType) > 0 {
+	js.Close()
+	drone.StopStickListener()
+	//}
 
 	select {
 	case fdStopChan <- true: // stop the flight data listener goroutine
