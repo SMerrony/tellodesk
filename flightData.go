@@ -34,6 +34,7 @@ func fdListener(fdChan <-chan tello.FlightData) {
 				liveTrack.addPositionIfChanged(tmpFd)
 			}
 		case <-fdStopChan:
+			log.Println("Info: Flight Data Listener stopping")
 			return
 		}
 	}

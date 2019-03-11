@@ -130,6 +130,7 @@ func (wgt *videoWgtT) startVideo() {
 			drone.GetVideoSpsPps()
 			select {
 			case <-vrStopChan:
+				log.Println("Info: Video SPS/PPS Requestor stopping")
 				return
 			default:
 			}
@@ -137,7 +138,7 @@ func (wgt *videoWgtT) startVideo() {
 		}
 	}()
 
-	stopFeedImageChan = make(chan bool)
+	feedImageStopChan = make(chan bool)
 
 	go wgt.videoListener()
 
@@ -147,7 +148,7 @@ func (wgt *videoWgtT) startVideo() {
 func customReader() ([]byte, int) {
 	pkt, more := <-videoChan
 	if !more {
-		stopFeedImageChan <- true
+		feedImageStopChan <- true
 	}
 	videoRecMu.RLock()
 	if videoRecording {
@@ -301,7 +302,7 @@ func (wgt *videoWgtT) updateFeed() bool {
 
 	// check if feed should be shutdown
 	select {
-	case <-stopFeedImageChan:
+	case <-feedImageStopChan:
 		log.Println("Debug: updateFeed stopping")
 		wgt.image.SetFromPixbuf(blueSkyPixbuf)
 		return false // stops the timer

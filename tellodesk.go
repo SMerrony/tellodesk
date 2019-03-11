@@ -40,19 +40,17 @@ const (
 var appAuthors = []string{"Stephen Merrony"}
 
 var (
-	drone                                     tello.Tello
-	stickChan                                 chan<- tello.StickMessage
-	fdStopChan, vrStopChan, liveTrackStopChan chan bool
-	//fdChan                                        <-chan tello.FlightData
-	videoChan                                     <-chan []byte
-	stopFeedImageChan                             chan bool
-	videoWgt                                      *videoWgtT
-	videoWidth, videoHeight                       = normalVideoWidth, normalVideoHeight
-	win                                           *gtk.Window
-	menuBar                                       *menuBarT
-	notebook                                      *gtk.Notebook
-	videoPage, statusPage, trackPage, profilePage int // IDs of the notebook pages for each tab
-	statusBar                                     *statusBarT
+	drone                                                        tello.Tello
+	stickChan                                                    chan<- tello.StickMessage
+	fdStopChan, vrStopChan, liveTrackStopChan, feedImageStopChan chan bool
+	videoChan                                                    <-chan []byte
+	videoWgt                                                     *videoWgtT
+	videoWidth, videoHeight                                      = normalVideoWidth, normalVideoHeight
+	win                                                          *gtk.Window
+	menuBar                                                      *menuBarT
+	notebook                                                     *gtk.Notebook
+	videoPage, statusPage, trackPage, profilePage                int // IDs of the notebook pages for each tab
+	statusBar                                                    *statusBarT
 
 	flightDataMu sync.RWMutex
 	flightData   tello.FlightData
@@ -72,10 +70,6 @@ func main() {
 	// preload the images from generated data
 	blueSkyPixbuf = gdkpixbuf.NewPixbufFromData(blueSkyPNG)
 	iconPixbuf = gdkpixbuf.NewPixbufFromData(iconPNG)
-
-	fdStopChan = make(chan bool) // not buffered
-	vrStopChan = make(chan bool) // not buffered
-	liveTrackStopChan = make(chan bool)
 
 	gtk.Init(nil)
 	win = gtk.NewWindow(gtk.WINDOW_TOPLEVEL)

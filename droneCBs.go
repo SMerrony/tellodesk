@@ -24,6 +24,10 @@ to the Tello network.`)
 		return // Comment this for GUI testing
 	}
 
+	fdStopChan = make(chan bool) // not buffered
+	vrStopChan = make(chan bool) // not buffered
+	liveTrackStopChan = make(chan bool)
+
 	videoWgt.startVideo()
 
 	if len(settings.JoystickType) > 0 {
@@ -67,8 +71,6 @@ func checkConnectedTCB() bool {
 }
 
 func disconnectCB() {
-	drone.VideoDisconnect()
-	drone.ControlDisconnect()
 
 	//if len(settings.JoystickType) > 0 {
 	js.Close()
@@ -88,9 +90,12 @@ func disconnectCB() {
 	default:
 	}
 	select {
-	case stopFeedImageChan <- true: // stop the video image updater goroutine
+	case feedImageStopChan <- true: // stop the video image updater goroutine
 	default:
 	}
+
+	drone.VideoDisconnect()
+	drone.ControlDisconnect()
 
 	menuBar.disableFlightMenus()
 	statusBar.connectionLab.SetText(" Disconnected ")
