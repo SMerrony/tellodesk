@@ -146,9 +146,10 @@ func (wgt *videoWgtT) startVideo() {
 }
 
 func customReader() ([]byte, int) {
-	pkt, more := <-videoChan
-	if !more {
-		feedImageStopChan <- true
+	pkt, ok := <-videoChan
+	if !ok {
+		//feedImageStopChan <- true
+		return nil, 0
 	}
 	videoRecMu.RLock()
 	if videoRecording {
@@ -235,10 +236,14 @@ func (wgt *videoWgtT) videoListener() {
 	// for pkt := range iCtx.GetNewPackets() {
 	for {
 		pkt, err := iCtx.GetNextPacket()
-		if err != nil && err != io.EOF {
-			if pkt != nil {
-				pkt.Free()
+		if err != nil {
+			if err == io.EOF {
 				break
+			} else {
+				if pkt != nil {
+					pkt.Free()
+					break
+				}
 			}
 		}
 
